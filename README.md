@@ -2,8 +2,8 @@
 
 ### documento dedicado a ingenieria en software: 
 
-Próximos pasos:
+**Próximos pasos:**
 
-Corrección de documento 0 
-diagrama de componentes
-diagrama de despliegue
+* Corrección de documento 0 
+* diagrama de componentes
+* diagrama de despliegue
