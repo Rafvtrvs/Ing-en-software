@@ -4,6 +4,6 @@
 
 **Próximos pasos:**
 
-* Corrección de documento 0 
-* diagrama de componentes
-* diagrama de despliegue
+-[x] `Corrección de documento 0`
+-[x] `diagrama de componentes`
+ -[x] `diagrama de despliegue`
