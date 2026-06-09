@@ -1,3 +1,16 @@
+# Dependencias (frontend y backend, en cualquier subcarpeta)
+node_modules/
+
+# Builds generados
+dist/
+
+# Secretos - NUNCA subir
+.env
+.env.local
+
+# Storage simulado del backend
+.storage/
+
 # Base de datos SQLite
 clientes.db
 clientes.db-journal
@@ -11,6 +24,7 @@ __pycache__/
 # VS Code
 .vscode/
 
-# Sistema operativo
+# Sistema operativo / temporales
 .DS_Store
 Thumbs.db
+*.log
