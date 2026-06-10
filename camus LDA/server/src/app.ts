@@ -11,7 +11,22 @@ import { errorHandler, notFound } from './middleware/error.js'
 export function createApp() {
   const app = express()
 
-  app.use(cors({ origin: env.corsOrigin, credentials: true }))
+  app.use(
+    cors({
+      origin(origin, callback) {
+        if (!origin) return callback(null, true)
+
+        const allowed = env.corsOrigin.split(',').map((o) => o.trim())
+        if (allowed.includes(origin)) return callback(null, true)
+
+        // Vite puede usar 5174, 5175, etc. si 5173 está ocupado
+        if (/^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true)
+
+        callback(new Error(`CORS bloqueado para origen: ${origin}`))
+      },
+      credentials: true,
+    }),
+  )
   app.use(express.json())
   app.use(morgan('dev'))
 
