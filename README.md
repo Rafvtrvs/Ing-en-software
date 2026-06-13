@@ -10,7 +10,7 @@
 - [x] `diagrama de secuencia de diseño`
 - [x] `MERE - MER`
 >
-- [ ] `Modelo de datos`
+- [x] `Modelo de datos`
 - [ ] `Diagrama de clase`
 - [ ] `levantamiento de procesos`
 ### La documentación sobre los diagramas pueden visualizarla en `Documentación`
