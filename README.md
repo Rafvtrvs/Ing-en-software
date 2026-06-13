@@ -12,4 +12,5 @@
 >
 - [ ] `Modelo de datos`
 - [ ] `Diagrama de clase`
+- [ ] `levantamiento de procesos`
 ### La documentación sobre los diagramas pueden visualizarla en `Documentación`
