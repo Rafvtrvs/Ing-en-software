@@ -7,5 +7,6 @@
 `Corrección de documento 0`
 - [x] `diagrama de componentes`
 - [x] `diagrama de despliegue`
+- [x] `diagrama de secuencia de diseño`
 
 ### Además agregue documentación sobre los diagramas que pueden visualizar en `Documentación`
