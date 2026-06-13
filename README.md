@@ -8,5 +8,6 @@
 - [x] `diagrama de componentes`
 - [x] `diagrama de despliegue`
 - [x] `diagrama de secuencia de diseño`
+- [x] `MERE - MER` 
 
-### Además agregue documentación sobre los diagramas que pueden visualizar en `Documentación`
+### La documentación sobre los diagramas pueden visualizarla en `Documentación`
