@@ -11,6 +11,6 @@
 - [x] `MERE - MER`
 >
 - [x] `Modelo de datos`
-- [ ] `Diagrama de clase`
-- [ ] `levantamiento de procesos`
+- [x] `Diagrama de clase`
+
 ### La documentación sobre los diagramas pueden visualizarla en `Documentación`
