@@ -1,7 +1,8 @@
-import { Bell, LogOut, Menu } from 'lucide-react'
+import { LogOut, Menu } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store/useAppStore'
 import { authService } from '@/services/authService'
+import { NotificationsPanel } from '@/components/layout/NotificationsPanel'
 
 export function Header() {
   const { user, toggleSidebar } = useAppStore()
@@ -34,18 +35,7 @@ export function Header() {
       </button>
 
       <div className="flex flex-1 items-center justify-end gap-3 sm:gap-4">
-        <button
-          type="button"
-          className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100"
-          aria-label="Notificaciones"
-        >
-          <Bell className="h-5 w-5" />
-          {user.notifications > 0 && (
-            <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-              {user.notifications}
-            </span>
-          )}
-        </button>
+        <NotificationsPanel />
 
         <div className="flex items-center gap-3 rounded-lg py-1.5 pl-1.5 pr-2">
           <img

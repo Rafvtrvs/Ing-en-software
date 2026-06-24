@@ -35,7 +35,15 @@ export function ReportExportCatalog({ filterTab }: ReportExportCatalogProps) {
 
   const handleExport = (id: string, title: string, format: string) => {
     if (format === 'PDF') {
-      addToast(`Generación PDF de "${title}" — próximamente`, 'info')
+      const content = `Reporte: ${title}\nGenerado: ${new Date().toLocaleString('es-CL')}\n\nDocumento de demostración — Camus LDA\n`
+      const blob = new Blob([content], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${title.replace(/\s+/g, '_').toLowerCase()}_demo.pdf`
+      link.click()
+      URL.revokeObjectURL(url)
+      addToast(`PDF de demostración "${title}" descargado`)
       return
     }
 

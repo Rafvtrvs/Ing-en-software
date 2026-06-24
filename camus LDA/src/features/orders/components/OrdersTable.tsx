@@ -144,6 +144,7 @@ export function OrdersTable() {
               <option value="all">Todos</option>
               <option value="Pendiente">Pendiente</option>
               <option value="En Curso">En Curso</option>
+              <option value="Abonado">Abonado</option>
               <option value="Completada">Completada</option>
               <option value="Cancelada">Cancelada</option>
             </Select>

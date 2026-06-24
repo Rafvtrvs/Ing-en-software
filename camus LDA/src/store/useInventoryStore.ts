@@ -16,7 +16,10 @@ import {
 } from '@/data/mock/categories-suppliers'
 import { initialKits } from '@/data/mock/kits'
 import { computeStockStatus } from '@/features/inventory/utils/inventoryStatus'
+import { findDuplicateProductCode } from '@/features/inventory/utils/productDuplicates'
 import { assetsService } from '@/services/assetsService'
+import { useNotificationsStore } from '@/store/useNotificationsStore'
+import axios from 'axios'
 
 export type InventoryModalMode = 'create' | 'edit' | 'view' | 'delete' | null
 export type ModalEntity = 'product' | 'category' | 'supplier' | 'kit'
@@ -47,8 +50,13 @@ interface InventoryState {
   toasts: ToastMessage[]
   setActiveTab: (tab: InventoryTab) => void
   syncProductsFromApi: () => Promise<void>
-  addProduct: (product: Omit<Product, 'id' | 'status'>) => void
-  updateProduct: (id: string, data: Partial<Omit<Product, 'id'>>) => void
+  addProduct: (
+    product: Omit<Product, 'id' | 'status'>,
+  ) => Promise<{ ok: boolean; field?: 'code'; message?: string }>
+  updateProduct: (
+    id: string,
+    data: Partial<Omit<Product, 'id'>>,
+  ) => Promise<{ ok: boolean; field?: 'code'; message?: string }>
   deleteProduct: (id: string) => void
   addCategory: (category: Omit<ProductCategory, 'id'>) => void
   updateCategory: (id: string, data: Partial<Omit<ProductCategory, 'id'>>) => void
@@ -93,6 +101,19 @@ function withStatus(
   }
 }
 
+function apiErrorMessage(
+  err: unknown,
+  fallback: string,
+): { message: string; field?: 'code' } {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { error?: string; field?: 'code' } | undefined
+    if (data?.error) {
+      return { message: data.error, field: data.field }
+    }
+  }
+  return { message: fallback }
+}
+
 export const useInventoryStore = create<InventoryState>()(
   persist(
     (set, get) => ({
@@ -132,44 +153,85 @@ export const useInventoryStore = create<InventoryState>()(
           .categories.filter((c) => c.status === 'Activa')
           .map((c) => c.name),
 
-      addProduct: (product) => {
+      addProduct: async (product) => {
+        const state = useInventoryStore.getState()
+        const duplicate = findDuplicateProductCode(state.products, product.code)
+        if (duplicate) {
+          state.addToast(duplicate.message, 'error')
+          return { ok: false, field: duplicate.field, message: duplicate.message }
+        }
+
         const tempId = safeId()
-        set((state) => ({
+        set((s) => ({
           products: [
             { ...product, id: tempId, ...withStatus(product) },
-            ...state.products,
+            ...s.products,
           ],
         }))
-        assetsService
-          .create(product)
-          .then((created) =>
-            set((state) => ({
-              products: state.products.map((p) =>
-                p.id === tempId ? created : p,
-              ),
-              apiAvailable: true,
-            })),
-          )
-          .catch(() => set({ apiAvailable: false }))
+
+        try {
+          const created = await assetsService.create(product)
+          set((s) => ({
+            products: s.products.map((p) => (p.id === tempId ? created : p)),
+            apiAvailable: true,
+          }))
+          useNotificationsStore.getState().pushProductCreated({
+            code: created.code,
+            name: created.name,
+            category: created.category,
+          })
+          return { ok: true }
+        } catch (err) {
+          set((s) => ({
+            products: s.products.filter((p) => p.id !== tempId),
+          }))
+          const apiErr = apiErrorMessage(err, 'No se pudo crear el producto')
+          useInventoryStore.getState().addToast(apiErr.message, 'error')
+          return { ok: false, field: apiErr.field, message: apiErr.message }
+        }
       },
 
-      updateProduct: (id, data) => {
-        set((state) => {
-          const products = state.products.map((p) => {
+      updateProduct: async (id, data) => {
+        const state = useInventoryStore.getState()
+        const current = state.products.find((p) => p.id === id)
+        if (!current) return { ok: false }
+
+        const duplicate = findDuplicateProductCode(
+          state.products,
+          data.code ?? current.code,
+          id,
+        )
+        if (duplicate) {
+          state.addToast(duplicate.message, 'error')
+          return { ok: false, field: duplicate.field, message: duplicate.message }
+        }
+
+        const previous = { ...current, ...withStatus(current) }
+        set((s) => {
+          const products = s.products.map((p) => {
             if (p.id !== id) return p
             const updated = { ...p, ...data }
             return { ...updated, ...withStatus(updated) }
           })
           const selectedProduct =
-            state.selectedProduct?.id === id
+            s.selectedProduct?.id === id
               ? products.find((p) => p.id === id) ?? null
-              : state.selectedProduct
+              : s.selectedProduct
           return { products, selectedProduct }
         })
-        assetsService
-          .update(id, data)
-          .then(() => set({ apiAvailable: true }))
-          .catch(() => set({ apiAvailable: false }))
+
+        try {
+          await assetsService.update(id, data)
+          set({ apiAvailable: true })
+          return { ok: true }
+        } catch (err) {
+          set((s) => ({
+            products: s.products.map((p) => (p.id === id ? previous : p)),
+          }))
+          const apiErr = apiErrorMessage(err, 'No se pudo actualizar el producto')
+          useInventoryStore.getState().addToast(apiErr.message, 'error')
+          return { ok: false, field: apiErr.field, message: apiErr.message }
+        }
       },
 
       deleteProduct: (id) => {
@@ -343,7 +405,7 @@ export const useInventoryStore = create<InventoryState>()(
         set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
     }),
     {
-      name: 'camus_inventory_store_v1',
+      name: 'camus_inventory_store_v2',
       partialize: (state) => ({
         products: state.products,
         categories: state.categories,

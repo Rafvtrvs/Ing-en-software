@@ -14,7 +14,7 @@ export const useAppStore = create<AppState>((set) => ({
     name: 'Juan Pérez',
     role: 'Administrador',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Juan',
-    notifications: 3,
+    notifications: 0,
   },
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),

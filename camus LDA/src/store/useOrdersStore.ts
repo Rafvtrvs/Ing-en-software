@@ -10,6 +10,8 @@ import {
   normalizeOrdersSort,
   ORDER_STATUSES,
 } from '@/features/orders/utils/orderSort'
+import { useNotificationsStore } from '@/store/useNotificationsStore'
+import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
 
 export type OrderModalMode = 'create' | 'edit' | 'view' | 'delete' | null
 
@@ -29,7 +31,7 @@ interface OrdersState {
   toasts: ToastMessage[]
   syncFromApi: () => Promise<void>
   addOrder: (order: WorkOrder) => void
-  updateOrder: (id: string, data: Partial<WorkOrder>) => void
+  updateOrder: (id: string, data: Partial<WorkOrder>, options?: { fromForm?: boolean }) => void
   deleteOrder: (id: string) => void
   moveOrderOnBoard: (activeId: string, overId: string) => void
   openCreateModal: () => void
@@ -91,6 +93,7 @@ export const useOrdersStore = create<OrdersState>()(
 
       addOrder: (order) => {
         const newId = order.id || safeId()
+        const newOrder: WorkOrder = { ...order, id: newId, sortOrder: 0 }
         set((state) => {
           const status = order.status
           const column = getColumnOrders(state.orders, status)
@@ -99,16 +102,26 @@ export const useOrdersStore = create<OrdersState>()(
           const orders = state.orders.map((o) =>
             bumpedIds.has(o.id) ? bumped.find((b) => b.id === o.id)! : o,
           )
-          const newOrder: WorkOrder = { ...order, id: newId, sortOrder: 0 }
           return { orders: [newOrder, ...orders] }
         })
+
+        useNotificationsStore.getState().pushOrderCreated({
+          orderId: newId,
+          client: order.client,
+          service: order.service ?? order.category,
+          status: order.status,
+        })
+
         ordersService
           .create({ ...order, id: newId, sortOrder: 0 })
           .then(() => set({ apiAvailable: true }))
           .catch(() => set({ apiAvailable: false }))
       },
 
-      updateOrder: (id, data) => {
+      updateOrder: (id, data, options) => {
+        const existing = get().orders.find((o) => o.id === id)
+        const merged = existing ? { ...existing, ...data } : null
+
         set((state) => {
           const orders = state.orders.map((o) =>
             o.id === id ? { ...o, ...data } : o,
@@ -119,6 +132,27 @@ export const useOrdersStore = create<OrdersState>()(
               : state.selectedOrder
           return { orders, selectedOrder }
         })
+
+        if (existing && merged) {
+          if (options?.fromForm) {
+            const changes = getOrderFieldChanges(existing, merged)
+            if (changes.length > 0) {
+              useNotificationsStore.getState().pushOrderFieldChanges({
+                orderId: existing.id,
+                client: merged.client,
+                changes,
+              })
+            }
+          } else if (data.status && data.status !== existing.status) {
+            useNotificationsStore.getState().pushOrderStatusChange({
+              orderId: existing.id,
+              client: existing.client,
+              previousStatus: existing.status,
+              newStatus: data.status,
+            })
+          }
+        }
+
         ordersService
           .update(id, data)
           .then(() => set({ apiAvailable: true }))
@@ -218,6 +252,16 @@ export const useOrdersStore = create<OrdersState>()(
             : state.selectedOrder
 
         set({ orders, selectedOrder })
+
+        if (targetStatus !== active.status) {
+          useNotificationsStore.getState().pushOrderStatusChange({
+            orderId: active.id,
+            client: active.client,
+            previousStatus: active.status,
+            newStatus: targetStatus,
+          })
+        }
+
         get().addToast(`Orden movida a "${targetStatus}"`, 'info')
         const movedOrder = orders.find((o) => o.id === activeId)
         if (movedOrder) {

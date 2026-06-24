@@ -28,6 +28,7 @@ import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 const columns: { title: OrderStatus; hint: string; ring: string }[] = [
   { title: 'Pendiente', hint: 'Por iniciar', ring: 'ring-blue-500/20' },
   { title: 'En Curso', hint: 'En ejecución', ring: 'ring-amber-500/20' },
+  { title: 'Abonado', hint: 'Pago parcial', ring: 'ring-violet-500/20' },
   { title: 'Completada', hint: 'Finalizadas', ring: 'ring-emerald-500/20' },
   { title: 'Cancelada', hint: 'Anuladas', ring: 'ring-slate-400/20' },
 ]
@@ -94,7 +95,9 @@ function OrderCard({
 
       <div className="mt-3 flex items-center justify-between gap-3 pl-6">
         <Badge label={order.status} context="order" />
-        {order.status !== 'Cancelada' && order.status !== 'Completada' && (
+        {order.status !== 'Cancelada' &&
+          order.status !== 'Completada' &&
+          order.status !== 'Abonado' && (
           <button
             type="button"
             onClick={(e) => {

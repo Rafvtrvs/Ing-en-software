@@ -2,6 +2,9 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { RequireAuth } from '@/components/auth/RequireAuth'
 import { LoginPage } from '@/features/auth/LoginPage'
+import { LoginSuccessPage } from '@/features/auth/LoginSuccessPage'
+import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage'
+import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { ClientsPage } from '@/features/clients/ClientsPage'
 import { OrdersPage } from '@/features/orders/OrdersPage'
@@ -17,6 +20,9 @@ import { ROUTES } from '@/constants/routes'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
+  { path: ROUTES.LOGIN_SUCCESS, element: <LoginSuccessPage /> },
+  { path: ROUTES.FORGOT_PASSWORD, element: <ForgotPasswordPage /> },
+  { path: ROUTES.RESET_PASSWORD, element: <ResetPasswordPage /> },
   {
     path: '/',
     element: (

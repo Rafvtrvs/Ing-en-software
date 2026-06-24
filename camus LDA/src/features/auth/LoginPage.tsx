@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Droplets, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { authService } from '@/services/authService'
+import { ROUTES } from '@/constants/routes'
 
 // Pantalla de autenticación. Consume /api/auth/login (AuthController),
 // guarda el JWT y habilita las operaciones de escritura contra la BD.
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: string })?.from ?? '/'
+  const from = (location.state as { from?: string; message?: string })?.from ?? '/'
+  const successMessage =
+    (location.state as { message?: string })?.message ?? ''
 
   const [email, setEmail] = useState('admin@camus.cl')
   const [password, setPassword] = useState('admin123')
@@ -22,7 +25,7 @@ export function LoginPage() {
     setLoading(true)
     try {
       await authService.login(email, password)
-      navigate(from, { replace: true })
+      navigate(ROUTES.LOGIN_SUCCESS, { replace: true, state: { from } })
     } catch {
       setError('Credenciales inválidas o backend no disponible.')
     } finally {
@@ -67,7 +70,21 @@ export function LoginPage() {
               required
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
+            <div className="mt-2 text-right">
+              <Link
+                to={ROUTES.FORGOT_PASSWORD}
+                className="text-xs font-medium text-blue-600 hover:text-blue-700"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </div>
+
+          {successMessage && (
+            <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+              {successMessage}
+            </p>
+          )}
 
           {error && (
             <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">

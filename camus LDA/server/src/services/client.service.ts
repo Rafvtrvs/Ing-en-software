@@ -6,6 +6,7 @@
 import { prisma } from '../db/prisma.js'
 import { auditService } from './audit.service.js'
 import { toClientDto } from './mappers.js'
+import { assertNoDuplicateClient } from '../utils/clientDuplicates.js'
 
 interface ClientInput {
   name: string
@@ -29,6 +30,13 @@ export const clientService = {
   },
 
   async create(input: ClientInput, userId?: number) {
+    const existing = await prisma.cliente.findMany()
+    assertNoDuplicateClient(existing, {
+      rut: input.rut,
+      email: input.email,
+      phone: input.phone,
+    })
+
     const row = await prisma.cliente.create({
       data: {
         nombre: input.name,
@@ -51,6 +59,23 @@ export const clientService = {
 
   async update(id: number, input: Partial<ClientInput>, userId?: number) {
     const before = await prisma.cliente.findUnique({ where: { id } })
+    if (!before) {
+      const err = new Error('Cliente no encontrado') as Error & { status: number }
+      err.status = 404
+      throw err
+    }
+
+    const existing = await prisma.cliente.findMany()
+    assertNoDuplicateClient(
+      existing,
+      {
+        rut: input.rut ?? before.rut,
+        email: input.email ?? before.email,
+        phone: input.phone ?? before.telefono,
+      },
+      id,
+    )
+
     const row = await prisma.cliente.update({
       where: { id },
       data: {

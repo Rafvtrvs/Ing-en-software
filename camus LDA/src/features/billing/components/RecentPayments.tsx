@@ -1,10 +1,12 @@
 import { CreditCard } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
-import { recentPayments } from '@/data/mock/billing'
+import { useBillingStore } from '@/store/useBillingStore'
 import { formatInvoiceAmount } from '@/features/billing/utils/exportBilling'
 import { formatShortDate } from '@/utils/formatters'
 
 export function RecentPayments() {
+  const payments = useBillingStore((s) => s.payments)
+
   return (
     <Card>
       <CardHeader
@@ -17,7 +19,7 @@ export function RecentPayments() {
         }
       />
       <ul className="space-y-3">
-        {recentPayments.map((payment) => (
+        {payments.slice(0, 5).map((payment) => (
           <li
             key={payment.id}
             className="flex items-center justify-between gap-3 border-b border-slate-50 pb-3 last:border-0 last:pb-0"

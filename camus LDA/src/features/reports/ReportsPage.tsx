@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { Download } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Tabs } from '@/components/ui/Tabs'
@@ -22,14 +24,22 @@ import { SummaryReportPanel } from './components/SummaryReportPanel'
 import { OrdersReportPanel } from './components/OrdersReportPanel'
 import { InventoryReportPanel } from './components/InventoryReportPanel'
 import { BillingReportPanel } from './components/BillingReportPanel'
+import { CostsReportPanel } from './components/CostsReportPanel'
 import { TechniciansReportPanel } from './components/TechniciansReportPanel'
+import { AuditReportPanel } from './components/AuditReportPanel'
+import { TraceabilityReportPanel } from './components/TraceabilityReportPanel'
+import { PhysicalAssetsReportPanel } from './components/PhysicalAssetsReportPanel'
 
 const REPORT_TABS: { id: ReportTab; label: string }[] = [
   { id: 'resumen', label: 'Resumen' },
   { id: 'ordenes', label: 'Órdenes' },
   { id: 'inventario', label: 'Inventario' },
   { id: 'facturacion', label: 'Facturación' },
+  { id: 'trazabilidad', label: 'Trazabilidad' },
+  { id: 'activos', label: 'Activos físicos' },
+  { id: 'costos', label: 'Costos' },
   { id: 'tecnicos', label: 'Técnicos' },
+  { id: 'auditoria', label: 'Auditoría' },
 ]
 
 export function ReportsPage() {
@@ -43,6 +53,14 @@ export function ReportsPage() {
   const invoices = useBillingStore((s) => s.invoices)
   const products = useInventoryStore((s) => s.products)
   const clients = useClientsStore((s) => s.clients)
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    const tab = searchParams.get('tab') as ReportTab | null
+    if (tab && REPORT_TABS.some((t) => t.id === tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams, setActiveTab])
 
   const handleExportAll = () => {
     exportOrdersReport(orders)
@@ -79,7 +97,11 @@ export function ReportsPage() {
         {activeTab === 'ordenes' && <OrdersReportPanel />}
         {activeTab === 'inventario' && <InventoryReportPanel />}
         {activeTab === 'facturacion' && <BillingReportPanel />}
+        {activeTab === 'trazabilidad' && <TraceabilityReportPanel />}
+        {activeTab === 'activos' && <PhysicalAssetsReportPanel />}
+        {activeTab === 'costos' && <CostsReportPanel />}
         {activeTab === 'tecnicos' && <TechniciansReportPanel />}
+        {activeTab === 'auditoria' && <AuditReportPanel />}
       </div>
 
       <ToastContainerView toasts={toasts} onRemove={removeToast} />

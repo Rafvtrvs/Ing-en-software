@@ -37,7 +37,7 @@ let toastId = 0
 const STORE_KEYS = [
   'camus_clients_store_v1',
   'camus_orders_store_v1',
-  'camus_inventory_store_v1',
+  'camus_inventory_store_v2',
   'camus_billing_store_v1',
   'camus_users_store_v1',
   'camus_parameters_store_v1',

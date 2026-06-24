@@ -63,6 +63,26 @@ export function AppearanceSettingsPanel() {
             onChange={(v) => setValue('compactSidebar', v)}
           />
         </div>
+
+        <div className="rounded-xl border border-slate-200 p-4">
+          <p className="mb-3 text-sm font-medium text-slate-700">Vista previa del tema</p>
+          <div
+            className={
+              watch('theme') === 'dark'
+                ? 'rounded-lg bg-slate-900 p-4 text-slate-100'
+                : 'rounded-lg bg-white p-4 text-slate-900 shadow-sm ring-1 ring-slate-200'
+            }
+          >
+            <p className="text-sm font-semibold">Alcantarillados Camus Ltda.</p>
+            <p className="mt-1 text-xs opacity-70">
+              Panel de control — {watch('language') === 'en' ? 'Dashboard' : 'Tablero'}
+            </p>
+            <div className="mt-3 flex gap-2">
+              <span className="rounded-md bg-blue-600 px-2 py-1 text-xs text-white">Acción</span>
+              <span className="rounded-md border px-2 py-1 text-xs">Secundario</span>
+            </div>
+          </div>
+        </div>
       </SettingsCard>
     </form>
   )

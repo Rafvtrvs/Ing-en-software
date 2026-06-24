@@ -5,6 +5,7 @@
 import { prisma } from '../db/prisma.js'
 import { auditService } from './audit.service.js'
 import { toAssetDto } from './mappers.js'
+import { assertNoDuplicateProductCode } from '../utils/productDuplicates.js'
 
 interface AssetInput {
   code?: string
@@ -44,6 +45,9 @@ export const assetService = {
   },
 
   async create(input: AssetInput, userId?: number) {
+    const existing = await prisma.insumo.findMany()
+    assertNoDuplicateProductCode(existing, input.code ?? '')
+
     const estado = computeStatus(input.currentStock ?? 0, input.minStock ?? 0)
     const idCategoria = await resolveCategoria(input.category)
     const row = await prisma.insumo.create({
@@ -70,7 +74,17 @@ export const assetService = {
 
   async update(id: number, input: Partial<AssetInput>, userId?: number) {
     const before = await prisma.insumo.findUnique({ where: { id } })
-    const current = input.currentStock ?? before?.stockActual ?? 0
+    if (!before) {
+      const err = new Error('Producto no encontrado') as Error & { status: number }
+      err.status = 404
+      throw err
+    }
+
+    const code = input.code ?? before.codigo
+    const existing = await prisma.insumo.findMany()
+    assertNoDuplicateProductCode(existing, code, id)
+
+    const current = input.currentStock ?? before.stockActual ?? 0
     const min = input.minStock ?? before?.stockMinimo ?? 0
     const idCategoria =
       input.category !== undefined

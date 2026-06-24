@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Tabs } from '@/components/ui/Tabs'
 import { ToastContainerView } from '@/components/ui/ToastContainer'
@@ -15,11 +17,21 @@ const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
   { id: 'sistema', label: 'Sistema' },
 ]
 
+const VALID_TABS = SETTINGS_TABS.map((t) => t.id)
+
 export function SettingsPage() {
   const activeTab = useSettingsStore((s) => s.activeTab)
   const setActiveTab = useSettingsStore((s) => s.setActiveTab)
   const toasts = useSettingsStore((s) => s.toasts)
   const removeToast = useSettingsStore((s) => s.removeToast)
+  const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    const tab = searchParams.get('tab') as SettingsTab | null
+    if (tab && VALID_TABS.includes(tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams, setActiveTab])
 
   return (
     <>

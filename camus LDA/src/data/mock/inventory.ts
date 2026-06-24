@@ -89,6 +89,16 @@ export const initialProducts: Product[] = [
     unit: 'un',
     status: 'Bajo',
   },
+  {
+    id: '9',
+    code: 'CAM-009',
+    name: 'Camión hidrojet Isuzu NPR 5000L',
+    category: 'Camiones',
+    currentStock: 2,
+    minStock: 1,
+    unit: 'un',
+    status: 'Ok',
+  },
 ].map((p) => ({
   ...p,
   status: computeStockStatus(p.currentStock, p.minStock),

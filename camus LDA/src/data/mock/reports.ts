@@ -107,6 +107,20 @@ export const reportExportCatalog: ReportExportItem[] = [
     category: 'resumen',
     format: 'CSV',
   },
+  {
+    id: 'exp-7',
+    title: 'Reporte de Costos Operacionales',
+    description: 'Costos estimados por período (mano de obra, combustible, overhead).',
+    category: 'costos',
+    format: 'PDF',
+  },
+  {
+    id: 'exp-8',
+    title: 'Informe de Uso de Activos Físicos',
+    description: 'Servicios y órdenes donde operó cada máquina o camión.',
+    category: 'activos',
+    format: 'PDF',
+  },
 ]
 
 export function getSummaryReportKpis(stats: {

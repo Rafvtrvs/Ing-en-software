@@ -1,8 +1,10 @@
 import { Calendar } from 'lucide-react'
 import { KpiCard } from '@/components/ui/KpiCard'
-import { dashboardKpis } from '@/data/mock/dashboard'
 import { formatDate } from '@/utils/formatters'
 import { useAppStore } from '@/store/useAppStore'
+import { useOrdersStore } from '@/store/useOrdersStore'
+import { useBillingStore } from '@/store/useBillingStore'
+import { getDashboardKpis } from './utils/getDashboardKpis'
 import { OrdersByStatusChart } from './components/OrdersByStatusChart'
 import { OrdersByMonthChart } from './components/OrdersByMonthChart'
 import { OrdersByCategoryChart } from './components/OrdersByCategoryChart'
@@ -12,7 +14,10 @@ import { QuickActions } from './components/QuickActions'
 
 export function DashboardPage() {
   const user = useAppStore((s) => s.user)
+  const orders = useOrdersStore((s) => s.orders)
+  const invoices = useBillingStore((s) => s.invoices)
   const today = formatDate(new Date())
+  const kpis = getDashboardKpis(orders, invoices)
 
   return (
     <div className="space-y-6">
@@ -30,7 +35,7 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {dashboardKpis.map((kpi) => (
+        {kpis.map((kpi) => (
           <KpiCard key={kpi.title} data={kpi} />
         ))}
       </div>

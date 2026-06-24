@@ -6,6 +6,7 @@ import { FormField } from '@/components/ui/FormField'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useClientsStore } from '@/store/useClientsStore'
+import { findDuplicateClient } from '@/features/clients/utils/clientDuplicates'
 import type { Client, ClientStatus } from '@/types'
 
 interface ClientFormValues {
@@ -25,6 +26,7 @@ interface ClientFormModalProps {
 }
 
 export function ClientFormModal({ mode, client, open, onClose }: ClientFormModalProps) {
+  const clients = useClientsStore((s) => s.clients)
   const addClient = useClientsStore((s) => s.addClient)
   const updateClient = useClientsStore((s) => s.updateClient)
   const addToast = useClientsStore((s) => s.addToast)
@@ -33,6 +35,8 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
     register,
     handleSubmit,
     reset,
+    watch,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<ClientFormValues>({
     defaultValues: {
@@ -68,16 +72,42 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
     }
   }, [open, mode, client, reset])
 
-  const onSubmit = (data: ClientFormValues) => {
+  const validateUnique = (data: ClientFormValues): boolean => {
+    const duplicate = findDuplicateClient(
+      clients,
+      { rut: data.rut, email: data.email, phone: data.phone },
+      mode === 'edit' ? client?.id : undefined,
+    )
+    if (!duplicate) return true
+
+    setError(duplicate.field, { type: 'validate', message: duplicate.message })
+    return false
+  }
+
+  const onSubmit = async (data: ClientFormValues) => {
+    if (!validateUnique(data)) return
+
     if (mode === 'create') {
-      addClient({
+      const result = await addClient({
         ...data,
         lastOrder: '—',
         createdAt: new Date().toISOString(),
       })
+      if (!result.ok) {
+        if (result.field && result.message) {
+          setError(result.field, { type: 'validate', message: result.message })
+        }
+        return
+      }
       addToast(`Cliente "${data.name}" creado correctamente`)
     } else if (client) {
-      updateClient(client.id, data)
+      const result = await updateClient(client.id, data)
+      if (!result.ok) {
+        if (result.field && result.message) {
+          setError(result.field, { type: 'validate', message: result.message })
+        }
+        return
+      }
       addToast(`Cliente "${data.name}" actualizado correctamente`)
     }
     onClose()
@@ -134,7 +164,17 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
             <Input
               id="rut"
               placeholder="Ej: 76.123.456-7"
-              {...register('rut', { required: 'El RUT es obligatorio' })}
+              {...register('rut', {
+                required: 'El RUT es obligatorio',
+                validate: (value) => {
+                  const duplicate = findDuplicateClient(
+                    clients,
+                    { rut: value, email: watch('email'), phone: watch('phone') },
+                    mode === 'edit' ? client?.id : undefined,
+                  )
+                  return duplicate?.field === 'rut' ? duplicate.message : true
+                },
+              })}
               className={errors.rut ? 'border-red-300' : undefined}
             />
           </FormField>
@@ -142,7 +182,17 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
             <Input
               id="phone"
               placeholder="Ej: +56 9 8765 4321"
-              {...register('phone', { required: 'El teléfono es obligatorio' })}
+              {...register('phone', {
+                required: 'El teléfono es obligatorio',
+                validate: (value) => {
+                  const duplicate = findDuplicateClient(
+                    clients,
+                    { rut: watch('rut'), email: watch('email'), phone: value },
+                    mode === 'edit' ? client?.id : undefined,
+                  )
+                  return duplicate?.field === 'phone' ? duplicate.message : true
+                },
+              })}
               className={errors.phone ? 'border-red-300' : undefined}
             />
           </FormField>
@@ -159,6 +209,14 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
                 pattern: {
                   value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                   message: 'Ingresa un email válido',
+                },
+                validate: (value) => {
+                  const duplicate = findDuplicateClient(
+                    clients,
+                    { rut: watch('rut'), email: value, phone: watch('phone') },
+                    mode === 'edit' ? client?.id : undefined,
+                  )
+                  return duplicate?.field === 'email' ? duplicate.message : true
                 },
               })}
               className={errors.email ? 'border-red-300' : undefined}

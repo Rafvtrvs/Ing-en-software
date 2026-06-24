@@ -75,6 +75,8 @@ export const initialOrders: WorkOrder[] = [
     priority: 'Alta',
     technician: 'Luis Torres',
     progress: 0,
+    equipmentId: 'eq-3',
+    truckCode: 'CAM-009',
   },
   {
     id: 'OT-2026-0127',
@@ -87,6 +89,8 @@ export const initialOrders: WorkOrder[] = [
     priority: 'Media',
     technician: 'Ana Pérez',
     progress: 60,
+    equipmentId: 'eq-2',
+    truckCode: 'CAM-012',
   },
   {
     id: 'OT-2026-0126',
@@ -123,6 +127,7 @@ export const initialOrders: WorkOrder[] = [
     priority: 'Alta',
     technician: 'Daniela Soto',
     progress: 35,
+    truckCode: 'CAM-009',
   },
 ]
 

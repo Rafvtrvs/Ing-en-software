@@ -43,6 +43,12 @@ export const initialCategories: ProductCategory[] = [
     description: 'Cemento, adhesivos y materiales de obra.',
     status: 'Activa',
   },
+  {
+    id: 'cat-8',
+    name: 'Camiones',
+    description: 'Flota vehicular para operaciones de alcantarillado e hidrojet.',
+    status: 'Activa',
+  },
 ]
 
 export const initialSuppliers: Supplier[] = [

@@ -12,6 +12,7 @@ import { RecentPayments } from './components/RecentPayments'
 import { InvoiceFormModal } from './components/InvoiceFormModal'
 import { InvoiceViewModal } from './components/InvoiceViewModal'
 import { DeleteInvoiceModal } from './components/DeleteInvoiceModal'
+import { RegisterPaymentModal } from './components/RegisterPaymentModal'
 
 export function BillingPage() {
   const invoices = useBillingStore((s) => s.invoices)
@@ -71,6 +72,11 @@ export function BillingPage() {
       <DeleteInvoiceModal
         invoice={selectedInvoice}
         open={modalMode === 'delete'}
+        onClose={closeModal}
+      />
+      <RegisterPaymentModal
+        invoice={selectedInvoice}
+        open={modalMode === 'payment'}
         onClose={closeModal}
       />
 

@@ -6,6 +6,7 @@ import { FormField } from '@/components/ui/FormField'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useInventoryStore } from '@/store/useInventoryStore'
+import { findDuplicateProductCode } from '@/features/inventory/utils/productDuplicates'
 import type { Product } from '@/types'
 
 interface ProductFormValues {
@@ -33,6 +34,7 @@ export function ProductFormModal({
   const addProduct = useInventoryStore((s) => s.addProduct)
   const updateProduct = useInventoryStore((s) => s.updateProduct)
   const addToast = useInventoryStore((s) => s.addToast)
+  const products = useInventoryStore((s) => s.products)
   // Seleccionar el array estable y derivar con useMemo: un selector que
   // retorna un array nuevo en cada llamada provoca re-renders infinitos.
   const categories = useInventoryStore((s) => s.categories)
@@ -45,6 +47,7 @@ export function ProductFormModal({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormValues>({
     defaultValues: {
@@ -80,18 +83,42 @@ export function ProductFormModal({
     }
   }, [open, mode, product, reset])
 
-  const onSubmit = (data: ProductFormValues) => {
+  const onSubmit = async (data: ProductFormValues) => {
     const payload = {
       ...data,
+      code: data.code.trim(),
+      name: data.name.trim(),
       currentStock: Number(data.currentStock),
       minStock: Number(data.minStock),
     }
 
+    const duplicate = findDuplicateProductCode(
+      products,
+      payload.code,
+      mode === 'edit' ? product?.id : undefined,
+    )
+    if (duplicate) {
+      setError('code', { type: 'validate', message: duplicate.message })
+      return
+    }
+
     if (mode === 'create') {
-      addProduct(payload)
+      const result = await addProduct(payload)
+      if (!result.ok) {
+        if (result.field && result.message) {
+          setError(result.field, { type: 'validate', message: result.message })
+        }
+        return
+      }
       addToast(`Producto "${data.name}" creado correctamente`)
     } else if (product) {
-      updateProduct(product.id, payload)
+      const result = await updateProduct(product.id, payload)
+      if (!result.ok) {
+        if (result.field && result.message) {
+          setError(result.field, { type: 'validate', message: result.message })
+        }
+        return
+      }
       addToast(`Producto "${data.name}" actualizado correctamente`)
     }
     onClose()
@@ -121,7 +148,17 @@ export function ProductFormModal({
             <Input
               id="code"
               placeholder="Ej: PVC-110-001"
-              {...register('code', { required: 'El código es obligatorio' })}
+              {...register('code', {
+                required: 'El código es obligatorio',
+                validate: (value) => {
+                  const duplicate = findDuplicateProductCode(
+                    products,
+                    value,
+                    mode === 'edit' ? product?.id : undefined,
+                  )
+                  return duplicate?.message ?? true
+                },
+              })}
               className={errors.code ? 'border-red-300' : undefined}
             />
           </FormField>

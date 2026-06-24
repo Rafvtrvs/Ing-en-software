@@ -5,6 +5,7 @@ import {
   Play,
   Tag,
   Trash2,
+  Truck,
   User,
   Wrench,
 } from 'lucide-react'
@@ -12,6 +13,7 @@ import { Drawer } from '@/components/ui/Drawer'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { useOrdersStore } from '@/store/useOrdersStore'
+import { useInventoryStore } from '@/store/useInventoryStore'
 import type { OrderStatus, WorkOrder } from '@/types'
 import { cn } from '@/utils/cn'
 
@@ -93,10 +95,14 @@ export function OrderDetailDrawer({
   const openDeleteModal = useOrdersStore((s) => s.openDeleteModal)
   const updateOrder = useOrdersStore((s) => s.updateOrder)
   const addToast = useOrdersStore((s) => s.addToast)
+  const products = useInventoryStore((s) => s.products)
 
   const isReady = Boolean(order)
   const status = order?.status ?? 'Pendiente'
   const next = nextStatus(status)
+  const assignedTruck = order?.truckCode
+    ? products.find((p) => p.code === order.truckCode) ?? null
+    : null
 
   return (
     <Drawer
@@ -186,6 +192,17 @@ export function OrderDetailDrawer({
             <InfoRow icon={Wrench} label="Descripción" value={order.service ?? '—'} />
             <InfoRow icon={MapPin} label="Dirección" value={order.address} />
             <InfoRow icon={Tag} label="Categoría" value={order.category} />
+            <InfoRow
+              icon={Truck}
+              label="Camión asignado"
+              value={
+                assignedTruck
+                  ? `${assignedTruck.code} — ${assignedTruck.name}`
+                  : order.truckCode
+                    ? order.truckCode
+                    : 'Sin asignar'
+              }
+            />
             <InfoRow icon={User} label="Técnico" value={order.technician ?? 'Sin asignar'} />
           </div>
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Eye, Filter, Pencil, Search, Trash2, Upload, X, CheckCircle } from 'lucide-react'
+import { Eye, Filter, Pencil, Search, Trash2, Upload, X, Wallet } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
@@ -27,7 +27,7 @@ export function InvoicesTable({ onCreateClick }: InvoicesTableProps) {
   const openViewModal = useBillingStore((s) => s.openViewModal)
   const openEditModal = useBillingStore((s) => s.openEditModal)
   const openDeleteModal = useBillingStore((s) => s.openDeleteModal)
-  const markAsPaid = useBillingStore((s) => s.markAsPaid)
+  const openPaymentModal = useBillingStore((s) => s.openPaymentModal)
   const addToast = useBillingStore((s) => s.addToast)
 
   const [search, setSearch] = useState('')
@@ -63,11 +63,6 @@ export function InvoicesTable({ onCreateClick }: InvoicesTableProps) {
     addToast(`${filtered.length} facturas exportadas a CSV`)
   }
 
-  const handleMarkPaid = (inv: Invoice) => {
-    markAsPaid(inv.id, 'Transferencia')
-    addToast(`Factura ${inv.number} marcada como pagada`)
-  }
-
   const columns: Column<Invoice>[] = [
     {
       key: 'number',
@@ -100,7 +95,18 @@ export function InvoicesTable({ onCreateClick }: InvoicesTableProps) {
     {
       key: 'status',
       header: 'Estado',
-      render: (row) => <Badge label={row.status} context="billing" />,
+      render: (row) => {
+        const paid = row.paidAmount ?? 0
+        const isPartial = paid > 0 && paid < row.amount
+        return (
+          <div className="flex flex-col gap-1">
+            <Badge label={row.status} context="billing" />
+            {isPartial && (
+              <span className="text-xs text-amber-600">Pago parcial</span>
+            )}
+          </div>
+        )
+      },
     },
     {
       key: 'actions',
@@ -126,11 +132,11 @@ export function InvoicesTable({ onCreateClick }: InvoicesTableProps) {
           {(row.status === 'Emitida' || row.status === 'Vencida') && (
             <button
               type="button"
-              onClick={() => handleMarkPaid(row)}
+              onClick={() => openPaymentModal(row)}
               className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
-              aria-label={`Marcar pagada ${row.number}`}
+              aria-label={`Registrar pago ${row.number}`}
             >
-              <CheckCircle className="h-4 w-4" />
+              <Wallet className="h-4 w-4" />
             </button>
           )}
           <button

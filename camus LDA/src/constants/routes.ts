@@ -10,4 +10,7 @@ export const ROUTES = {
   PARAMETROS: '/parametros',
   CONFIGURACION: '/configuracion',
   SOPORTE: '/soporte',
+  FORGOT_PASSWORD: '/recuperar-contrasena',
+  RESET_PASSWORD: '/restablecer-contrasena',
+  LOGIN_SUCCESS: '/login-exitoso',
 } as const

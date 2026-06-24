@@ -1,6 +1,11 @@
 import type { LucideIcon } from 'lucide-react'
 
-export type OrderStatus = 'Pendiente' | 'En Curso' | 'Completada' | 'Cancelada'
+export type OrderStatus =
+  | 'Pendiente'
+  | 'En Curso'
+  | 'Completada'
+  | 'Abonado'
+  | 'Cancelada'
 export type InventoryStatus = 'Ok' | 'Bajo' | 'Crítico'
 export type TrendDirection = 'up' | 'down'
 
@@ -35,6 +40,10 @@ export interface WorkOrder {
   createdAt: string
   priority?: 'Baja' | 'Media' | 'Alta'
   technician?: string
+  /** Código de producto (Inventario) asignado como camión */
+  truckCode?: string
+  /** ID del equipo (módulo Equipos) asociado a la OT */
+  equipmentId?: string
   progress?: number
   /** Orden visual dentro de la columna del kanban */
   sortOrder?: number
@@ -58,6 +67,27 @@ export interface Product {
   status: InventoryStatus
 }
 
+export type EquipmentStatus =
+  | 'Operativo'
+  | 'Mantenimiento'
+  | 'Fuera de servicio'
+  | 'Asignado'
+
+export interface Equipment {
+  id: string
+  code: string
+  name: string
+  serialNumber: string
+  location: string
+  status: EquipmentStatus
+  lastMaintenance: string
+  nextMaintenance: string
+  assignedTo?: string
+  /** OT asociada cuando el equipo está asignado */
+  assignedOrderId?: string
+  category: string
+}
+
 export type StockMovementType = 'Entrada' | 'Salida'
 
 export interface StockMovement {
@@ -71,7 +101,12 @@ export interface StockMovement {
   user: string
 }
 
-export type InventoryTab = 'inventario' | 'categorias' | 'proveedores' | 'kits'
+export type InventoryTab =
+  | 'inventario'
+  | 'equipos'
+  | 'categorias'
+  | 'proveedores'
+  | 'kits'
 
 export type CategoryStatus = 'Activa' | 'Inactiva'
 export type SupplierStatus = 'Activo' | 'Inactivo'
@@ -169,6 +204,19 @@ export interface User {
   notifications: number
 }
 
+export type NotificationType = 'order' | 'system' | 'inventory'
+
+export interface AppNotification {
+  id: string
+  title: string
+  message: string
+  type: NotificationType
+  read: boolean
+  createdAt: string
+  link?: string
+  orderId?: string
+}
+
 export type SystemUserStatus = 'Activo' | 'Inactivo' | 'Bloqueado'
 
 export type UsersTab = 'usuarios' | 'roles'
@@ -261,6 +309,7 @@ export interface Invoice {
   status: InvoiceStatus
   paymentMethod?: PaymentMethod
   paidAt?: string
+  paidAmount?: number
   notes?: string
 }
 
@@ -273,7 +322,16 @@ export interface PaymentRecord {
   date: string
 }
 
-export type ReportTab = 'resumen' | 'ordenes' | 'inventario' | 'facturacion' | 'tecnicos'
+export type ReportTab =
+  | 'resumen'
+  | 'ordenes'
+  | 'inventario'
+  | 'facturacion'
+  | 'trazabilidad'
+  | 'activos'
+  | 'costos'
+  | 'tecnicos'
+  | 'auditoria'
 
 export type ReportPeriod = 'month' | 'quarter' | 'year'
 

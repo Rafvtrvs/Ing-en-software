@@ -3,6 +3,7 @@ import type { OrderStatus, WorkOrder } from '@/types'
 export const ORDER_STATUSES: OrderStatus[] = [
   'Pendiente',
   'En Curso',
+  'Abonado',
   'Completada',
   'Cancelada',
 ]

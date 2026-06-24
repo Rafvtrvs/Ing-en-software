@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -6,6 +6,8 @@ import { FormField } from '@/components/ui/FormField'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useOrdersStore } from '@/store/useOrdersStore'
+import { useInventoryStore } from '@/store/useInventoryStore'
+import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
 import type { OrderStatus, WorkOrder } from '@/types'
 
 interface OrderFormValues {
@@ -17,6 +19,7 @@ interface OrderFormValues {
   status: OrderStatus
   priority: 'Baja' | 'Media' | 'Alta'
   technician: string
+  truckCode: string
   progress: number
 }
 
@@ -31,6 +34,11 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
   const addOrder = useOrdersStore((s) => s.addOrder)
   const updateOrder = useOrdersStore((s) => s.updateOrder)
   const addToast = useOrdersStore((s) => s.addToast)
+  const products = useInventoryStore((s) => s.products)
+  const trucks = useMemo(
+    () => products.filter((p) => p.category === 'Camiones' && p.currentStock > 0),
+    [products],
+  )
 
   const {
     register,
@@ -47,6 +55,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       status: 'Pendiente',
       priority: 'Media',
       technician: '',
+      truckCode: '',
       progress: 0,
     },
   })
@@ -63,6 +72,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         status: order.status,
         priority: order.priority ?? 'Media',
         technician: order.technician ?? '',
+        truckCode: order.truckCode ?? '',
         progress: order.progress ?? 0,
       })
     } else {
@@ -75,6 +85,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         status: 'Pendiente',
         priority: 'Media',
         technician: '',
+        truckCode: '',
         progress: 0,
       })
     }
@@ -91,6 +102,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       createdAt: order?.createdAt ?? new Date().toLocaleDateString('es-CL'),
       priority: data.priority,
       technician: data.technician.trim(),
+      ...(data.truckCode ? { truckCode: data.truckCode } : null),
       progress: Number.isFinite(data.progress) ? Number(data.progress) : 0,
     }
 
@@ -98,8 +110,18 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       addOrder(payload)
       addToast(`Orden creada para "${payload.client}"`)
     } else if (order) {
-      updateOrder(order.id, payload)
-      addToast(`Orden "${payload.id || order.id}" actualizada`)
+      const changes = getOrderFieldChanges(order, payload)
+      if (changes.length === 0) {
+        addToast('No hay cambios para guardar', 'info')
+        onClose()
+        return
+      }
+      updateOrder(order.id, payload, { fromForm: true })
+      addToast(
+        changes.length === 1
+          ? `Campo "${changes[0].label}" actualizado en la orden`
+          : `${changes.length} campos actualizados en la orden`,
+      )
     }
     onClose()
   }
@@ -169,13 +191,14 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
             <Select id="status" {...register('status')}>
               <option value="Pendiente">Pendiente</option>
               <option value="En Curso">En Curso</option>
+              <option value="Abonado">Abonado</option>
               <option value="Completada">Completada</option>
               <option value="Cancelada">Cancelada</option>
             </Select>
           </FormField>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <FormField label="Prioridad" htmlFor="priority" required>
             <Select id="priority" {...register('priority')}>
               <option value="Baja">Baja</option>
@@ -185,6 +208,16 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
           </FormField>
           <FormField label="Técnico" htmlFor="technician">
             <Input id="technician" placeholder="Ej: Luis Torres" {...register('technician')} />
+          </FormField>
+          <FormField label="Camión asignado" htmlFor="truckCode">
+            <Select id="truckCode" {...register('truckCode')}>
+              <option value="">Sin asignar</option>
+              {trucks.map((t) => (
+                <option key={t.id} value={t.code}>
+                  {t.code} — {t.name}
+                </option>
+              ))}
+            </Select>
           </FormField>
           <FormField label="Progreso (%)" htmlFor="progress">
             <Input

@@ -2,7 +2,10 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { clientsList as initialClients } from '@/data/mock/clients'
 import { clientsService } from '@/services/clientsService'
+import { findDuplicateClient } from '@/features/clients/utils/clientDuplicates'
+import type { DuplicateField } from '@/features/clients/utils/clientDuplicates'
 import type { Client, ClientStatus } from '@/types'
+import axios from 'axios'
 
 export type ClientModalMode = 'create' | 'edit' | 'view' | 'delete' | null
 
@@ -21,8 +24,8 @@ interface ClientsState {
   showFilters: boolean
   toasts: ToastMessage[]
   syncFromApi: () => Promise<void>
-  addClient: (client: Omit<Client, 'id'>) => void
-  updateClient: (id: string, data: Partial<Omit<Client, 'id'>>) => void
+  addClient: (client: Omit<Client, 'id'>) => Promise<{ ok: boolean; field?: DuplicateField; message?: string }>
+  updateClient: (id: string, data: Partial<Omit<Client, 'id'>>) => Promise<{ ok: boolean; field?: DuplicateField; message?: string }>
   deleteClient: (id: string) => void
   openCreateModal: () => void
   openEditModal: (client: Client) => void
@@ -42,6 +45,16 @@ function safeId() {
     return crypto.randomUUID()
   }
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+function apiErrorMessage(err: unknown, fallback: string): { message: string; field?: DuplicateField } {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data as { error?: string; field?: DuplicateField } | undefined
+    if (data?.error) {
+      return { message: data.error, field: data.field }
+    }
+  }
+  return { message: fallback }
 }
 
 export const useClientsStore = create<ClientsState>()(
@@ -70,35 +83,76 @@ export const useClientsStore = create<ClientsState>()(
         }
       },
 
-      addClient: (client) => {
+      addClient: async (client) => {
+        const state = useClientsStore.getState()
+        const duplicate = findDuplicateClient(state.clients, {
+          rut: client.rut,
+          email: client.email,
+          phone: client.phone,
+        })
+        if (duplicate) {
+          state.addToast(duplicate.message, 'error')
+          return { ok: false, field: duplicate.field, message: duplicate.message }
+        }
+
         const tempId = safeId()
-        set((state) => ({
-          clients: [{ ...client, id: tempId }, ...state.clients],
+        set((s) => ({
+          clients: [{ ...client, id: tempId }, ...s.clients],
         }))
-        // Persistencia best-effort en el backend
-        clientsService
-          .create(client)
-          .then((created) =>
-            set((state) => ({
-              clients: state.clients.map((c) =>
-                c.id === tempId ? created : c,
-              ),
-              apiAvailable: true,
-            })),
-          )
-          .catch(() => set({ apiAvailable: false }))
+
+        try {
+          const created = await clientsService.create(client)
+          set((s) => ({
+            clients: s.clients.map((c) => (c.id === tempId ? created : c)),
+            apiAvailable: true,
+          }))
+          return { ok: true }
+        } catch (err) {
+          set((s) => ({
+            clients: s.clients.filter((c) => c.id !== tempId),
+          }))
+          const apiErr = apiErrorMessage(err, 'No se pudo crear el cliente')
+          useClientsStore.getState().addToast(apiErr.message, 'error')
+          return { ok: false, field: apiErr.field, message: apiErr.message }
+        }
       },
 
-      updateClient: (id, data) => {
-        set((state) => ({
-          clients: state.clients.map((c) =>
-            c.id === id ? { ...c, ...data } : c,
-          ),
+      updateClient: async (id, data) => {
+        const state = useClientsStore.getState()
+        const current = state.clients.find((c) => c.id === id)
+        if (!current) return { ok: false }
+
+        const duplicate = findDuplicateClient(
+          state.clients,
+          {
+            rut: data.rut ?? current.rut,
+            email: data.email ?? current.email,
+            phone: data.phone ?? current.phone,
+          },
+          id,
+        )
+        if (duplicate) {
+          state.addToast(duplicate.message, 'error')
+          return { ok: false, field: duplicate.field, message: duplicate.message }
+        }
+
+        const previous = { ...current }
+        set((s) => ({
+          clients: s.clients.map((c) => (c.id === id ? { ...c, ...data } : c)),
         }))
-        clientsService
-          .update(id, data)
-          .then(() => set({ apiAvailable: true }))
-          .catch(() => set({ apiAvailable: false }))
+
+        try {
+          await clientsService.update(id, data)
+          set({ apiAvailable: true })
+          return { ok: true }
+        } catch (err) {
+          set((s) => ({
+            clients: s.clients.map((c) => (c.id === id ? previous : c)),
+          }))
+          const apiErr = apiErrorMessage(err, 'No se pudo actualizar el cliente')
+          useClientsStore.getState().addToast(apiErr.message, 'error')
+          return { ok: false, field: apiErr.field, message: apiErr.message }
+        }
       },
 
       deleteClient: (id) => {

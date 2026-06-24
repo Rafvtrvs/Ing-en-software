@@ -13,6 +13,7 @@ export function errorHandler(
 ) {
   const status = (err as { status?: number })?.status ?? 500
   const message = (err as Error)?.message ?? 'Error interno'
+  const field = (err as { field?: string })?.field
   if (status >= 500) console.error('[error]', err)
-  res.status(status).json({ error: message })
+  res.status(status).json({ error: message, ...(field ? { field } : {}) })
 }

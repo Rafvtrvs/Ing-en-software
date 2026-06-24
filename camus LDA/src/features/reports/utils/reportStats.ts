@@ -3,12 +3,19 @@ import type { ChartDataPoint, Client, Invoice, OrderStatus, Product, WorkOrder }
 const orderStatusColors: Record<OrderStatus, string> = {
   Pendiente: '#3b82f6',
   'En Curso': '#eab308',
+  Abonado: '#8b5cf6',
   Completada: '#22c55e',
   Cancelada: '#94a3b8',
 }
 
 export function getOrdersByStatusChart(orders: WorkOrder[]): ChartDataPoint[] {
-  const statuses: OrderStatus[] = ['Pendiente', 'En Curso', 'Completada', 'Cancelada']
+  const statuses: OrderStatus[] = [
+    'Pendiente',
+    'En Curso',
+    'Abonado',
+    'Completada',
+    'Cancelada',
+  ]
   return statuses
     .map((status) => ({
       name: status,

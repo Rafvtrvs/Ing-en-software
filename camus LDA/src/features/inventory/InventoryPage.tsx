@@ -14,6 +14,7 @@ import { InventoryAlerts } from './components/InventoryAlerts'
 import { CategoriesPanel } from './components/CategoriesPanel'
 import { SuppliersPanel } from './components/SuppliersPanel'
 import { KitsPanel } from './components/KitsPanel'
+import { EquipmentPanel } from './components/EquipmentPanel'
 import { ProductFormModal } from './components/ProductFormModal'
 import { ProductViewModal } from './components/ProductViewModal'
 import { DeleteProductModal } from './components/DeleteProductModal'
@@ -29,6 +30,7 @@ import { DeleteKitModal } from './components/DeleteKitModal'
 
 const INVENTORY_TABS: { id: InventoryTab; label: string }[] = [
   { id: 'inventario', label: 'Inventario' },
+  { id: 'equipos', label: 'Equipos' },
   { id: 'categorias', label: 'Categorías' },
   { id: 'proveedores', label: 'Proveedores' },
   { id: 'kits', label: 'Kits y Paquetes' },
@@ -84,6 +86,8 @@ export function InventoryPage() {
             </div>
           </div>
         )}
+
+        {activeTab === 'equipos' && <EquipmentPanel />}
 
         {activeTab === 'categorias' && <CategoriesPanel />}
         {activeTab === 'proveedores' && <SuppliersPanel />}
