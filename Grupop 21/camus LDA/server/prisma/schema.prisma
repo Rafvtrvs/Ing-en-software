@@ -1,0 +1,278 @@
+// ============================================================
+//  Prisma ORM  ->  Cloud SQL PostgreSQL (Transaccional)
+//  Componente "Conexión BD" del diagrama de despliegue.
+//  Refleja base_de_datos.postgresql.sql.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Rol {
+  id          Int      @id @default(autoincrement()) @map("id_rol")
+  nombre      String   @db.VarChar(100)
+  descripcion String   @default("") @db.VarChar(255)
+  estado      String   @default("Activo") @db.VarChar(20)
+  esSistema   Boolean  @default(false) @map("es_sistema")
+  usuarios    Usuario[]
+  permisos    RolPermiso[]
+
+  @@map("rol")
+}
+
+model Permiso {
+  id       Int    @id @default(autoincrement()) @map("id_permiso")
+  clave    String @unique @db.VarChar(100)
+  etiqueta String @db.VarChar(150)
+  modulo   String @db.VarChar(100)
+  roles    RolPermiso[]
+
+  @@map("permiso")
+}
+
+model RolPermiso {
+  idRol     Int @map("id_rol")
+  idPermiso Int @map("id_permiso")
+  rol       Rol     @relation(fields: [idRol], references: [id], onDelete: Cascade)
+  permiso   Permiso @relation(fields: [idPermiso], references: [id], onDelete: Cascade)
+
+  @@id([idRol, idPermiso])
+  @@map("rol_permiso")
+}
+
+model Usuario {
+  id               Int       @id @default(autoincrement()) @map("id_usuario")
+  nombre           String    @db.VarChar(100)
+  correoElectronico String   @unique @map("correo_electronico") @db.VarChar(150)
+  passwordHash     String    @default("") @map("password_hash") @db.VarChar(255)
+  firebaseUid      String    @default("") @map("firebase_uid") @db.VarChar(128)
+  telefono         String    @default("") @db.VarChar(20)
+  idRol            Int?      @map("id_rol")
+  estado           String    @default("Activo") @db.VarChar(20)
+  ultimoAcceso     DateTime? @map("ultimo_acceso")
+  rol              Rol?      @relation(fields: [idRol], references: [id])
+  ordenes          OrdenTrabajo[]
+  auditorias       BitacoraAuditoria[]
+
+  @@map("usuario")
+}
+
+model Cliente {
+  id          Int      @id @default(autoincrement()) @map("id_cliente")
+  rut         String   @unique @db.VarChar(12)
+  nombre      String   @db.VarChar(100)
+  empresa     String   @default("") @db.VarChar(150)
+  telefono    String   @default("") @db.VarChar(20)
+  email       String   @default("") @db.VarChar(150)
+  direccion   String   @default("") @db.VarChar(255)
+  estado      String   @default("Activo") @db.VarChar(20)
+  ultimaOrden String   @default("") @map("ultima_orden") @db.VarChar(20)
+  creadoEn    DateTime @default(now()) @map("creado_en")
+  ordenes     OrdenTrabajo[]
+  facturas    Factura[]
+
+  @@map("cliente")
+}
+
+model Maquinaria {
+  id       Int    @id @default(autoincrement()) @map("id_maquinaria")
+  patente  String? @db.VarChar(10)
+  marca    String? @db.VarChar(50)
+  estado   String @default("Operativa") @db.VarChar(50)
+  usos     Utiliza[]
+
+  @@map("maquinaria")
+}
+
+model Proveedor {
+  id            Int    @id @default(autoincrement()) @map("id_proveedor")
+  nombre        String @db.VarChar(150)
+  rut           String @default("") @db.VarChar(12)
+  contacto      String @default("") @db.VarChar(100)
+  telefono      String @default("") @db.VarChar(20)
+  email         String @default("") @db.VarChar(150)
+  direccion     String @default("") @db.VarChar(255)
+  condicionPago String @default("") @map("condicion_pago") @db.VarChar(100)
+  estado        String @default("Activo") @db.VarChar(20)
+  insumos       Insumo[]
+
+  @@map("proveedor")
+}
+
+model CategoriaInsumo {
+  id          Int    @id @default(autoincrement()) @map("id_categoria")
+  nombre      String @db.VarChar(100)
+  descripcion String @default("") @db.VarChar(255)
+  estado      String @default("Activa") @db.VarChar(20)
+  insumos     Insumo[]
+
+  @@map("categoria_insumo")
+}
+
+model Insumo {
+  id          Int    @id @default(autoincrement()) @map("id_insumo")
+  codigo      String @default("") @db.VarChar(50)
+  nombre      String @db.VarChar(100)
+  stockActual Int    @default(0) @map("stock_actual")
+  stockMinimo Int    @default(0) @map("stock_minimo")
+  unidad      String @default("unidad") @db.VarChar(30)
+  estado      String @default("Ok") @db.VarChar(20)
+  idCategoria Int?   @map("id_categoria")
+  idProveedor Int?   @map("id_proveedor")
+  categoria   CategoriaInsumo? @relation(fields: [idCategoria], references: [id])
+  proveedor   Proveedor?       @relation(fields: [idProveedor], references: [id])
+  kitItems    KitItem[]
+  consumos    Consume[]
+
+  @@map("insumo")
+}
+
+model Kit {
+  id          Int    @id @default(autoincrement()) @map("id_kit")
+  nombre      String @db.VarChar(100)
+  descripcion String @default("") @db.VarChar(255)
+  estado      String @default("Activo") @db.VarChar(20)
+  items       KitItem[]
+
+  @@map("kit")
+}
+
+model KitItem {
+  idKit    Int @map("id_kit")
+  idInsumo Int @map("id_insumo")
+  cantidad Int @default(1)
+  kit      Kit    @relation(fields: [idKit], references: [id], onDelete: Cascade)
+  insumo   Insumo @relation(fields: [idInsumo], references: [id])
+
+  @@id([idKit, idInsumo])
+  @@map("kit_item")
+}
+
+model OrdenTrabajo {
+  id           String   @id @map("id_ot") @db.VarChar(30)
+  fechaEmision DateTime @default(now()) @map("fecha_emision") @db.Date
+  estado       String   @default("Pendiente") @db.VarChar(50)
+  prioridad    String   @default("Media") @db.VarChar(20)
+  servicio     String   @default("") @db.VarChar(150)
+  categoria    String   @default("") @db.VarChar(100)
+  direccion    String   @default("") @db.VarChar(255)
+  progreso     Int      @default(0)
+  ordenVisual  Int      @default(0) @map("orden_visual")
+  idCliente    Int?     @map("id_cliente")
+  idOperador   Int?     @map("id_operador")
+  cliente      Cliente? @relation(fields: [idCliente], references: [id])
+  operador     Usuario? @relation(fields: [idOperador], references: [id])
+  intervenciones Intervencion[]
+  evidencias   EvidenciaMultimedia[]
+  registros    RegistroFinanciero[]
+  facturas     Factura[]
+  usos         Utiliza[]
+  consumos     Consume[]
+
+  @@map("orden_trabajo")
+}
+
+model Intervencion {
+  id      Int    @id @default(autoincrement()) @map("id_intervencion")
+  detalle String? @db.VarChar(255)
+  idOt    String? @map("id_ot") @db.VarChar(30)
+  orden   OrdenTrabajo? @relation(fields: [idOt], references: [id], onDelete: Cascade)
+
+  @@map("intervencion")
+}
+
+model BitacoraAuditoria {
+  id            BigInt   @id @default(autoincrement()) @map("id_log")
+  moduloAfectado String? @map("modulo_afectado") @db.VarChar(100)
+  accion        String?  @db.VarChar(100)
+  valorAnterior String?  @map("valor_anterior")
+  valorNuevo    String?  @map("valor_nuevo")
+  idUsuario     Int?     @map("id_usuario")
+  fechaHora     DateTime @default(now()) @map("fecha_hora")
+  usuario       Usuario? @relation(fields: [idUsuario], references: [id])
+
+  @@map("bitacora_auditoria")
+}
+
+model EvidenciaMultimedia {
+  id            Int      @id @default(autoincrement()) @map("id_evidencia")
+  tipoArchivo   String?  @map("tipo_archivo") @db.VarChar(50)
+  version       Int      @default(1)
+  rutaArchivoUrl String? @map("ruta_archivo_url") @db.VarChar(255)
+  capaDibujoJson String? @map("capa_dibujo_json")
+  fechaCarga    DateTime @default(now()) @map("fecha_carga")
+  idOt          String?  @map("id_ot") @db.VarChar(30)
+  orden         OrdenTrabajo? @relation(fields: [idOt], references: [id], onDelete: Cascade)
+
+  @@map("evidencia_multimedia")
+}
+
+model RegistroFinanciero {
+  id              Int     @id @default(autoincrement()) @map("id_registro")
+  estimacionCosto Decimal @default(0) @map("estimacion_costo") @db.Decimal(12, 2)
+  estadoPago      String  @default("Pendiente") @map("estado_pago") @db.VarChar(50)
+  iva             Decimal @default(0) @db.Decimal(12, 2)
+  idOt            String? @map("id_ot") @db.VarChar(30)
+  orden           OrdenTrabajo? @relation(fields: [idOt], references: [id])
+
+  @@map("registro_financiero")
+}
+
+model Factura {
+  id               Int      @id @default(autoincrement()) @map("id_factura")
+  numero           String   @unique @db.VarChar(40)
+  idCliente        Int?     @map("id_cliente")
+  idOt             String?  @map("id_ot") @db.VarChar(30)
+  fechaEmision     DateTime @default(now()) @map("fecha_emision") @db.Date
+  fechaVencimiento DateTime? @map("fecha_vencimiento") @db.Date
+  monto            Decimal  @default(0) @db.Decimal(12, 2)
+  estado           String   @default("Emitida") @db.VarChar(20)
+  metodoPago       String?  @map("metodo_pago") @db.VarChar(30)
+  pagadaEn         DateTime? @map("pagada_en") @db.Date
+  notas            String?
+  cliente          Cliente? @relation(fields: [idCliente], references: [id])
+  orden            OrdenTrabajo? @relation(fields: [idOt], references: [id])
+  pagos            Pago[]
+
+  @@map("factura")
+}
+
+model Pago {
+  id        Int      @id @default(autoincrement()) @map("id_pago")
+  idFactura Int?     @map("id_factura")
+  monto     Decimal  @default(0) @db.Decimal(12, 2)
+  metodo    String?  @db.VarChar(30)
+  fecha     DateTime @default(now()) @db.Date
+  factura   Factura? @relation(fields: [idFactura], references: [id])
+
+  @@map("pago")
+}
+
+model Utiliza {
+  idOt         String @map("id_ot") @db.VarChar(30)
+  idMaquinaria Int    @map("id_maquinaria")
+  horasUso     Int    @default(0) @map("horas_uso")
+  fechaUso     DateTime? @map("fecha_uso") @db.Date
+  orden        OrdenTrabajo @relation(fields: [idOt], references: [id], onDelete: Cascade)
+  maquinaria   Maquinaria   @relation(fields: [idMaquinaria], references: [id])
+
+  @@id([idOt, idMaquinaria])
+  @@map("utiliza")
+}
+
+model Consume {
+  idOt              String  @map("id_ot") @db.VarChar(30)
+  idInsumo          Int     @map("id_insumo")
+  cantidadConsumida Int     @default(0) @map("cantidad_consumida")
+  costoTotal        Decimal @default(0) @map("costo_total") @db.Decimal(12, 2)
+  orden             OrdenTrabajo @relation(fields: [idOt], references: [id], onDelete: Cascade)
+  insumo            Insumo       @relation(fields: [idInsumo], references: [id])
+
+  @@id([idOt, idInsumo])
+  @@map("consume")
+}

@@ -1,0 +1,890 @@
+<mxfile host="app.diagrams.net" pages="9">
+  <diagram id="hH2zVhY5_WKu--MePmp4" name="CU68-DS">
+    <mxGraphModel dx="2357" dy="1295" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Fddou2SITbJRG36Oy87--2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="50" width="80" x="264" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--3" parent="1" style="html=1;whiteSpace=wrap;" value="V_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="404" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--4" parent="1" style="html=1;whiteSpace=wrap;" value="C_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="604" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--5" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="804" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="pago" vertex="1">
+          <mxGeometry height="50" width="140" x="1004" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--7" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="consume" vertex="1">
+          <mxGeometry height="50" width="140" x="1204" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="299" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="469" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="669" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="869" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--12" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="1069" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--13" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="1269" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. acceder_reportes_financieros()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="309" y="380" as="sourcePoint" />
+            <mxPoint x="469" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. seleccionar_reporte_utilidad()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="309" y="440" as="sourcePoint" />
+            <mxPoint x="469" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--16" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. ingresar_periodo(fecha_inicio, fecha_fin)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="309" y="500" as="sourcePoint" />
+            <mxPoint x="469" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. generar_reporte_utilidad(params)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="479" y="560" as="sourcePoint" />
+            <mxPoint x="669" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--18" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. calcular_ingresos(params)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="679" y="610" as="sourcePoint" />
+            <mxPoint x="869" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--19" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="6. SELECT SUM(monto) FROM pago WHERE fecha BETWEEN $1 AND $2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="879" y="660" as="sourcePoint" />
+            <mxPoint x="1069" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--20" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: total_ingresos">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1069" y="700" as="sourcePoint" />
+            <mxPoint x="879" y="700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--21" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="7. calcular_costos(params)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="679" y="740" as="sourcePoint" />
+            <mxPoint x="869" y="740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--22" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="8. SELECT SUM(costo_total) FROM consume c JOIN orden_trabajo ot ON c.id_ot=ot.id_ot WHERE ot.fecha_emision BETWEEN $1 AND $2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="879" y="790" as="sourcePoint" />
+            <mxPoint x="1269" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--23" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: total_costos">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1269" y="830" as="sourcePoint" />
+            <mxPoint x="879" y="830" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--24" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: utilidad = ingresos - costos">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="869" y="870" as="sourcePoint" />
+            <mxPoint x="679" y="870" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Fddou2SITbJRG36Oy87--25" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: renderizar_SummaryReportPanel(utilidad)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="669" y="920" as="sourcePoint" />
+            <mxPoint x="309" y="920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="gnLLzEWqOf494Fz0w-YU" name="CU69-DS">
+    <mxGraphModel dx="2020" dy="1110" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ivmL4dhcGgm39yV_io4J-2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="50" width="80" x="252" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-3" parent="1" style="html=1;whiteSpace=wrap;" value="V_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="392" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-4" parent="1" style="html=1;whiteSpace=wrap;" value="C_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="592" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-5" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="792" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="pago" vertex="1">
+          <mxGeometry height="50" width="140" x="992" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-7" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="consume" vertex="1">
+          <mxGeometry height="50" width="140" x="1192" y="179" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="540" width="10" x="287" y="229" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="540" width="10" x="457" y="229" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="540" width="10" x="657" y="229" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="540" width="10" x="857" y="229" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-12" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="540" width="10" x="1057" y="229" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-13" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="540" width="10" x="1257" y="229" as="geometry" />
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. acceder_modulo_financiero()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="297" y="289" as="sourcePoint" />
+            <mxPoint x="457" y="289" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. solicitar_visualizacion_estado()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="467" y="359" as="sourcePoint" />
+            <mxPoint x="657" y="359" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-16" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. summary()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="667" y="409" as="sourcePoint" />
+            <mxPoint x="857" y="409" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. SELECT SUM(monto) AS ingresos FROM pago">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="867" y="459" as="sourcePoint" />
+            <mxPoint x="1057" y="459" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-18" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: total_ingresos">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1057" y="499" as="sourcePoint" />
+            <mxPoint x="867" y="499" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-19" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. SELECT SUM(costo_total) AS costos FROM consume">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="867" y="549" as="sourcePoint" />
+            <mxPoint x="1257" y="549" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-20" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: total_costos">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1257" y="589" as="sourcePoint" />
+            <mxPoint x="867" y="589" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-21" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: {ingresos, costos, utilidad}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="857" y="639" as="sourcePoint" />
+            <mxPoint x="667" y="639" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ivmL4dhcGgm39yV_io4J-22" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: presentar_ingresos_costos_utilidad(resumen)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="657" y="699" as="sourcePoint" />
+            <mxPoint x="297" y="699" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="witJjQxQRmObEUSLbZ5B" name="CU70-DS">
+    <mxGraphModel dx="2571" dy="1413" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="50" width="80" x="224" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-3" parent="1" style="html=1;whiteSpace=wrap;" value="V_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="364" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-4" parent="1" style="html=1;whiteSpace=wrap;" value="C_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="564" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-5" parent="1" style="html=1;whiteSpace=wrap;" value="C_exportar" vertex="1">
+          <mxGeometry height="50" width="140" x="764" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="964" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-7" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="pago" vertex="1">
+          <mxGeometry height="50" width="140" x="1164" y="189" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="259" y="239" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="429" y="239" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="629" y="239" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="829" y="239" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-12" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="1029" y="239" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-13" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="1229" y="239" as="geometry" />
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. visualizar_reporte_financiero()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="269" y="299" as="sourcePoint" />
+            <mxPoint x="429" y="299" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. seleccionar_formato(PDF/Excel)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="269" y="369" as="sourcePoint" />
+            <mxPoint x="429" y="369" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-16" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. confirmar_descarga(formato)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="439" y="429" as="sourcePoint" />
+            <mxPoint x="629" y="429" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. exportAll(formato, params)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="639" y="489" as="sourcePoint" />
+            <mxPoint x="829" y="489" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-18" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. consultar_ingresos_costos_utilidad(params)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="839" y="539" as="sourcePoint" />
+            <mxPoint x="1029" y="539" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-19" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="6. SELECT ingresos,costos,(ingresos-costos) AS utilidad FROM...">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1039" y="589" as="sourcePoint" />
+            <mxPoint x="1229" y="589" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-20" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: datos_completos">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1229" y="629" as="sourcePoint" />
+            <mxPoint x="1039" y="629" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-21" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: datos_completos_dto">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1029" y="669" as="sourcePoint" />
+            <mxPoint x="839" y="669" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-22" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="7. generar_archivo_completo(datos, formato)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="829" y="719" as="sourcePoint" />
+            <mxPoint x="639" y="719" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VIDH_FAse49Hadhn-_ZV-23" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: descargar_reporte_completo(archivo)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="629" y="779" as="sourcePoint" />
+            <mxPoint x="269" y="779" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="BO6-bG5MNvkGaSwhlcsD" name="CU71-DS">
+    <mxGraphModel dx="2571" dy="1413" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ojc9auopVjcDIaOqqUcU-2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="50" width="80" x="255" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-3" parent="1" style="html=1;whiteSpace=wrap;" value="V_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="395" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-4" parent="1" style="html=1;whiteSpace=wrap;" value="C_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="595" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-5" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="795" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="140" x="995" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-7" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="bitacora_auditoria" vertex="1">
+          <mxGeometry height="50" width="140" x="1195" y="228" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="290" y="278" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="460" y="278" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="660" y="278" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="860" y="278" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-12" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="1060" y="278" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-13" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="1260" y="278" as="geometry" />
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. seleccionar_modulo_trazabilidad()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="338" as="sourcePoint" />
+            <mxPoint x="460" y="338" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. aplicar_filtros(rango_fecha, operario)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="470" y="408" as="sourcePoint" />
+            <mxPoint x="660" y="408" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-16" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. seleccionar_orden(id_ot)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="468" as="sourcePoint" />
+            <mxPoint x="460" y="468" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. exportOrdersReport(id_ot)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="470" y="528" as="sourcePoint" />
+            <mxPoint x="660" y="528" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-18" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. buscar_historial_cambios(id_ot)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670" y="578" as="sourcePoint" />
+            <mxPoint x="860" y="578" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-19" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="6. SELECT ot.*,u.nombre AS operario FROM orden_trabajo ot JOIN usuario u ON ot.id_operador=u.id_usuario WHERE ot.id_ot=$1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="870" y="638" as="sourcePoint" />
+            <mxPoint x="1060" y="638" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-20" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="7. SELECT accion,valor_anterior,valor_nuevo,fecha_hora FROM bitacora_auditoria WHERE modulo=ordenes AND valor_nuevo LIKE &#39;%id_ot%&#39;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="870" y="693" as="sourcePoint" />
+            <mxPoint x="1260" y="693" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-21" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: historial_cambios_ot[]">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1060" y="743" as="sourcePoint" />
+            <mxPoint x="670" y="743" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ojc9auopVjcDIaOqqUcU-22" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: renderizar_OrdersReportPanel(trazabilidad)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="660" y="808" as="sourcePoint" />
+            <mxPoint x="300" y="808" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="znKmnFsusWYBDoclA-yz" name="CU72-DS">
+    <mxGraphModel dx="2571" dy="1413" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="CvsJj2DK5UjhMV326q97-2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="50" width="80" x="302" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-3" parent="1" style="html=1;whiteSpace=wrap;" value="V_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="442" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-4" parent="1" style="html=1;whiteSpace=wrap;" value="C_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="642" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-5" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="842" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="utiliza" vertex="1">
+          <mxGeometry height="50" width="140" x="1042" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-7" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="maquinaria" vertex="1">
+          <mxGeometry height="50" width="140" x="1242" y="249" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="337" y="299" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="507" y="299" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="707" y="299" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="907" y="299" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-12" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="1107" y="299" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-13" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="1307" y="299" as="geometry" />
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. ingresar_panel_reportes_activos()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="347" y="359" as="sourcePoint" />
+            <mxPoint x="507" y="359" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. filtrar_por_maquina(tipo_camion)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="347" y="429" as="sourcePoint" />
+            <mxPoint x="507" y="429" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-16" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. generar_informe_uso(id_maquinaria)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="517" y="489" as="sourcePoint" />
+            <mxPoint x="707" y="489" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. InventoryReportPanel(params)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="717" y="549" as="sourcePoint" />
+            <mxPoint x="907" y="549" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-18" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. SELECT u.id_ot,ot.servicio,u.horas_uso,u.fecha_uso FROM utiliza u JOIN orden_trabajo ot ON u.id_ot=ot.id_ot WHERE u.id_maquinaria=$1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="917" y="609" as="sourcePoint" />
+            <mxPoint x="1107" y="609" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-19" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="6. SELECT patente,marca,estado FROM maquinaria WHERE id_maquinaria=$1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="917" y="664" as="sourcePoint" />
+            <mxPoint x="1307" y="664" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-20" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: {servicios_vinculados[], datos_maquina}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1107" y="714" as="sourcePoint" />
+            <mxPoint x="717" y="714" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CvsJj2DK5UjhMV326q97-21" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: renderizar_InventoryReportPanel(datos)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="707" y="779" as="sourcePoint" />
+            <mxPoint x="347" y="779" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="4LlVN0pxgFW1jMwZpzSU" name="CU73-DS">
+    <mxGraphModel dx="2571" dy="1413" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="50" width="80" x="262" y="257" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-3" parent="1" style="html=1;whiteSpace=wrap;" value="V_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="402" y="257" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-4" parent="1" style="html=1;whiteSpace=wrap;" value="C_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="602" y="257" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-5" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="802" y="257" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="cliente" vertex="1">
+          <mxGeometry height="50" width="140" x="1002" y="257" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-7" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="140" x="1202" y="257" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="297" y="307" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="467" y="307" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="667" y="307" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="867" y="307" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-12" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="1067" y="307" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-13" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="1267" y="307" as="geometry" />
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. seleccionar_filtro_por_cliente()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="307" y="367" as="sourcePoint" />
+            <mxPoint x="467" y="367" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. seleccionar_cliente(id_cliente)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="307" y="437" as="sourcePoint" />
+            <mxPoint x="467" y="437" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-16" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. solicitar_trazabilidad_cliente(id_cliente)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="477" y="497" as="sourcePoint" />
+            <mxPoint x="667" y="497" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. TechniciansReportPanel(id_cliente)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="677" y="557" as="sourcePoint" />
+            <mxPoint x="867" y="557" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-18" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. SELECT c.nombre,c.rut FROM cliente c WHERE c.id_cliente=$1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="877" y="617" as="sourcePoint" />
+            <mxPoint x="1067" y="617" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-19" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="6. SELECT COUNT(*) AS total,servicio,estado FROM orden_trabajo WHERE id_cliente=$1 GROUP BY servicio,estado">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="877" y="672" as="sourcePoint" />
+            <mxPoint x="1267" y="672" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-20" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: {cliente, servicios_agrupados[]}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1067" y="722" as="sourcePoint" />
+            <mxPoint x="677" y="722" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="McBOKNeCQW6AvVx6dPqA-21" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: renderizar_grafico_recurrencia(datos)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="667" y="787" as="sourcePoint" />
+            <mxPoint x="307" y="787" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="JLhF0okcipUN-3BXQU6l" name="CU74-DS">
+    <mxGraphModel dx="2571" dy="1413" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="0iyDXf9Wtfx204mpBowa-2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="50" width="80" x="228" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-3" parent="1" style="html=1;whiteSpace=wrap;" value="V_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="368" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-4" parent="1" style="html=1;whiteSpace=wrap;" value="C_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="568" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-5" parent="1" style="html=1;whiteSpace=wrap;" value="C_exportar" vertex="1">
+          <mxGeometry height="50" width="140" x="768" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="968" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-7" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="560" width="10" x="263" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="560" width="10" x="433" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="560" width="10" x="633" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="560" width="10" x="833" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="560" width="10" x="1033" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-12" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. presionar_exportar_a_PDF()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="273" y="405" as="sourcePoint" />
+            <mxPoint x="433" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-13" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. solicitar_exportacion_PDF(params)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="443" y="475" as="sourcePoint" />
+            <mxPoint x="633" y="475" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. exportBilling(formato=PDF, params)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="643" y="535" as="sourcePoint" />
+            <mxPoint x="833" y="535" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. preparar_estructura_documento(datos)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="843" y="595" as="sourcePoint" />
+            <mxPoint x="1033" y="595" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-16" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: estructura_pdf_lista">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1033" y="635" as="sourcePoint" />
+            <mxPoint x="843" y="635" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. renderizar_PDF(estructura, logo_institucional)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="833" y="685" as="sourcePoint" />
+            <mxPoint x="643" y="685" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-18" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: archivo_pdf_blob">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="633" y="735" as="sourcePoint" />
+            <mxPoint x="443" y="735" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0iyDXf9Wtfx204mpBowa-19" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: descargar_PDF(reporte.pdf)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="433" y="795" as="sourcePoint" />
+            <mxPoint x="273" y="795" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="fBBpnXHmoB0IseQVaVEk" name="CU75-DS">
+    <mxGraphModel dx="2828" dy="1554" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="slz9EGyF5L16asOCR4P--2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="50" width="80" x="194" y="269" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--3" parent="1" style="html=1;whiteSpace=wrap;" value="V_inventario" vertex="1">
+          <mxGeometry height="50" width="140" x="334" y="269" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--4" parent="1" style="html=1;whiteSpace=wrap;" value="C_inventario" vertex="1">
+          <mxGeometry height="50" width="140" x="534" y="269" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--5" parent="1" style="html=1;whiteSpace=wrap;" value="C_exportar" vertex="1">
+          <mxGeometry height="50" width="140" x="734" y="269" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="934" y="269" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--7" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="insumo" vertex="1">
+          <mxGeometry height="50" width="140" x="1134" y="269" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="229" y="319" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="399" y="319" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="599" y="319" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="799" y="319" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--12" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="999" y="319" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--13" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="1199" y="319" as="geometry" />
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. seleccionar_descargar_xlsx()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="239" y="379" as="sourcePoint" />
+            <mxPoint x="399" y="379" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. elegir_items(todos/filtrados)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="239" y="449" as="sourcePoint" />
+            <mxPoint x="399" y="449" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--16" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. exportar_inventario_xlsx(filtros)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="409" y="509" as="sourcePoint" />
+            <mxPoint x="599" y="509" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. generar_libro_calculo(datos, filtros)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="609" y="569" as="sourcePoint" />
+            <mxPoint x="799" y="569" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--18" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. SELECT i.*,c.nombre AS categoria FROM insumo i LEFT JOIN categoria_insumo c ON i.id_categoria=c.id_categoria">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="809" y="629" as="sourcePoint" />
+            <mxPoint x="1199" y="629" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--19" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: datos_inventario[]">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1199" y="679" as="sourcePoint" />
+            <mxPoint x="809" y="679" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--20" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="6. organizar_columnas_xlsx(datos)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="799" y="729" as="sourcePoint" />
+            <mxPoint x="609" y="729" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--21" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: archivo_xlsx_blob">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="599" y="779" as="sourcePoint" />
+            <mxPoint x="409" y="779" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="slz9EGyF5L16asOCR4P--22" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: descargar_inventario.xlsx">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="399" y="829" as="sourcePoint" />
+            <mxPoint x="239" y="829" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="g7WSdru4YGNLHr5Kegq3" name="CU76-DS">
+    <mxGraphModel dx="2020" dy="1110" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="mm-2mKVntB-uTwtdV16m-2" parent="1" style="shape=mxgraph.flowchart.start_2;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" value="Jefe" vertex="1">
+          <mxGeometry height="50" width="80" x="353" y="301" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-3" parent="1" style="html=1;whiteSpace=wrap;" value="V_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="493" y="301" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-4" parent="1" style="html=1;whiteSpace=wrap;" value="C_reportes" vertex="1">
+          <mxGeometry height="50" width="140" x="693" y="301" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-5" parent="1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="140" x="893" y="301" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-6" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="140" x="1093" y="301" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-7" parent="1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="pago" vertex="1">
+          <mxGeometry height="50" width="140" x="1293" y="301" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-8" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="388" y="351" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-9" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="558" y="351" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-10" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="758" y="351" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-11" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="958" y="351" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-12" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="1158" y="351" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-13" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;" value="" vertex="1">
+          <mxGeometry height="640" width="10" x="1358" y="351" as="geometry" />
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="1. definir_mes_anio(mes, anio)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="398" y="411" as="sourcePoint" />
+            <mxPoint x="558" y="411" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-15" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="2. solicitar_balance_consolidado(mes, anio)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="568" y="481" as="sourcePoint" />
+            <mxPoint x="758" y="481" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-16" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="3. recopilar_ordenes_periodo(mes, anio)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="768" y="541" as="sourcePoint" />
+            <mxPoint x="958" y="541" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-17" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="4. SELECT COUNT(*),estado FROM orden_trabajo WHERE DATE_TRUNC(month,fecha_emision)=$1 GROUP BY estado">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="968" y="601" as="sourcePoint" />
+            <mxPoint x="1158" y="601" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-18" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: ordenes_por_estado">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1158" y="651" as="sourcePoint" />
+            <mxPoint x="968" y="651" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-19" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="5. SELECT SUM(monto) FROM pago WHERE DATE_TRUNC(month,fecha)=$1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="968" y="701" as="sourcePoint" />
+            <mxPoint x="1358" y="701" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-20" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: total_recaudado">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1358" y="751" as="sourcePoint" />
+            <mxPoint x="968" y="751" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-21" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: balance_mensual_dto">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="958" y="801" as="sourcePoint" />
+            <mxPoint x="768" y="801" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-22" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;align=center;verticalAlign=bottom;" value="6. descargar_informe_final(balance)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="398" y="851" as="sourcePoint" />
+            <mxPoint x="558" y="851" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mm-2mKVntB-uTwtdV16m-23" edge="1" parent="1" style="endArrow=open;dashed=1;endSize=8;html=1;align=center;verticalAlign=bottom;" value="return: archivo_cierre_mes.xlsx (descarga registrada en historial)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="758" y="911" as="sourcePoint" />
+            <mxPoint x="398" y="911" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
