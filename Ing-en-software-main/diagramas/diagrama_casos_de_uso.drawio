@@ -1,0 +1,1615 @@
+<mxfile host="app.diagrams.net" agent="claude" pages="22">
+  <diagram id="DSDTgabXlH_N0w6iafCv" name="Modulo_1">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 1: Gestionando Clientes" vertex="1">
+          <mxGeometry height="660" width="860" x="240" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_registrar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando cliente" vertex="1">
+          <mxGeometry height="50" width="200" x="280" y="147.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_val_datos" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando datos del cliente" vertex="1">
+          <mxGeometry height="40" width="190" x="580" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_ver_dup" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Verificando duplicidad de cliente" vertex="1">
+          <mxGeometry height="45" width="190" x="590" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_conf_reg" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Confirmando registro de cliente" vertex="1">
+          <mxGeometry height="45" width="190" x="580" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_listar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Listando clientes" vertex="1">
+          <mxGeometry height="50" width="200" x="290" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_buscar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Buscando clientes" vertex="1">
+          <mxGeometry height="45" width="190" x="295" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_detalle" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Visualizando detalle de cliente" vertex="1">
+          <mxGeometry height="45" width="190" x="580" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_modificar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Modificando datos del cliente" vertex="1">
+          <mxGeometry height="45" width="190" x="570" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_eliminar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Eliminando registro de cliente" vertex="1">
+          <mxGeometry height="45" width="190" x="500" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_ext_ordenes" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Intentando eliminar clientes con órdenes activas" vertex="1">
+          <mxGeometry height="45" width="230" x="850" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_reg" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_registrar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_list" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_listar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_registrar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_val_datos" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_registrar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_ver_dup" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" edge="1" parent="1" source="cu_registrar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_conf_reg" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_buscar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_detalle" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_modificar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext4" edge="1" parent="1" source="cu_eliminar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext5" edge="1" parent="1" source="cu_ext_ordenes" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_eliminar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="Lw1U8HwQ0krC3wPb8Njq" name="Modulo_2">
+    <mxGraphModel dx="808" dy="1394" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 2: Gestionando Órdenes de Trabajo" vertex="1">
+          <mxGeometry height="920" width="910" x="220" y="-110" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_crear" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Creando órdenes de trabajo" vertex="1">
+          <mxGeometry height="50" width="220" x="530" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_pendiente" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Asignando automáticamente estado &quot;Pendiente&quot;" vertex="1">
+          <mxGeometry height="45" width="230" x="230" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_estados" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Definiendo estados de la orden" vertex="1">
+          <mxGeometry height="45" width="200" x="230" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_listar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Visualizando listado de órdenes de trabajo" vertex="1">
+          <mxGeometry height="50" width="230" x="310" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_buscar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Buscando órdenes de trabajo" vertex="1">
+          <mxGeometry height="45" width="220" x="770" y="-60" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_filtrar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Filtrando órdenes de trabajo" vertex="1">
+          <mxGeometry height="45" width="220" x="850" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_ver_estado" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Visualizando estado de órdenes" vertex="1">
+          <mxGeometry height="45" width="220" x="840" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_asignar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Asignando operador a orden de trabajo" vertex="1">
+          <mxGeometry height="45" width="220" x="770" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_actualizar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Actualizando estado de orden de trabajo" vertex="1">
+          <mxGeometry height="45" width="220" x="650" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reprogramar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Reprogramando fecha de ejecución" vertex="1">
+          <mxGeometry height="45" width="220" x="630" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cancelar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Cancelando orden de trabajo" vertex="1">
+          <mxGeometry height="45" width="220" x="260" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_anular" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Anulando orden de trabajo duplicada" vertex="1">
+          <mxGeometry height="45" width="220" x="530" y="-60" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_comentario" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Registrando comentario en orden de trabajo" vertex="1">
+          <mxGeometry height="45" width="220" x="300" y="-60" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_sol_mod" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Solicitando modificación de orden de trabajo" vertex="1">
+          <mxGeometry height="50" width="230" x="620" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_notificar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Notificando cambio de estado de la orden" vertex="1">
+          <mxGeometry height="45" width="220" x="830" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_val_fecha" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando disponibilidad de fecha" vertex="1">
+          <mxGeometry height="45" width="220" x="830" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_crear" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_crear">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_list" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_listar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_crear" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_crear">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_sol" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_sol_mod">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_crear" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_pendiente" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="z4oG2HjhgG60r8hMr-Ru-1" connectable="0" parent="inc1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;include&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.0276" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_crear" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_estados" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_buscar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_filtrar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" x="0.0012" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_ver_estado" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" x="-0.0604" y="-5" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext4" edge="1" parent="1" source="cu_asignar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext5" edge="1" parent="1" source="cu_actualizar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext6" edge="1" parent="1" source="cu_reprogramar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext7" edge="1" parent="1" source="cu_cancelar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0.257;entryY=0.949;entryDx=0;entryDy=0;entryPerimeter=0;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext8" edge="1" parent="1" source="cu_anular" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext9" edge="1" parent="1" source="cu_comentario" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0.446;entryY=0.08;entryDx=0;entryDy=0;entryPerimeter=0;" target="cu_listar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="50" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext_sol" edge="1" parent="1" source="cu_sol_mod" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=0.639;exitY=-0.027;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitPerimeter=0;" target="cu_actualizar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" edge="1" parent="1" source="cu_actualizar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_notificar" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc4" edge="1" parent="1" source="cu_reprogramar" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_val_fecha" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="kwJAqR1Mp7jnZK4NWQin" name="Modulo_3">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 3: Gestionando Seguridad y Accesos" vertex="1">
+          <mxGeometry height="860" width="850" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_crear_rol" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Creando rol" vertex="1">
+          <mxGeometry height="50" width="220" x="310" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_mod_rol" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Modificando rol" vertex="1">
+          <mxGeometry height="45" width="220" x="310" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_asig_rol" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Asignando rol a usuario" vertex="1">
+          <mxGeometry height="45" width="220" x="670" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_desact_usr" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Desactivando usuario del sistema" vertex="1">
+          <mxGeometry height="50" width="230" x="340" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_elim_usr" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Eliminando usuarios del sistema" vertex="1">
+          <mxGeometry height="45" width="220" x="345" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_react_usr" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Reactivando usuario del sistema" vertex="1">
+          <mxGeometry height="45" width="220" x="600" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_vinc_correo" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Vinculando correo electrónico a usuario" vertex="1">
+          <mxGeometry height="45" width="240" x="670" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_desv_correo" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Desvinculando correo electrónico" vertex="1">
+          <mxGeometry height="45" width="220" x="850" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_edit_correo" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Editando correo electrónico a usuario" vertex="1">
+          <mxGeometry height="45" width="220" x="680" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_sol_recup" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Solicitando recuperación de contraseña" vertex="1">
+          <mxGeometry height="50" width="240" x="290" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_restab" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Restableciendo contraseña" vertex="1">
+          <mxGeometry height="45" width="220" x="300" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="l_jefe_rol" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=classic;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=1;" target="cu_crear_rol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_jefe_usr" edge="1" parent="1" style="html=1;endArrow=classic;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=1;" target="cu_desact_usr">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="300" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l_jefe_rec" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_sol_recup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_rec" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_sol_recup">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="290" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l_op_rec" edge="1" parent="1" source="act_op" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_sol_recup">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_rol1" edge="1" parent="1" source="cu_mod_rol" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_crear_rol" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" x="0.0105" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext_rol2" edge="1" parent="1" source="cu_asig_rol" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_crear_rol" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_usr1" edge="1" parent="1" source="cu_elim_usr" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_desact_usr" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_usr2" edge="1" parent="1" source="cu_react_usr" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_desact_usr" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_usr3" edge="1" parent="1" source="cu_vinc_correo" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_desact_usr" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LWQa0oQitRsAE_OTaVHi-1" connectable="0" parent="ext_usr3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1191" y="-3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext_cor1" edge="1" parent="1" source="cu_desv_correo" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vinc_correo" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_cor2" edge="1" parent="1" source="cu_edit_correo" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vinc_correo" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc_rec1" edge="1" parent="1" source="cu_sol_recup" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cu_inc_restab" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="jGsCD5jnAtDivEnWpfPQ" name="modulo_4">
+    <mxGraphModel dx="975" dy="536" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 4: Auditando Historial de Cambios" vertex="1">
+          <mxGeometry height="620" width="600" x="260" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_visualizar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Visualizando historial de cambios de una orden" vertex="1">
+          <mxGeometry height="55" width="240" x="290" y="172.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_detalle" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Consultando detalle de cambio realizado" vertex="1">
+          <mxGeometry height="45" width="220" x="600" y="127.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_usuario" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Identificando usuario que realizó el cambio" vertex="1">
+          <mxGeometry height="45" width="220" x="600" y="227.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_fechahora" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Consultando fecha y hora de cambio en orden" vertex="1">
+          <mxGeometry height="45" width="220" x="530" y="337.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_registrar" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando cambio en orden de trabajo" vertex="1">
+          <mxGeometry height="55" width="240" x="270" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_vis" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_visualizar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_reg" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;entryX=0;entryY=0;entryDx=0;entryDy=0;" target="cu_registrar">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="353" y="391" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l_op_reg" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;entryX=0;entryY=1;entryDx=0;entryDy=0;" target="cu_registrar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_detalle" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_visualizar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_usuario" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_visualizar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_fechahora" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_visualizar" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="YyY6Q_7aAkhxEbgVg-HG" name="modulo_5">
+    <mxGraphModel dx="1664" dy="914" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 5: Gestionando Evidencias y Ubicación" vertex="1">
+          <mxGeometry height="880" width="670" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_vis_img" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Visualizando imágenes asociadas a una orden" vertex="1">
+          <mxGeometry height="50" width="240" x="290" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_elim_img" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Eliminando imagen de evidencia incorrecta" vertex="1">
+          <mxGeometry height="45" width="230" x="640" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_desc_img" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Descargando evidencia visual" vertex="1">
+          <mxGeometry height="45" width="230" x="640" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_carg_img" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Cargando imagen de evidencia a la orden" vertex="1">
+          <mxGeometry height="50" width="240" x="300" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_val_img" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando integridad de imagen cargada" vertex="1">
+          <mxGeometry height="45" width="230" x="640" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_vis_ubi" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Visualizando ubicación del trabajo" vertex="1">
+          <mxGeometry height="50" width="240" x="300" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_mod_ubi" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Modificando ubicación del trabajo" vertex="1">
+          <mxGeometry height="45" width="230" x="650" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reg_ubi" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando ubicación del trabajo" vertex="1">
+          <mxGeometry height="50" width="240" x="290" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_val_ubi" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando ubicación ingresada" vertex="1">
+          <mxGeometry height="45" width="230" x="640" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_aut_coord" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Obteniendo coordenadas automáticamente" vertex="1">
+          <mxGeometry height="45" width="240" x="635" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_vimg" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_vis_img">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_cimg" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_carg_img">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_vubi" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_vis_ubi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_rubi" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_reg_ubi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_cimg" edge="1" parent="1" source="act_op" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_carg_img">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_vubi" edge="1" parent="1" source="act_op" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_vis_ubi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_rubi" edge="1" parent="1" source="act_op" style="html=1;endArrow=classic;strokeWidth=1.2;endFill=1;" target="cu_reg_ubi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_elim_img" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cu_vis_img" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_desc_img" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cu_vis_img" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_mod_ubi" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_ubi" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_carg_img" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_val_img" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_reg_ubi" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_val_ubi" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" edge="1" parent="1" source="cu_reg_ubi" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_aut_coord" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="zR-t2xxFJGIDZerAxkS9" name="Modulo_6">
+    <mxGraphModel dx="1178" dy="648" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 6: Gestionando Inventario y Maquinaria" vertex="1">
+          <mxGeometry height="880" width="730" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="70" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="70" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reg_eq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando equipo en inventario" vertex="1">
+          <mxGeometry height="50" width="240" x="285" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_val_eq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando datos del equipo" vertex="1">
+          <mxGeometry height="45" width="220" x="295" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_clas_eq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Clasificando tipo de equipo" vertex="1">
+          <mxGeometry height="45" width="220" x="640" y="192.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_dup_eq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Verificando duplicidad de equipo" vertex="1">
+          <mxGeometry height="45" width="220" x="590" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cons_inv" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Consultando inventario en tiempo real" vertex="1">
+          <mxGeometry height="50" width="240" x="285" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_filt_maq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Filtrando maquinaria por categoría y estado" vertex="1">
+          <mxGeometry height="45" width="230" x="290" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_busc_eq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Buscando equipo/maquinaria en inventario" vertex="1">
+          <mxGeometry height="45" width="230" x="660" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_disp_eq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Verificando disponibilidad de equipo para asignación" vertex="1">
+          <mxGeometry height="45" width="250" x="700" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_ord_eq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Consultando orden de trabajo asociada a un equipo" vertex="1">
+          <mxGeometry height="45" width="250" x="700" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_act_mant" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Actualizando estado de mantenimiento de equipo" vertex="1">
+          <mxGeometry height="45" width="250" x="620" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_gest_fec" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Gestionando fechas de mantenimiento de maquinaria" vertex="1">
+          <mxGeometry height="45" width="250" x="280" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reg_ins" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando uso de insumos en orden de trabajo" vertex="1">
+          <mxGeometry height="50" width="250" x="280" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_act_stock" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Actualizando stock de insumos" vertex="1">
+          <mxGeometry height="45" width="220" x="680" y="757.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_disp_ins" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando disponibilidad de insumos" vertex="1">
+          <mxGeometry height="45" width="220" x="600" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_regeq" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_reg_eq">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_cinv" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cons_inv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_regins" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_reg_ins">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_regins" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_reg_ins">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_reg_eq" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="cu_val_eq" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_reg_eq" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_clas_eq" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" edge="1" parent="1" source="cu_reg_eq" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_dup_eq" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_filt_maq" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_cons_inv" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_busc_eq" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=1;entryY=0;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="cu_cons_inv" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_disp_eq" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="cu_cons_inv" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext4" edge="1" parent="1" source="cu_ord_eq" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0.976;entryY=0.664;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="cu_cons_inv" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext5" edge="1" parent="1" source="cu_act_mant" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=1;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="cu_cons_inv" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext6" edge="1" parent="1" source="cu_gest_fec" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_cons_inv" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc4" edge="1" parent="1" source="cu_reg_ins" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_act_stock" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc5" edge="1" parent="1" source="cu_reg_ins" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_disp_ins" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="qPycPjLlJ_GEI-XLZbdl" name="Página-7">
+    <mxGraphModel dx="1178" dy="648" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 7: Gestionando Finanzas y Facturación" vertex="1">
+          <mxGeometry height="620" width="650" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="70" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="70" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_vis_resumen" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Visualizando resumen financiero de la orden de trabajo" vertex="1">
+          <mxGeometry height="55" width="250" x="280" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_pago_ini" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Registrando estado de pago inicial" vertex="1">
+          <mxGeometry height="45" width="230" x="290" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_abono_parc" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Registrando abono parcial de servicio" vertex="1">
+          <mxGeometry height="45" width="230" x="625" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_pago_tot" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Actualizando pago total de servicio" vertex="1">
+          <mxGeometry height="45" width="230" x="630" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_calc_bruto" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Calculando valor bruto de la orden de trabajo" vertex="1">
+          <mxGeometry height="45" width="240" x="620" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_costo_adic" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Actualizando costos por servicios adicionales" vertex="1">
+          <mxGeometry height="45" width="230" x="625" y="453" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_camb_est" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Cambiando estado de pago de una orden de trabajo" vertex="1">
+          <mxGeometry height="55" width="250" x="300" y="448" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_bitacora" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Registrando cambios en bitácora" vertex="1">
+          <mxGeometry height="45" width="230" x="310" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_alerta" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Gestionando alertas por estado &quot;Vencido&quot;" vertex="1">
+          <mxGeometry height="45" width="230" x="310" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_res" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=1;" target="cu_vis_resumen">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_est" edge="1" parent="1" source="act_admin" style="html=1;endArrow=classic;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endFill=1;" target="cu_camb_est">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_pago_ini" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_resumen" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_abono_parc" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_resumen" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_pago_tot" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_resumen" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext4" edge="1" parent="1" source="cu_calc_bruto" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_resumen" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext5" edge="1" parent="1" source="cu_costo_adic" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_calc_bruto" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_camb_est" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="cu_inc_bitacora" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_camb_est" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_alerta" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="tJVYbcyCPhI0aBzKvTjx" name="Página-8">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 8: Generando Inteligencia de Negocios y Reportes" vertex="1">
+          <mxGeometry height="720" width="660" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cierre_mes" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Generando reporte de cierre de mes" vertex="1">
+          <mxGeometry height="50" width="250" x="280" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_exp_rep" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Exportando reportes (PDF / Excel)" vertex="1">
+          <mxGeometry height="55" width="250" x="280" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rep_ingresos" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Generando reporte financiero de ingresos" vertex="1">
+          <mxGeometry height="45" width="250" x="575" y="92.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rep_costos" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Generando reporte de costos operacionales" vertex="1">
+          <mxGeometry height="45" width="250" x="630" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rep_utilidad" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Generando reporte de utilidad" vertex="1">
+          <mxGeometry height="45" width="250" x="630" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rep_trazabilidad" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Generando reporte de trazabilidad de órdenes de trabajo" vertex="1">
+          <mxGeometry height="45" width="250" x="620" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rep_maq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Generando reporte de uso y control de maquinaria" vertex="1">
+          <mxGeometry height="45" width="250" x="610" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rep_serv_cli" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Generando reporte de servicios por cliente" vertex="1">
+          <mxGeometry height="45" width="250" x="280" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_gen_est" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Generando estimación de servicio" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_cost_ins" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Calculando costo de insumos y recursos" vertex="1">
+          <mxGeometry height="45" width="240" x="460" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_pres_cli" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Presentando estimación al cliente" vertex="1">
+          <mxGeometry height="45" width="240" x="610" y="617.5" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_rep" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_exp_rep">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_est" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_gen_est">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_est" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_gen_est">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_rep_ingresos" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_exp_rep" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_rep_costos" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_exp_rep" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_rep_utilidad" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_exp_rep" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext4" edge="1" parent="1" source="cu_rep_trazabilidad" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_exp_rep" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext5" edge="1" parent="1" source="cu_rep_maq" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_exp_rep" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext6" edge="1" parent="1" source="cu_rep_serv_cli" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_exp_rep" value="&lt;&lt;extend&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_gen_est" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_cost_ins" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_gen_est" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_pres_cli" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="QIe-_MjDqy2LB8o_NmHJ-1" edge="1" parent="1" source="cu_exp_rep" style="endArrow=classic;dashed=1;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endFill=0;" target="cu_cierre_mes" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="380" y="290" as="sourcePoint" />
+            <mxPoint x="430" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QIe-_MjDqy2LB8o_NmHJ-2" connectable="0" parent="QIe-_MjDqy2LB8o_NmHJ-1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;include&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0533" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="riJBQF7-LHYHJ8A_jIbu" name="Página-9">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1450" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 9: Analizando Panel de Control y Análisis Visual" vertex="1">
+          <mxGeometry height="710" width="710" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_acceso_panel" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Accediendo al panel principal" vertex="1">
+          <mxGeometry height="55" width="240" x="290" y="332.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_kpis" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Visualizando indicadores generales (KPIs)" vertex="1">
+          <mxGeometry height="45" width="240" x="290" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_g_ing_gas" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Visualizando gráfico ingresos vs gastos" vertex="1">
+          <mxGeometry height="45" width="240" x="540" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_g_recursos" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Visualizando gráfico de uso de recursos" vertex="1">
+          <mxGeometry height="45" width="240" x="670" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_g_servicios" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Visualizando gráfico de servicios solicitados" vertex="1">
+          <mxGeometry height="45" width="240" x="690" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_g_clientes" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Visualizando gráfico de clientes frecuentes" vertex="1">
+          <mxGeometry height="45" width="240" x="620" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_filtros" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Aplicando filtros en reportes y gráficos" vertex="1">
+          <mxGeometry height="45" width="240" x="570" y="467.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_act_manual" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Actualizando manualmente el panel principal" vertex="1">
+          <mxGeometry height="45" width="240" x="290" y="467.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_limp_filtros" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Limpiando filtros aplicados" vertex="1">
+          <mxGeometry height="45" width="220" x="725" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cfg_intervalo" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Configurando intervalo de actualización" vertex="1">
+          <mxGeometry height="50" width="250" x="285" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_act_auto" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Actualizando automáticamente gráficos" vertex="1">
+          <mxGeometry height="45" width="240" x="680" y="635" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_panel" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_acceso_panel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_cfg" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cfg_intervalo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_kpis" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_acceso_panel" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" x="-0.0054" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_g_ing_gas" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_acceso_panel" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_g_recursos" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_acceso_panel" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext4" edge="1" parent="1" source="cu_g_servicios" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_acceso_panel" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext5" edge="1" parent="1" source="cu_g_clientes" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_acceso_panel" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext6" edge="1" parent="1" source="cu_filtros" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_acceso_panel" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext7" edge="1" parent="1" source="cu_act_manual" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_acceso_panel" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext8" edge="1" parent="1" source="cu_limp_filtros" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="cu_filtros" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_cfg_intervalo" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_act_auto" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="qgMCLIBQLkJJ7nxwhPO-" name="Página-10">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 10: Monitoreando Sistema y Gestionando Alertas" vertex="1">
+          <mxGeometry height="590" width="880" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_gest_ret" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Gestionando orden retrasada" vertex="1">
+          <mxGeometry height="50" width="240" x="290" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_notif_ret" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Notificando retraso al usuario" vertex="1">
+          <mxGeometry height="45" width="230" x="295" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_det_ret_ord" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Detectando retraso en orden" vertex="1">
+          <mxGeometry height="45" width="230" x="630" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_clas_ret" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Clasificando órdenes por nivel de retraso" vertex="1">
+          <mxGeometry height="45" width="240" x="850" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_det_no_comp" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Detectando órdenes de trabajo no completadas" vertex="1">
+          <mxGeometry height="45" width="240" x="850" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rest_maq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Restringiendo asignación de maquinaria" vertex="1">
+          <mxGeometry height="50" width="240" x="290" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_notif_maq" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Notificando indisponibilidad de maquinaria" vertex="1">
+          <mxGeometry height="45" width="240" x="290" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_det_maq_nd" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Detectando maquinaria no disponible" vertex="1">
+          <mxGeometry height="45" width="230" x="640" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_gret" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_gest_ret">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_nret" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_notif_ret">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_rmaq" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_rest_maq">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_nmaq" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_notif_maq">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_det_ret_ord" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_notif_ret" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mMyeGp_oixpWSuLZABwI-1" connectable="0" parent="inc1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="-0.1166" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_det_no_comp" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_clas_ret" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" edge="1" parent="1" source="cu_det_no_comp" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cu_det_ret_ord" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" x="0.0005" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="849.9999999999982" y="150" as="sourcePoint" />
+            <mxPoint x="690" y="292.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="inc4" edge="1" parent="1" source="cu_det_maq_nd" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_notif_maq" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="Hs_voUWIWFHUrreoUv8b" name="Página-11">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=none;strokeColor=#4A5568;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 11: Gestionando Seguridad y Sesiones" vertex="1">
+          <mxGeometry height="570" width="690" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="275" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="70" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_ini_ses" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Iniciando sesión" vertex="1">
+          <mxGeometry height="50" width="240" x="310" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reg_acc" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Registrando acceso al sistema" vertex="1">
+          <mxGeometry height="45" width="230" x="665" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cerr_ses" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Cerrando sesión" vertex="1">
+          <mxGeometry height="50" width="240" x="300" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cerr_auto" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Cerrando sesión automáticamente por inactividad" vertex="1">
+          <mxGeometry height="45" width="260" x="650" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_fallo_acc" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Registrando intento de acceso fallido" vertex="1">
+          <mxGeometry height="45" width="240" x="660" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cons_hist" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Consultando historial de accesos" vertex="1">
+          <mxGeometry height="50" width="240" x="330" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_filt_fallos" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Filtrando registros de acceso fallidos" vertex="1">
+          <mxGeometry height="45" width="240" x="670" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_ini" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_ini_ses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_ini" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_ini_ses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_cerr" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cerr_ses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_cerr" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cerr_ses">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_hist" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cons_hist">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_ini_ses" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="cu_reg_acc" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_cerr_auto" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_cerr_ses" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_filt_fallos" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_cons_hist" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="PJRl0cCJWLOm5k75mZtJ-1" edge="1" parent="1" source="cu_ini_ses" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_fallo_acc" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="540" y="230" as="sourcePoint" />
+            <mxPoint x="730" y="256" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hNWtbgJjO_0QQ4CWSF5q-2" connectable="0" parent="PJRl0cCJWLOm5k75mZtJ-1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;include&amp;gt;" vertex="1">
+          <mxGeometry relative="1" x="0.0842" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hNWtbgJjO_0QQ4CWSF5q-1" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="160" y="170" as="sourcePoint" />
+            <mxPoint x="160" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="UodNK_rDqlmMHqtN9olo" name="Página-12">
+    <mxGraphModel dx="1178" dy="648" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=none;strokeColor=#4A5568;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 12: Gestionando Movilidad y Trabajo en Terreno" vertex="1">
+          <mxGeometry height="670" width="710" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_acceso_apk" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Accediendo desde dispositivo móvil (APK)" vertex="1">
+          <mxGeometry height="50" width="260" x="290" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cons_ruta" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" value="Consultando ruta y ubicación en viaje" vertex="1">
+          <mxGeometry height="50" width="260" x="290" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reg_avance" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" value="Registrando avance de trabajo en terreno" vertex="1">
+          <mxGeometry height="50" width="260" x="290" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cap_foto" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" value="Capturando evidencia fotográfica móvil" vertex="1">
+          <mxGeometry height="50" width="260" x="290" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reg_offline" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando información sin conexión" vertex="1">
+          <mxGeometry height="50" width="260" x="270" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_adapt" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Adaptando visualización a dispositivo móvil" vertex="1">
+          <mxGeometry height="45" width="260" x="640" y="112.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_sync" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Sincronizando información automáticamente" vertex="1">
+          <mxGeometry height="45" width="260" x="660" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_apk" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_acceso_apk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_ruta" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cons_ruta">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_avance" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_reg_avance">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_foto" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cap_foto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_off" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_reg_offline">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_acceso_apk" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_adapt" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_reg_offline" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_sync" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="4gg69e_ToruOCDX2Kkha" name="Página-13">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 13: Personalizando Interfaz y Navegación" vertex="1">
+          <mxGeometry height="570" width="660" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="80" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="80" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="80" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_menu_ppal" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" value="Accediendo al menú principal" vertex="1">
+          <mxGeometry height="50" width="250" x="280" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_secciones" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Mostrando acceso de secciones según el rol" vertex="1">
+          <mxGeometry height="45" width="260" x="630" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_tema" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" value="Cambiando tema de la interfaz" vertex="1">
+          <mxGeometry height="55" width="250" x="290" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_col_nav" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Personalizando colores de navegación" vertex="1">
+          <mxGeometry height="45" width="250" x="390" y="265" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_col_graf" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Personalizando colores de gráficos" vertex="1">
+          <mxGeometry height="45" width="250" x="630" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_ap_tablas" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Ajustando apariencia de tablas" vertex="1">
+          <mxGeometry height="45" width="250" x="640" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rest_ap" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="Restableciendo apariencia predeterminada" vertex="1">
+          <mxGeometry height="45" width="250" x="575" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_menu" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_menu_ppal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_tema" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_tema">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_menu" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_menu_ppal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_tema" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_tema">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_menu_ppal" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_secciones" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_col_nav" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_tema" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_col_graf" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_tema" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_ap_tablas" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_tema" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext4" edge="1" parent="1" source="cu_rest_ap" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_tema" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="BpaQDyLLUy3GCLwTXm-u" name="Página-14">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 14: Gestionando Documentos y Contratos" vertex="1">
+          <mxGeometry height="630" width="640" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_adj_doc" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Adjuntando documentos a órdenes de trabajo" vertex="1">
+          <mxGeometry height="55" width="260" x="320" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_val_doc" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando documento adjuntado" vertex="1">
+          <mxGeometry height="45" width="240" x="330" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_alm_cont" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Almacenando contratos de trabajo" vertex="1">
+          <mxGeometry height="45" width="240" x="610" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_alm_rep" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Almacenando reporte de orden de trabajo" vertex="1">
+          <mxGeometry height="45" width="240" x="600" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_ver_doc" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Creando nueva versión para el documento" vertex="1">
+          <mxGeometry height="55" width="260" x="280" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_hist_ver" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Consultando historial de versiones" vertex="1">
+          <mxGeometry height="45" width="240" x="290" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_ant_ver" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Accediendo a versiones anteriores del documento" vertex="1">
+          <mxGeometry height="45" width="260" x="580" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_adj" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_adj_doc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_ver" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_ver_doc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_adj" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_adj_doc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_adj_doc" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_val_doc" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_alm_cont" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_adj_doc" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_alm_rep" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_adj_doc" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_hist_ver" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_ver_doc" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext4" edge="1" parent="1" source="cu_ant_ver" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_ver_doc" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="AU0Egm_DbnqSkG6MlnZO" name="Página-15">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=none;strokeColor=#4A5568;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 15: Asignando Personal y Gestionando Carga Laboral" vertex="1">
+          <mxGeometry height="420" width="610" x="250" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="50" y="192.5" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="50" y="392.5" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_asig_tec" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Asignando técnico a orden de trabajo" vertex="1">
+          <mxGeometry height="55" width="240" x="290" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_perfil" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando perfil de operario" vertex="1">
+          <mxGeometry height="45" width="230" x="610" y="165" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_asig_cuad" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Asignando equipo de trabajo (cuadrilla)" vertex="1">
+          <mxGeometry height="45" width="230" x="540" y="275" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reasig_pers" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Reasignando personal de servicio" vertex="1">
+          <mxGeometry height="45" width="230" x="295" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cons_disp" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Consultando disponibilidad por carga laboral" vertex="1">
+          <mxGeometry height="55" width="250" x="290" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_asig" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_asig_tec">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_disp" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cons_disp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_asig_tec" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_perfil" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_asig_cuad" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_asig_tec" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_reasig_pers" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_asig_tec" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="tlwfRlBjQes1ZLP2O_oj" name="Página-16">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 16: Tipificando y Registrando Incidentes" vertex="1">
+          <mxGeometry height="530" width="590" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="237.5" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_graf_fallas" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Graficando distribución de fallas" vertex="1">
+          <mxGeometry height="50" width="250" x="285" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_vis_tabla" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Visualizando tabla de incidentes por categoría" vertex="1">
+          <mxGeometry height="55" width="260" x="280" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_mod_falla" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Modificando tipo de falla" vertex="1">
+          <mxGeometry height="45" width="240" x="570" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_exp_fallas" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Exportando informe de fallas" vertex="1">
+          <mxGeometry height="45" width="240" x="535" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reg_inc" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando tipo de incidente en la orden" vertex="1">
+          <mxGeometry height="50" width="260" x="290" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_tabla" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_vis_tabla">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_inc" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_reg_inc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_mod_falla" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_tabla" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_exp_fallas" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_tabla" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fZxJtCEoC1rq4-7gL_yd-1" edge="1" parent="1" source="cu_vis_tabla" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" target="cu_graf_fallas" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="553" y="210" as="sourcePoint" />
+            <mxPoint x="410" y="253" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="Wr7ZEBcztWxg5k0_gp-Q" name="Página-17">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 17: Priorizando y Gestionando Colas de Trabajo" vertex="1">
+          <mxGeometry height="500" width="490" x="250" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_filt_urg" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Filtrando dashboard por urgencia" vertex="1">
+          <mxGeometry height="45" width="240" x="300" y="107.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_vis_cola" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Visualizando cola de atención por prioridad" vertex="1">
+          <mxGeometry height="55" width="260" x="290" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_mod_prio" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Modificando prioridad manualmente" vertex="1">
+          <mxGeometry height="45" width="240" x="480" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="l_jefe_urg" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_filt_urg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_cola" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_vis_cola">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_cola" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_vis_cola">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_mod_prio" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_cola" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_filt_urg" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_vis_cola" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="I7q3qz3CybfeOLe4Pres" name="Página-18">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 18: Generando Resúmenes y Reportes PDF" vertex="1">
+          <mxGeometry height="410" width="640" x="250" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_gen_pdf" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Generando documento PDF de servicio" vertex="1">
+          <mxGeometry height="55" width="250" x="290" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_previa" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Visualizando vista previa del reporte" vertex="1">
+          <mxGeometry height="45" width="240" x="630" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_regen_rep" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Regenerando reporte corregido" vertex="1">
+          <mxGeometry height="45" width="240" x="580" y="257.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_desc_arch" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Descargando archivo de resumen" vertex="1">
+          <mxGeometry height="55" width="250" x="290" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_pdf" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_gen_pdf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_desc" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_desc_arch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_gen_pdf" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_previa" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_regen_rep" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_gen_pdf" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="2vbxywlr50ClzL7fOvFn" name="Página-19">
+    <mxGraphModel dx="1178" dy="648" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 19: Controlando Permisos y Edición de Operador" vertex="1">
+          <mxGeometry height="390" width="700" x="250" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cons_tareas" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Consultando lista de tareas asignadas" vertex="1">
+          <mxGeometry height="55" width="250" x="290" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_val_perm" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Validando permisos de edición por asignación" vertex="1">
+          <mxGeometry height="50" width="250" x="640" y="327.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_bloq_ajenas" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Bloqueando acceso a órdenes ajenas" vertex="1">
+          <mxGeometry height="45" width="240" x="295" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_perm_cuad" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Permitiendo edición a equipo de cuadrilla" vertex="1">
+          <mxGeometry height="45" width="240" x="645" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_rev_reasig" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Revocando permisos por reasignación" vertex="1">
+          <mxGeometry height="45" width="240" x="645" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_tareas" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_cons_tareas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_cons_tareas" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_val_perm" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_bloq_ajenas" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_val_perm" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_perm_cuad" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_val_perm" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext3" edge="1" parent="1" source="cu_rev_reasig" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_val_perm" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ZQgXzK1ZOsvJl83wYFIO" name="Página-20">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 20: Gestionando Intervenciones de Terceros" vertex="1">
+          <mxGeometry height="590" width="540" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_cons_mensual" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Consolidando resumen mensual de terceros" vertex="1">
+          <mxGeometry height="50" width="260" x="280" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_exp_pdf" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Exportando reporte de terceros en PDF" vertex="1">
+          <mxGeometry height="55" width="260" x="280" y="272.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_fotos" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Integrando fotos en reporte de terceros" vertex="1">
+          <mxGeometry height="45" width="240" x="520" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_filt_datos" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Filtrando datos para reporte de terceros" vertex="1">
+          <mxGeometry height="45" width="240" x="530" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_reg_interv" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando intervención de terceros" vertex="1">
+          <mxGeometry height="50" width="260" x="290" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_rep" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_exp_pdf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_reg" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_reg_interv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_reg" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_reg_interv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_exp_pdf" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_inc_fotos" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_filt_datos" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_exp_pdf" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="x3RiI8DgljfV06INWztB-1" edge="1" parent="1" source="cu_exp_pdf" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="cu_cons_mensual" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="232" as="sourcePoint" />
+            <mxPoint x="593" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="DM6Th4glRiNdismv49pD" name="Página-21">
+    <mxGraphModel dx="1414" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 21: Utilizando Herramientas de Edición Gráfica y Anotaciones" vertex="1">
+          <mxGeometry height="460" width="590" x="250" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_act_herr" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Activando herramientas de dibujo" vertex="1">
+          <mxGeometry height="55" width="250" x="290" y="212.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_dib_anot" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Dibujando anotaciones técnicas" vertex="1">
+          <mxGeometry height="50" width="240" x="410" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_desh_acc" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Deshaciendo acciones de dibujo" vertex="1">
+          <mxGeometry height="45" width="230" x="600" y="217.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_guard_img" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Guardando cambios en imagen editada" vertex="1">
+          <mxGeometry height="55" width="250" x="280" y="452.5" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_herr" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_act_herr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_guard" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_guard_img">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_herr" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_act_herr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_guard" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_guard_img">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_act_herr" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_dib_anot" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_desh_acc" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_dib_anot" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="jimGLwknvKkYQ1F1zvo4" name="Página-22">
+    <mxGraphModel dx="1664" dy="914" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;strokeWidth=2;fontSize=13;fontStyle=1;align=center;spacingTop=10;" value="Módulo 22: Controlando Tiempos, Aprobaciones y Bitácora Global" vertex="1">
+          <mxGeometry height="830" width="670" x="250" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="act_jefe" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Jefe" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Administrador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="act_op" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=12;fontStyle=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Operador" vertex="1">
+          <mxGeometry height="80" width="50" x="60" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_herencia" edge="1" parent="1" source="act_jefe" style="html=1;endArrow=block;endFill=0;endSize=12;strokeWidth=1.5;strokeColor=#4A5568;rounded=0;" target="act_admin" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_hist_usr" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;fontStyle=1;" value="Consultando historial de acciones por usuario" vertex="1">
+          <mxGeometry height="45" width="260" x="290" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_bitacora" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Consultando bitácora global de acciones" vertex="1">
+          <mxGeometry height="55" width="260" x="290" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_exp_excel" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Exportando historial de acciones a Excel" vertex="1">
+          <mxGeometry height="45" width="260" x="615" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_aprob_ot" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Aprobando orden de trabajo finalizada" vertex="1">
+          <mxGeometry height="55" width="260" x="290" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_antec" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Revisando antecedentes de la orden" vertex="1">
+          <mxGeometry height="55" width="250" x="620" y="355" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_reg_aprob" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Registrando aprobación de orden de trabajo" vertex="1">
+          <mxGeometry height="45" width="250" x="620" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_fec_ini" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;fontStyle=1;" value="Registrando fecha y hora de inicio" vertex="1">
+          <mxGeometry height="50" width="260" x="290" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_fec_fin" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=11;" value="Registrando fecha y hora de término" vertex="1">
+          <mxGeometry height="50" width="260" x="290" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="cu_inc_val_fec" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="Validando integridad de fechas" vertex="1">
+          <mxGeometry height="45" width="250" x="620" y="642.5" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_bit" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_bitacora">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_adm_aprob" edge="1" parent="1" source="act_admin" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_aprob_ot">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_ini" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_fec_ini">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="l_op_fin" edge="1" parent="1" source="act_op" style="html=1;endArrow=none;strokeWidth=1.2;" target="cu_fec_fin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" edge="1" parent="1" source="cu_exp_excel" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" target="cu_bitacora" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext2" edge="1" parent="1" source="cu_hist_usr" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" target="cu_bitacora" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="cu_aprob_ot" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_inc_antec" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="cu_aprob_ot" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_inc_reg_aprob" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" edge="1" parent="1" source="cu_fec_ini" style="html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cu_inc_val_fec" value="&amp;lt;include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

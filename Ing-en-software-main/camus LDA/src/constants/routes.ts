@@ -1,0 +1,16 @@
+export const ROUTES = {
+  DASHBOARD: '/',
+  CLIENTES: '/clientes',
+  ORDENES: '/ordenes',
+  INVENTARIO: '/inventario',
+  OPERACIONES: '/operaciones',
+  FACTURACION: '/facturacion',
+  REPORTES: '/reportes',
+  USUARIOS: '/usuarios',
+  PARAMETROS: '/parametros',
+  CONFIGURACION: '/configuracion',
+  SOPORTE: '/soporte',
+  FORGOT_PASSWORD: '/recuperar-contrasena',
+  RESET_PASSWORD: '/restablecer-contrasena',
+  LOGIN_SUCCESS: '/login-exitoso',
+} as const

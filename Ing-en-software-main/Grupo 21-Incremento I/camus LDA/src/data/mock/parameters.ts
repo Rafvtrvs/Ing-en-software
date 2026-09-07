@@ -1,0 +1,61 @@
+import type { SystemParameters } from '@/types'
+
+export const defaultSystemParameters: SystemParameters = {
+  general: {
+    companyName: 'Alcantarillados Camus Ltda.',
+    rut: '76.123.456-7',
+    address: 'Av. Industrial 1250, Maipú, Región Metropolitana',
+    phone: '+56 2 2345 6789',
+    email: 'contacto@camus.cl',
+    businessHoursStart: '08:00',
+    businessHoursEnd: '18:00',
+    timezone: 'America/Santiago',
+  },
+  orders: {
+    orderPrefix: 'OT',
+    defaultPriority: 'Media',
+    slaHoursHigh: 4,
+    slaHoursMedium: 24,
+    slaHoursLow: 72,
+    autoAssignTechnician: true,
+    requireClientSignature: true,
+    categories: [
+      'Obstrucción',
+      'Rotura de Tubería',
+      'Rebalse',
+      'Mantención',
+      'Inspección',
+      'Otros',
+    ],
+  },
+  billing: {
+    invoicePrefix: 'F',
+    defaultDueDays: 30,
+    taxRate: 19,
+    defaultPaymentTerms: '30 días',
+    sendReminderDaysBefore: 5,
+    autoGenerateFromCompletedOrders: false,
+  },
+  inventory: {
+    lowStockPercent: 40,
+    criticalStockPercent: 15,
+    enableLowStockAlerts: true,
+    enableCriticalAlerts: true,
+    defaultUnit: 'un',
+  },
+  notifications: {
+    emailNewOrder: true,
+    emailOrderCompleted: true,
+    emailLowStock: true,
+    emailInvoiceDue: true,
+    emailDailySummary: false,
+    pushFieldUpdates: true,
+  },
+  operations: {
+    gpsUpdateIntervalMinutes: 5,
+    maxOrdersPerTechnician: 6,
+    allowOfflineMode: true,
+    requirePhotoOnComplete: true,
+    geofenceRadiusMeters: 200,
+  },
+}
