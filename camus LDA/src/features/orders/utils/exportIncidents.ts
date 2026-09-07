@@ -1,42 +1,35 @@
 import type { WorkOrder } from '@/types'
 
-export function exportOrdersToCsv(
+/** Export CSV de incidentes por OT (CU-169) */
+export function exportIncidentsToCsv(
   orders: WorkOrder[],
-  filename = 'ordenes-trabajo-camus.csv',
+  filename = 'incidentes-ordenes-camus.csv',
 ) {
   const headers = [
     'ID Orden',
     'Cliente',
-    'Dirección',
-    'Servicio',
+    'Tipo incidente',
     'Categoría',
-    'Incidente',
-    'Estado',
     'Prioridad',
-    'Técnico',
-    'Progreso',
+    'Estado',
     'Inicio',
     'Término',
     'Duración (h)',
-    'Fecha Creación',
+    'Operadores',
   ]
 
   const rows = orders.map((o) =>
     [
       o.id,
       o.client,
-      o.address,
-      o.service ?? '',
+      o.incidentType ?? o.category,
       o.category,
-      o.incidentType ?? '',
-      o.status,
       o.priority ?? '',
-      o.technician ?? '',
-      String(o.progress ?? ''),
+      o.status,
       o.startDate ?? '',
       o.endDate ?? '',
       o.durationHours != null ? String(o.durationHours) : '',
-      o.createdAt,
+      o.operators?.map((op) => op.name).join('; ') || o.technician || '',
     ]
       .map((v) => `"${String(v).replace(/"/g, '""')}"`)
       .join(','),
@@ -51,4 +44,3 @@ export function exportOrdersToCsv(
   link.click()
   URL.revokeObjectURL(url)
 }
-

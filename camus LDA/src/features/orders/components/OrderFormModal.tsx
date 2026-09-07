@@ -7,8 +7,25 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
+import { useUsersStore } from '@/store/useUsersStore'
+import { useSessionUser } from '@/features/auth/useSessionUser'
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
-import type { OrderStatus, WorkOrder } from '@/types'
+import {
+  canEditOrder,
+  orderEditBlockedMessage,
+} from '@/features/orders/utils/canEditOrder'
+import { calcDurationHours, toInputDate } from '@/features/orders/utils/orderDates'
+import {
+  autoPriorityForIncident,
+  INCIDENT_TYPES,
+} from '@/features/orders/utils/priorityRules'
+import type {
+  IncidentType,
+  OrderPriority,
+  OrderStatus,
+  WorkOrder,
+} from '@/types'
+import { cn } from '@/utils/cn'
 
 interface OrderFormValues {
   id: string
@@ -16,11 +33,17 @@ interface OrderFormValues {
   address: string
   service: string
   category: string
+  incidentType: IncidentType
   status: OrderStatus
-  priority: 'Baja' | 'Media' | 'Alta'
+  priority: OrderPriority
+  priorityManual: boolean
   technician: string
+  operatorIds: string[]
   truckCode: string
   progress: number
+  startDate: string
+  endDate: string
+  durationHours: number | undefined
 }
 
 interface OrderFormModalProps {
@@ -35,15 +58,40 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
   const updateOrder = useOrdersStore((s) => s.updateOrder)
   const addToast = useOrdersStore((s) => s.addToast)
   const products = useInventoryStore((s) => s.products)
+  const users = useUsersStore((s) => s.users)
+  const roles = useUsersStore((s) => s.roles)
+  const currentUser = useSessionUser()
+
   const trucks = useMemo(
     () => products.filter((p) => p.category === 'Camiones' && p.currentStock > 0),
     [products],
   )
 
+  const technicians = useMemo(() => {
+    const techRoleIds = new Set(
+      roles
+        .filter((r) => {
+          const n = r.name.toLowerCase()
+          return (
+            n.includes('técnico') ||
+            n.includes('tecnico') ||
+            n.includes('operador') ||
+            n.includes('campo')
+          )
+        })
+        .map((r) => r.id),
+    )
+    return users.filter(
+      (u) => u.status === 'Activo' && techRoleIds.has(u.roleId),
+    )
+  }, [users, roles])
+
   const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<OrderFormValues>({
     defaultValues: {
@@ -52,28 +100,54 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       address: '',
       service: '',
       category: 'Obstrucción',
+      incidentType: 'Obstrucción',
       status: 'Pendiente',
       priority: 'Media',
+      priorityManual: false,
       technician: '',
+      operatorIds: [],
       truckCode: '',
       progress: 0,
+      startDate: '',
+      endDate: '',
+      durationHours: undefined,
     },
   })
+
+  const operatorIds = watch('operatorIds')
+  const incidentType = watch('incidentType')
+  const priorityManual = watch('priorityManual')
+  const startDate = watch('startDate')
+  const endDate = watch('endDate')
 
   useEffect(() => {
     if (!open) return
     if (mode === 'edit' && order) {
+      if (!canEditOrder(currentUser, order)) {
+        addToast(orderEditBlockedMessage(order), 'error')
+        onClose()
+        return
+      }
       reset({
         id: order.id,
         client: order.client,
         address: order.address,
         service: order.service ?? '',
         category: order.category,
+        incidentType:
+          (order.incidentType as IncidentType) ??
+          (order.category as IncidentType) ??
+          'Obstrucción',
         status: order.status,
         priority: order.priority ?? 'Media',
+        priorityManual: Boolean(order.priorityManual),
         technician: order.technician ?? '',
+        operatorIds: order.operatorIds ?? [],
         truckCode: order.truckCode ?? '',
         progress: order.progress ?? 0,
+        startDate: toInputDate(order.startDate),
+        endDate: toInputDate(order.endDate),
+        durationHours: order.durationHours,
       })
     } else {
       reset({
@@ -82,36 +156,91 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         address: '',
         service: '',
         category: 'Obstrucción',
+        incidentType: 'Obstrucción',
         status: 'Pendiente',
         priority: 'Media',
+        priorityManual: false,
         technician: '',
+        operatorIds: [],
         truckCode: '',
         progress: 0,
+        startDate: '',
+        endDate: '',
+        durationHours: undefined,
       })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- currentUser from auth is stable enough per open
   }, [open, mode, order, reset])
 
+  useEffect(() => {
+    if (!priorityManual) {
+      setValue('priority', autoPriorityForIncident(incidentType))
+    }
+  }, [incidentType, priorityManual, setValue])
+
+  useEffect(() => {
+    const calc = calcDurationHours(startDate, endDate)
+    if (calc !== undefined) setValue('durationHours', calc)
+  }, [startDate, endDate, setValue])
+
+  const toggleOperator = (id: string) => {
+    const next = operatorIds.includes(id)
+      ? operatorIds.filter((x) => x !== id)
+      : [...operatorIds, id]
+    setValue('operatorIds', next, { shouldDirty: true })
+    const first = technicians.find((t) => t.id === next[0])
+    setValue('technician', first?.name ?? '', { shouldDirty: true })
+  }
+
   const onSubmit = (data: OrderFormValues) => {
+    const operators = data.operatorIds
+      .map((id) => {
+        const u = technicians.find((t) => t.id === id)
+        return u ? { id: u.id, name: u.name } : null
+      })
+      .filter(Boolean) as WorkOrder['operators']
+
     const payload: WorkOrder = {
       id: data.id.trim(),
       client: data.client.trim(),
       address: data.address.trim(),
       service: data.service.trim(),
-      category: data.category,
+      category: data.incidentType || data.category,
+      incidentType: data.incidentType,
       status: data.status,
       createdAt: order?.createdAt ?? new Date().toLocaleDateString('es-CL'),
       priority: data.priority,
-      technician: data.technician.trim(),
+      priorityManual: data.priorityManual,
+      technician:
+        data.technician.trim() ||
+        operators?.[0]?.name ||
+        '',
+      operatorIds: data.operatorIds,
+      operators,
       ...(data.truckCode ? { truckCode: data.truckCode } : null),
       progress: Number.isFinite(data.progress) ? Number(data.progress) : 0,
+      startDate: data.startDate || undefined,
+      endDate: data.endDate || undefined,
+      durationHours:
+        data.durationHours != null && Number.isFinite(data.durationHours)
+          ? Number(data.durationHours)
+          : undefined,
+      photoUrls: order?.photoUrls,
+      thirdParties: order?.thirdParties,
+      equipmentId: order?.equipmentId,
     }
 
     if (mode === 'create') {
       addOrder(payload)
       addToast(`Orden creada para "${payload.client}"`)
     } else if (order) {
+      if (!canEditOrder(currentUser, order)) {
+        addToast(orderEditBlockedMessage(order), 'error')
+        onClose()
+        return
+      }
       const changes = getOrderFieldChanges(order, payload)
-      if (changes.length === 0) {
+      if (changes.length === 0 && JSON.stringify(order.operatorIds ?? []) === JSON.stringify(payload.operatorIds ?? [])) {
         addToast('No hay cambios para guardar', 'info')
         onClose()
         return
@@ -120,7 +249,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       addToast(
         changes.length === 1
           ? `Campo "${changes[0].label}" actualizado en la orden`
-          : `${changes.length} campos actualizados en la orden`,
+          : `${Math.max(changes.length, 1)} campos actualizados en la orden`,
       )
     }
     onClose()
@@ -178,13 +307,13 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         </FormField>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="Categoría" htmlFor="category" required>
-            <Select id="category" {...register('category')}>
-              <option value="Obstrucción">Obstrucción</option>
-              <option value="Rotura de Tubería">Rotura de Tubería</option>
-              <option value="Rebalse">Rebalse</option>
-              <option value="Mantención">Mantención</option>
-              <option value="Otros">Otros</option>
+          <FormField label="Tipo de incidente" htmlFor="incidentType" required>
+            <Select id="incidentType" {...register('incidentType')}>
+              {INCIDENT_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
             </Select>
           </FormField>
           <FormField label="Estado" htmlFor="status" required>
@@ -198,16 +327,34 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
           </FormField>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <FormField label="Prioridad" htmlFor="priority" required>
-            <Select id="priority" {...register('priority')}>
-              <option value="Baja">Baja</option>
-              <option value="Media">Media</option>
+            <Select
+              id="priority"
+              {...register('priority')}
+              disabled={!priorityManual}
+            >
+              <option value="Urgente">Urgente</option>
               <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Baja">Baja</option>
             </Select>
           </FormField>
-          <FormField label="Técnico" htmlFor="technician">
-            <Input id="technician" placeholder="Ej: Luis Torres" {...register('technician')} />
+          <FormField label="Prioridad manual" htmlFor="priorityManual">
+            <label className="flex h-10 items-center gap-2 text-sm text-slate-700">
+              <input
+                id="priorityManual"
+                type="checkbox"
+                checked={priorityManual}
+                onChange={(e) =>
+                  setValue('priorityManual', e.target.checked, {
+                    shouldDirty: true,
+                  })
+                }
+                className="rounded border-slate-300 text-primary focus:ring-primary"
+              />
+              Fijar manualmente
+            </label>
           </FormField>
           <FormField label="Camión asignado" htmlFor="truckCode">
             <Select id="truckCode" {...register('truckCode')}>
@@ -218,6 +365,56 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
                 </option>
               ))}
             </Select>
+          </FormField>
+        </div>
+
+        <FormField
+          label="Operadores / técnicos (cuadrilla)"
+          htmlFor="operators"
+        >
+          <div className="max-h-36 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-2">
+            {technicians.length === 0 ? (
+              <p className="text-xs text-slate-500">No hay técnicos activos.</p>
+            ) : (
+              technicians.map((t) => {
+                const checked = operatorIds.includes(t.id)
+                return (
+                  <label
+                    key={t.id}
+                    className={cn(
+                      'flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm',
+                      checked ? 'bg-primary/5' : 'hover:bg-slate-50',
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleOperator(t.id)}
+                      className="rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    {t.name}
+                  </label>
+                )
+              })
+            )}
+          </div>
+        </FormField>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <FormField label="Fecha inicio" htmlFor="startDate">
+            <Input id="startDate" type="date" {...register('startDate')} />
+          </FormField>
+          <FormField label="Fecha término" htmlFor="endDate">
+            <Input id="endDate" type="date" {...register('endDate')} />
+          </FormField>
+          <FormField label="Duración (h)" htmlFor="durationHours">
+            <Input
+              id="durationHours"
+              type="number"
+              min={0}
+              step={0.5}
+              {...register('durationHours', { valueAsNumber: true })}
+            />
           </FormField>
           <FormField label="Progreso (%)" htmlFor="progress">
             <Input
@@ -233,4 +430,3 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
     </Modal>
   )
 }
-

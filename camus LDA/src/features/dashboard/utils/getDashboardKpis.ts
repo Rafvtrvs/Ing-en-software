@@ -3,6 +3,7 @@ import {
   ClipboardList,
   Clock,
   DollarSign,
+  LoaderCircle,
 } from 'lucide-react'
 import type { Invoice, KpiData, WorkOrder } from '@/types'
 import { formatCurrency } from '@/utils/formatters'
@@ -13,6 +14,13 @@ export function getDashboardKpis(
 ): KpiData[] {
   const completed = orders.filter((o) => o.status === 'Completada').length
   const pending = orders.filter((o) => o.status === 'Pendiente').length
+  const inProgress = orders.filter((o) => o.status === 'En Curso')
+  const avgProgress =
+    inProgress.length === 0
+      ? 0
+      : Math.round(
+          inProgress.reduce((sum, o) => sum + (o.progress ?? 0), 0) / inProgress.length,
+        )
   const revenue = invoices
     .filter((inv) => inv.status === 'Pagada')
     .reduce((sum, inv) => sum + inv.amount, 0)
@@ -20,7 +28,7 @@ export function getDashboardKpis(
   return [
     {
       title: 'Órdenes Totales',
-      value: String(orders.length || 128),
+      value: String(orders.length),
       trend: 'Resumen operacional',
       trendDirection: 'up',
       icon: ClipboardList,
@@ -29,7 +37,7 @@ export function getDashboardKpis(
     },
     {
       title: 'Órdenes Completadas',
-      value: String(completed || 96),
+      value: String(completed),
       trend: 'Trabajos finalizados',
       trendDirection: 'up',
       icon: CheckCircle,
@@ -38,7 +46,7 @@ export function getDashboardKpis(
     },
     {
       title: 'Órdenes Pendientes',
-      value: String(pending || 32),
+      value: String(pending),
       trend: 'Por asignar o iniciar',
       trendDirection: 'down',
       icon: Clock,
@@ -46,8 +54,20 @@ export function getDashboardKpis(
       iconColor: 'text-amber-600',
     },
     {
+      title: 'Avance de servicios',
+      value: inProgress.length === 0 ? '—' : `${avgProgress}%`,
+      trend:
+        inProgress.length === 0
+          ? 'Sin OT en curso'
+          : `${inProgress.length} OT en curso`,
+      trendDirection: 'up',
+      icon: LoaderCircle,
+      iconBg: 'bg-sky-50',
+      iconColor: 'text-sky-600',
+    },
+    {
       title: 'Ingresos Facturados',
-      value: formatCurrency(revenue || 24580000),
+      value: formatCurrency(revenue),
       trend: 'Facturas pagadas',
       trendDirection: 'up',
       icon: DollarSign,

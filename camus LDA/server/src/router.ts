@@ -8,6 +8,7 @@ import { requireAuth, optionalAuth } from './middleware/auth.js'
 import { authController } from './controllers/auth.controller.js'
 import { clientController } from './controllers/client.controller.js'
 import { orderController } from './controllers/order.controller.js'
+import { interventionController } from './controllers/intervention.controller.js'
 import { assetController } from './controllers/asset.controller.js'
 import { reportController } from './controllers/report.controller.js'
 
@@ -31,6 +32,23 @@ router.get('/orders', optionalAuth, orderController.list)
 router.post('/orders', requireAuth, orderController.create)
 router.put('/orders/:id', requireAuth, orderController.update)
 router.delete('/orders/:id', requireAuth, orderController.remove)
+
+// Intervenciones por OT (RF-44 / CU-149–151)
+router.get(
+  '/orders/:id/interventions',
+  optionalAuth,
+  interventionController.list,
+)
+router.post(
+  '/orders/:id/interventions',
+  requireAuth,
+  interventionController.create,
+)
+router.put(
+  '/orders/:id/interventions/:interventionId',
+  requireAuth,
+  interventionController.update,
+)
 
 // Activos / inventario
 router.get('/assets', optionalAuth, assetController.list)

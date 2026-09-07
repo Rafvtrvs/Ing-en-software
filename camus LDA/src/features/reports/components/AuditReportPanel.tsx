@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Eye, Filter, Search, Shield } from 'lucide-react'
+import { Download, Eye, Filter, Search, Shield } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Drawer } from '@/components/ui/Drawer'
@@ -11,11 +11,13 @@ import { KpiCard } from '@/components/ui/KpiCard'
 import { reportsService } from '@/services/reportsService'
 import type { AuditLogEntry } from '@/data/mock/audit'
 import { AuditLogDetailPanel } from '@/features/reports/components/AuditLogDetailPanel'
+import { useReportsStore } from '@/store/useReportsStore'
 import { formatDateTime } from '@/utils/formatters'
 
 const MODULES = [
   'Todos',
   'Autenticación',
+  'Seguridad',
   'Clientes',
   'Órdenes',
   'Inventario',
@@ -25,7 +27,8 @@ const MODULES = [
 ] as const
 
 const MODULE_ALIASES: Record<string, string[]> = {
-  Autenticación: ['auth', 'autenticación', 'autenticacion'],
+  Autenticación: ['auth', 'autenticación', 'autenticacion', 'seguridad'],
+  Seguridad: ['auth', 'autenticación', 'autenticacion', 'seguridad'],
   Clientes: ['clientes'],
   Órdenes: ['órdenes', 'ordenes'],
   Inventario: ['inventario'],
@@ -41,7 +44,43 @@ function matchesModuleFilter(modulo: string, filter: string): boolean {
   return aliases.some((alias) => alias.toLowerCase() === normalized)
 }
 
+function isSecurityFilter(filter: string): boolean {
+  return filter === 'Autenticación' || filter === 'Seguridad'
+}
+
+function exportAuditLogsCsv(logs: AuditLogEntry[]) {
+  const headers = [
+    'Fecha y hora',
+    'Módulo',
+    'Acción',
+    'Usuario',
+    'Valor anterior',
+    'Valor nuevo',
+    'Ubicación',
+  ]
+  const rows = logs.map((log) => [
+    log.fechaHora,
+    log.moduloAfectado,
+    log.accion,
+    log.usuario,
+    log.valorAnterior ?? '',
+    log.valorNuevo ?? '',
+    log.ubicacion,
+  ])
+  const csv = [headers, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `bitacora-auditoria_${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 export function AuditReportPanel() {
+  const addToast = useReportsStore((s) => s.addToast)
   const [logs, setLogs] = useState<AuditLogEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -87,9 +126,22 @@ export function AuditReportPanel() {
 
   const openDetail = (log: AuditLogEntry) => setSelectedLog(log)
 
+  const handleExport = () => {
+    exportAuditLogsCsv(filtered)
+    addToast('Bitácora exportada a CSV correctamente', 'success')
+  }
+
   const todayCount = logs.filter((l) =>
     l.fechaHora.startsWith(new Date().toISOString().slice(0, 10)),
   ).length
+
+  const bitacoraTitle = isSecurityFilter(moduleFilter)
+    ? 'Bitácora de seguridad'
+    : 'Bitácora de auditoría'
+
+  const bitacoraSubtitle = isSecurityFilter(moduleFilter)
+    ? 'Registro de inicios de sesión y eventos de autenticación.'
+    : 'Haz clic en un registro para ver fecha, hora, ubicación y responsable.'
 
   const kpis = [
     {
@@ -196,17 +248,28 @@ export function AuditReportPanel() {
 
       <Card>
         <CardHeader
-          title="Bitácora de auditoría"
-          subtitle="Haz clic en un registro para ver fecha, hora, ubicación y responsable."
+          title={bitacoraTitle}
+          subtitle={bitacoraSubtitle}
           action={
-            <Button
-              variant="outline"
-              size="sm"
-              leftIcon={<Filter className="h-4 w-4" />}
-              onClick={() => setShowFilters((v) => !v)}
-            >
-              Filtros
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<Download className="h-4 w-4" />}
+                onClick={handleExport}
+                disabled={filtered.length === 0}
+              >
+                Exportar a Excel/CSV
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<Filter className="h-4 w-4" />}
+                onClick={() => setShowFilters((v) => !v)}
+              >
+                Filtros
+              </Button>
+            </div>
           }
         />
 
@@ -230,7 +293,7 @@ export function AuditReportPanel() {
               >
                 {MODULES.map((mod) => (
                   <option key={mod} value={mod}>
-                    {mod}
+                    {mod === 'Autenticación' ? 'Autenticación (login)' : mod}
                   </option>
                 ))}
               </Select>

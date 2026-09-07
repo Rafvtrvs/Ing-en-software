@@ -30,6 +30,33 @@ export interface KpiData {
   iconColor: string
 }
 
+export type OrderPriority = 'Baja' | 'Media' | 'Alta' | 'Urgente'
+
+/** Tipos de incidente (CU-165) */
+export type IncidentType =
+  | 'Obstrucción'
+  | 'Fuga'
+  | 'Colapso'
+  | 'Rotura de Tubería'
+  | 'Rebalse'
+  | 'Mantención'
+  | 'Otros'
+
+export interface OrderOperator {
+  id: string
+  name: string
+}
+
+/** Intervención de tercero en una OT (CU-188) */
+export interface ThirdPartyIntervention {
+  id: string
+  orderId: string
+  company: string
+  detail: string
+  photoUrls: string[]
+  registeredAt: string
+}
+
 export interface WorkOrder {
   id: string
   client: string
@@ -38,7 +65,7 @@ export interface WorkOrder {
   category: string
   status: OrderStatus
   createdAt: string
-  priority?: 'Baja' | 'Media' | 'Alta'
+  priority?: OrderPriority
   technician?: string
   /** Código de producto (Inventario) asignado como camión */
   truckCode?: string
@@ -47,6 +74,37 @@ export interface WorkOrder {
   progress?: number
   /** Orden visual dentro de la columna del kanban */
   sortOrder?: number
+  /** Posición en la cola de atención (arrastre manual) */
+  queueOrder?: number
+  /** Fecha inicio trabajo (ISO o dd/mm/yyyy) — CU-152 */
+  startDate?: string
+  /** Fecha término trabajo — CU-153 */
+  endDate?: string
+  /** Duración en horas — CU-154 */
+  durationHours?: number
+  /** Tipo de incidente — CU-165 */
+  incidentType?: IncidentType
+  /** IDs de técnicos/operadores asignados (cuadrilla) — CU-160 */
+  operatorIds?: string[]
+  /** Snapshot de operadores para display */
+  operators?: OrderOperator[]
+  /** true si la prioridad fue fijada manualmente (CU-170) */
+  priorityManual?: boolean
+  /** URLs de evidencia fotográfica */
+  photoUrls?: string[]
+  /** Intervenciones de terceros — CU-188 */
+  thirdParties?: ThirdPartyIntervention[]
+  /** Timestamp última generación PDF resumen — CU-173 */
+  pdfGeneratedAt?: string
+}
+
+/** Intervención registrada en una OT (RF-44 / CU-149–151) */
+export interface OrderIntervention {
+  id: number
+  orderId: string
+  detail: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface InventoryItem {
@@ -349,7 +407,7 @@ export interface ReportExportItem {
   title: string
   description: string
   category: ReportTab
-  format: 'CSV' | 'PDF'
+  format: 'PDF' | 'CSV'
 }
 
 export type ParametersTab =
@@ -373,7 +431,7 @@ export interface GeneralParameters {
 
 export interface OrderParameters {
   orderPrefix: string
-  defaultPriority: 'Baja' | 'Media' | 'Alta'
+  defaultPriority: 'Baja' | 'Media' | 'Alta' | 'Urgente'
   slaHoursHigh: number
   slaHoursMedium: number
   slaHoursLow: number

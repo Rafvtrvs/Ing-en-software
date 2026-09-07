@@ -6,6 +6,7 @@ interface AppState {
   user: User
   toggleSidebar: () => void
   setSidebarOpen: (open: boolean) => void
+  setUser: (user: Partial<User>) => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -18,4 +19,8 @@ export const useAppStore = create<AppState>((set) => ({
   },
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  setUser: (user) =>
+    set((state) => ({
+      user: { ...state.user, ...user },
+    })),
 }))

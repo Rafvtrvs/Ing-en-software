@@ -10,6 +10,10 @@ export const ORDER_FIELD_LABELS: Record<string, string> = {
   priority: 'Prioridad',
   technician: 'Técnico',
   progress: 'Progreso',
+  startDate: 'Fecha inicio',
+  endDate: 'Fecha término',
+  durationHours: 'Duración (h)',
+  incidentType: 'Tipo incidente',
 }
 
 const TRACKED_FIELDS = [
@@ -22,6 +26,10 @@ const TRACKED_FIELDS = [
   'priority',
   'technician',
   'progress',
+  'startDate',
+  'endDate',
+  'durationHours',
+  'incidentType',
 ] as const
 
 export type TrackedOrderField = (typeof TRACKED_FIELDS)[number]
@@ -34,7 +42,7 @@ export interface OrderFieldChange {
 }
 
 function normalizeFieldValue(field: TrackedOrderField, value: unknown): string {
-  if (field === 'progress') {
+  if (field === 'progress' || field === 'durationHours') {
     const num = Number(value ?? 0)
     return Number.isFinite(num) ? String(num) : '0'
   }
@@ -44,6 +52,7 @@ function normalizeFieldValue(field: TrackedOrderField, value: unknown): string {
 function displayValue(field: TrackedOrderField, value: unknown): string {
   const normalized = normalizeFieldValue(field, value)
   if (field === 'progress') return `${normalized}%`
+  if (field === 'durationHours') return `${normalized} h`
   return normalized || '—'
 }
 

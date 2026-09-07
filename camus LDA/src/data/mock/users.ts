@@ -87,7 +87,7 @@ export const initialSystemUsers: SystemUser[] = [
   {
     id: 'u3',
     name: 'Luis Torres',
-    email: 'luis.torres@camus.cl',
+    email: 'operador@camus.cl',
     phone: '+56 9 6543 2109',
     roleId: 'role-tecnico',
     status: 'Activo',

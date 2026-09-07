@@ -2,15 +2,22 @@ import { LogOut, Menu } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/store/useAppStore'
 import { authService } from '@/services/authService'
+import { useSessionUser } from '@/features/auth/useSessionUser'
 import { NotificationsPanel } from '@/components/layout/NotificationsPanel'
 
 export function Header() {
-  const { user, toggleSidebar } = useAppStore()
+  const toggleSidebar = useAppStore((s) => s.toggleSidebar)
+  const setUser = useAppStore((s) => s.setUser)
   const navigate = useNavigate()
-  const authUser = authService.getUser()
+  const session = useSessionUser()
 
   const handleLogout = () => {
     authService.logout()
+    setUser({
+      name: 'Invitado',
+      role: '',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest',
+    })
     navigate('/login', { replace: true })
   }
 
@@ -39,17 +46,13 @@ export function Header() {
 
         <div className="flex items-center gap-3 rounded-lg py-1.5 pl-1.5 pr-2">
           <img
-            src={user.avatar}
-            alt={authUser?.name ?? user.name}
+            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(session.name ?? 'user')}`}
+            alt={session.name}
             className="h-9 w-9 rounded-full bg-slate-100 object-cover ring-2 ring-slate-100"
           />
           <div className="hidden text-left sm:block">
-            <p className="text-sm font-semibold text-slate-900">
-              {authUser?.name ?? user.name}
-            </p>
-            <p className="text-xs text-slate-500">
-              {authUser?.role ?? user.role}
-            </p>
+            <p className="text-sm font-semibold text-slate-900">{session.name}</p>
+            <p className="text-xs text-slate-500">{session.role || 'Sin rol'}</p>
           </div>
         </div>
 

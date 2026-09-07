@@ -103,7 +103,9 @@ export function LoginPage() {
         </form>
 
         <p className="mt-4 text-center text-xs text-slate-400">
-          Demo: admin@camus.cl / admin123
+          Admin: admin@camus.cl / admin123
+          <br />
+          Operador: operador@camus.cl / operador123
         </p>
       </div>
     </div>

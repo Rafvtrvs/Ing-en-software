@@ -20,6 +20,9 @@ interface OrderInput {
   progress?: number
   sortOrder?: number
   idCliente?: number
+  technician?: string
+  operatorIds?: string[]
+  idOperador?: number | null
 }
 
 function genId() {
@@ -28,8 +31,6 @@ function genId() {
   return `OT-${year}-${rand}`
 }
 
-// La Vista envía el nombre del cliente; aquí lo resolvemos al id real
-// buscando por nombre o empresa para no perder el vínculo al recargar.
 async function resolveCliente(name?: string): Promise<number | null> {
   if (!name) return null
   const c = await prisma.cliente.findFirst({
@@ -38,10 +39,34 @@ async function resolveCliente(name?: string): Promise<number | null> {
   return c?.id ?? null
 }
 
+async function resolveOperador(input: {
+  technician?: string
+  operatorIds?: string[]
+  idOperador?: number | null
+}): Promise<number | null | undefined> {
+  if (input.idOperador !== undefined) return input.idOperador
+  if (input.operatorIds?.length) {
+    const raw = input.operatorIds[0]
+    const asNum = Number(raw)
+    if (Number.isFinite(asNum) && String(asNum) === raw) return asNum
+  }
+  const name = input.technician?.trim()
+  if (!name) return undefined
+  const byName = await prisma.usuario.findFirst({ where: { nombre: name } })
+  if (byName) return byName.id
+  if (name.toLowerCase().includes('luis')) {
+    const op = await prisma.usuario.findFirst({
+      where: { correoElectronico: 'operador@camus.cl' },
+    })
+    return op?.id ?? null
+  }
+  return null
+}
+
 export const orderService = {
   async list() {
     const rows = await prisma.ordenTrabajo.findMany({
-      include: { cliente: true },
+      include: { cliente: true, operador: true },
       orderBy: { ordenVisual: 'asc' },
     })
     return rows.map(toOrderDto)
@@ -49,6 +74,7 @@ export const orderService = {
 
   async create(input: OrderInput, userId?: number) {
     const idCliente = input.idCliente ?? (await resolveCliente(input.client))
+    const idOperador = await resolveOperador(input)
     const row = await prisma.ordenTrabajo.create({
       data: {
         id: input.id || genId(),
@@ -60,8 +86,9 @@ export const orderService = {
         progreso: input.progress ?? 0,
         ordenVisual: input.sortOrder ?? 0,
         idCliente,
+        idOperador: idOperador ?? null,
       },
-      include: { cliente: true },
+      include: { cliente: true, operador: true },
     })
     await auditService.log({
       modulo: 'ordenes',
@@ -69,7 +96,6 @@ export const orderService = {
       valorNuevo: row,
       idUsuario: userId,
     })
-    // Servicios externos (SIMULADOS)
     await mailService.send({
       to: 'operaciones@camus.cl',
       subject: `Nueva orden ${row.id}`,
@@ -90,6 +116,7 @@ export const orderService = {
       (input.client !== undefined
         ? await resolveCliente(input.client)
         : undefined)
+    const idOperador = await resolveOperador(input)
     const row = await prisma.ordenTrabajo.update({
       where: { id },
       data: {
@@ -101,8 +128,9 @@ export const orderService = {
         progreso: input.progress,
         ordenVisual: input.sortOrder,
         idCliente,
+        ...(idOperador !== undefined ? { idOperador } : null),
       },
-      include: { cliente: true },
+      include: { cliente: true, operador: true },
     })
     await auditService.log({
       modulo: 'ordenes',

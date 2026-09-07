@@ -168,8 +168,13 @@ function DroppableColumn({
   )
 }
 
-export function OrdersBoard() {
-  const orders = useOrdersStore((s) => s.orders)
+export function OrdersBoard({
+  ordersOverride,
+}: {
+  ordersOverride?: WorkOrder[]
+} = {}) {
+  const storeOrders = useOrdersStore((s) => s.orders)
+  const orders = ordersOverride ?? storeOrders
   const moveOrderOnBoard = useOrdersStore((s) => s.moveOrderOnBoard)
   const [activeId, setActiveId] = useState<string | null>(null)
 

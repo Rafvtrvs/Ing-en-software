@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -29,7 +29,11 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
   const updateUser = useUsersStore((s) => s.updateUser)
   const addToast = useUsersStore((s) => s.addToast)
 
-  const activeRoles = roles.filter((r) => r.status === 'Activo')
+  const activeRoles = useMemo(
+    () => roles.filter((r) => r.status === 'Activo'),
+    [roles],
+  )
+  const defaultRoleId = activeRoles[0]?.id ?? ''
 
   const {
     register,
@@ -41,7 +45,7 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
       name: '',
       email: '',
       phone: '',
-      roleId: activeRoles[0]?.id ?? '',
+      roleId: defaultRoleId,
       status: 'Activo',
     },
   })
@@ -56,18 +60,22 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
         roleId: user.roleId,
         status: user.status,
       })
-    } else {
-      reset({
-        name: '',
-        email: '',
-        phone: '',
-        roleId: activeRoles[0]?.id ?? '',
-        status: 'Activo',
-      })
+      return
     }
-  }, [open, mode, user, reset, activeRoles])
+    reset({
+      name: '',
+      email: '',
+      phone: '',
+      roleId: defaultRoleId,
+      status: 'Activo',
+    })
+  }, [open, mode, user, reset, defaultRoleId])
 
   const onSubmit = (data: UserFormValues) => {
+    if (!data.roleId) {
+      addToast('Selecciona un rol activo para el usuario', 'error')
+      return
+    }
     if (mode === 'create') {
       addUser(data)
       addToast(`Usuario "${data.name}" creado correctamente`)

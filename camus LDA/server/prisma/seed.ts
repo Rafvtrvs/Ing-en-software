@@ -59,23 +59,85 @@ async function main() {
 
   // Rol Administrador con todos los permisos
   const permisos = await prisma.permiso.findMany()
-  const adminRol = await prisma.rol.create({
-    data: {
-      nombre: 'Administrador',
-      descripcion: 'Acceso total al sistema',
-      esSistema: true,
-      permisos: { create: permisos.map((p) => ({ idPermiso: p.id })) },
-    },
-  })
+  let adminRol = await prisma.rol.findFirst({ where: { nombre: 'Administrador' } })
+  if (!adminRol) {
+    adminRol = await prisma.rol.create({
+      data: {
+        nombre: 'Administrador',
+        descripcion: 'Acceso total al sistema',
+        esSistema: true,
+      },
+    })
+  }
+  for (const p of permisos) {
+    await prisma.rolPermiso.upsert({
+      where: { idRol_idPermiso: { idRol: adminRol.id, idPermiso: p.id } },
+      update: {},
+      create: { idRol: adminRol.id, idPermiso: p.id },
+    })
+  }
 
-  // Usuario administrador (login local: admin@camus.cl / admin123)
-  await prisma.usuario.create({
-    data: {
+  // Rol Técnico / Operador (CU-183–187)
+  let tecnicoRol = await prisma.rol.findFirst({
+    where: { nombre: 'Técnico de Campo' },
+  })
+  if (!tecnicoRol) {
+    tecnicoRol = await prisma.rol.create({
+      data: {
+        nombre: 'Técnico de Campo',
+        descripcion: 'Operario de terreno: solo órdenes asignadas',
+        esSistema: true,
+      },
+    })
+  }
+  const tecnicoPermisos = permisos.filter((p) =>
+    ['dashboard.view', 'orders.manage', 'operations.view'].includes(p.clave),
+  )
+  for (const p of tecnicoPermisos) {
+    await prisma.rolPermiso.upsert({
+      where: {
+        idRol_idPermiso: { idRol: tecnicoRol.id, idPermiso: p.id },
+      },
+      update: {},
+      create: { idRol: tecnicoRol.id, idPermiso: p.id },
+    })
+  }
+
+  // Usuario administrador (login: admin@camus.cl / admin123)
+  await prisma.usuario.upsert({
+    where: { correoElectronico: 'admin@camus.cl' },
+    update: {
+      nombre: 'Administrador',
+      passwordHash: await bcrypt.hash('admin123', 10),
+      idRol: adminRol.id,
+      estado: 'Activo',
+    },
+    create: {
       nombre: 'Administrador',
       correoElectronico: 'admin@camus.cl',
       passwordHash: await bcrypt.hash('admin123', 10),
       idRol: adminRol.id,
       estado: 'Activo',
+    },
+  })
+
+  // Usuario operario / técnico (login: operador@camus.cl / operador123)
+  await prisma.usuario.upsert({
+    where: { correoElectronico: 'operador@camus.cl' },
+    update: {
+      nombre: 'Luis Torres',
+      passwordHash: await bcrypt.hash('operador123', 10),
+      idRol: tecnicoRol.id,
+      estado: 'Activo',
+      telefono: '+56 9 6543 2109',
+    },
+    create: {
+      nombre: 'Luis Torres',
+      correoElectronico: 'operador@camus.cl',
+      passwordHash: await bcrypt.hash('operador123', 10),
+      idRol: tecnicoRol.id,
+      estado: 'Activo',
+      telefono: '+56 9 6543 2109',
     },
   })
 
@@ -108,7 +170,9 @@ async function main() {
     })
   }
 
-  console.log('[seed] completado. Usuario: admin@camus.cl / admin123')
+  console.log('[seed] completado.')
+  console.log('  Admin:     admin@camus.cl / admin123')
+  console.log('  Operador:  operador@camus.cl / operador123')
 }
 
 main()

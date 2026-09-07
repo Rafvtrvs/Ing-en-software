@@ -2,9 +2,17 @@ import { NavLink } from 'react-router-dom'
 import { NAV_SECTIONS, SUPPORT_ITEM } from '@/constants/navigation'
 import { cn } from '@/utils/cn'
 import { useAppStore } from '@/store/useAppStore'
+import { useSessionUser } from '@/features/auth/useSessionUser'
+import { canAccessPath } from '@/features/auth/roleAccess'
 
 export function Sidebar() {
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
+  const user = useSessionUser()
+
+  const sections = NAV_SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => canAccessPath(user, item.path)),
+  })).filter((section) => section.items.length > 0)
 
   return (
     <aside
@@ -19,10 +27,13 @@ export function Sidebar() {
           alt="Alcantarillados Camus Ltda."
           className="mx-auto h-auto w-full max-w-[200px] rounded-lg bg-white object-contain p-1.5"
         />
+        <p className="mt-2 truncate text-center text-[11px] text-slate-400">
+          {user.name} · {user.role}
+        </p>
       </div>
 
       <nav className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4">
-        {NAV_SECTIONS.map((section, idx) => (
+        {sections.map((section, idx) => (
           <div key={idx} className={cn(idx > 0 && 'mt-6')}>
             {section.title && (
               <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">

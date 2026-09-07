@@ -19,7 +19,12 @@ export function toClientDto(c: Cliente) {
   }
 }
 
-export function toOrderDto(o: OrdenTrabajo & { cliente?: Cliente | null }) {
+export function toOrderDto(
+  o: OrdenTrabajo & {
+    cliente?: Cliente | null
+    operador?: { id: number; nombre: string } | null
+  },
+) {
   return {
     id: o.id,
     client: o.cliente?.nombre ?? '',
@@ -31,6 +36,12 @@ export function toOrderDto(o: OrdenTrabajo & { cliente?: Cliente | null }) {
     priority: o.prioridad,
     progress: o.progreso,
     sortOrder: o.ordenVisual,
+    // Extras mapeables desde Prisma cuando existen (resto vive en store frontend)
+    technician: o.operador?.nombre ?? undefined,
+    operatorIds: o.operador ? [String(o.operador.id)] : undefined,
+    operators: o.operador
+      ? [{ id: String(o.operador.id), name: o.operador.nombre }]
+      : undefined,
   }
 }
 

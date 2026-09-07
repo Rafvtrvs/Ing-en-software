@@ -8,23 +8,22 @@ import {
   YAxis,
 } from 'recharts'
 import { Card, CardHeader } from '@/components/ui/Card'
-import { ordersByMonth } from '@/data/mock/dashboard'
+import type { WorkOrder } from '@/types'
+import { buildOrdersByMonth } from '../utils/dashboardHelpers'
 
-export function OrdersByMonthChart() {
+interface OrdersByMonthChartProps {
+  orders: WorkOrder[]
+}
+
+export function OrdersByMonthChart({ orders }: OrdersByMonthChartProps) {
+  const data = buildOrdersByMonth(orders)
+
   return (
     <Card>
-      <CardHeader
-        title="Órdenes por Mes"
-        action={
-          <select className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/30">
-            <option>Este año</option>
-            <option>Año anterior</option>
-          </select>
-        }
-      />
+      <CardHeader title="Órdenes por Mes" subtitle="Últimos 6 meses según filtro" />
       <div className="h-52">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={ordersByMonth} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+          <LineChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />

@@ -38,6 +38,8 @@ export function EquipmentPanel() {
   const [selected, setSelected] = useState<Equipment | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const [draftStatus, setDraftStatus] = useState<EquipmentStatus>('Operativo')
+  const [draftLastMaintenance, setDraftLastMaintenance] = useState('')
+  const [draftNextMaintenance, setDraftNextMaintenance] = useState('')
   const [history, setHistory] = useState<
     Array<{
       id: string
@@ -46,13 +48,23 @@ export function EquipmentPanel() {
       from: EquipmentStatus
       to: EquipmentStatus
       date: string
+      note?: string
     }>
   >([])
 
   useEffect(() => {
     if (!editOpen || !selected) return
     setDraftStatus(selected.status)
+    setDraftLastMaintenance(selected.lastMaintenance)
+    setDraftNextMaintenance(selected.nextMaintenance)
   }, [editOpen, selected])
+
+  const maintenanceCalendar = useMemo(() => {
+    return [...items].sort(
+      (a, b) =>
+        new Date(a.nextMaintenance).getTime() - new Date(b.nextMaintenance).getTime(),
+    )
+  }, [items])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
@@ -133,36 +145,62 @@ export function EquipmentPanel() {
 
   const saveEdit = () => {
     if (!selected) return
-    if (draftStatus === selected.status) {
+
+    const statusChanged = draftStatus !== selected.status
+    const lastChanged = draftLastMaintenance !== selected.lastMaintenance
+    const nextChanged = draftNextMaintenance !== selected.nextMaintenance
+
+    if (!statusChanged && !lastChanged && !nextChanged) {
       addToast('No hay cambios para guardar', 'info')
       setEditOpen(false)
       return
     }
 
-    const active = isEquipmentInActiveOrder(selected)
-    if (active.active) {
-      addToast(
-        `No se puede cambiar el estado: el equipo está en una orden activa (${active.orderId}).`,
-        'error',
-      )
-      return
+    if (statusChanged) {
+      const active = isEquipmentInActiveOrder(selected)
+      if (active.active) {
+        addToast(
+          `No se puede cambiar el estado: el equipo está en una orden activa (${active.orderId}).`,
+          'error',
+        )
+        return
+      }
     }
 
     setItems((prev) =>
-      prev.map((eq) => (eq.id === selected.id ? { ...eq, status: draftStatus } : eq)),
+      prev.map((eq) =>
+        eq.id === selected.id
+          ? {
+              ...eq,
+              status: draftStatus,
+              lastMaintenance: draftLastMaintenance,
+              nextMaintenance: draftNextMaintenance,
+            }
+          : eq,
+      ),
     )
-    setHistory((prev) => [
-      {
-        id: `h-${Date.now()}`,
-        equipmentCode: selected.code,
-        equipmentName: selected.name,
-        from: selected.status,
-        to: draftStatus,
-        date: new Date().toISOString(),
-      },
-      ...prev,
-    ].slice(0, 10))
-    addToast(`Estado del equipo "${selected.code}" actualizado`, 'success')
+
+    if (statusChanged) {
+      setHistory((prev) =>
+        [
+          {
+            id: `h-${Date.now()}`,
+            equipmentCode: selected.code,
+            equipmentName: selected.name,
+            from: selected.status,
+            to: draftStatus,
+            date: new Date().toISOString(),
+            note:
+              lastChanged || nextChanged
+                ? 'También se actualizaron fechas de mantención'
+                : undefined,
+          },
+          ...prev,
+        ].slice(0, 10),
+      )
+    }
+
+    addToast(`Equipo "${selected.code}" actualizado`, 'success')
     setEditOpen(false)
   }
 
@@ -296,6 +334,42 @@ export function EquipmentPanel() {
       </Card>
 
       <Card>
+        <CardHeader
+          title="Calendario de mantenimiento"
+          subtitle="Equipos ordenados por próxima mantención programada."
+        />
+        {maintenanceCalendar.length === 0 ? (
+          <p className="text-sm text-slate-500">No hay equipos registrados.</p>
+        ) : (
+          <ul className="space-y-2">
+            {maintenanceCalendar.map((eq) => (
+              <li
+                key={eq.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-100 bg-white px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {eq.code} — {eq.name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Última: {formatShortDate(eq.lastMaintenance)} · Estado: {eq.status}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Próx. mantención
+                  </p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {formatShortDate(eq.nextMaintenance)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card>
         <CardHeader title="Historial de cambios (mock)" subtitle="Últimas modificaciones de estado realizadas." />
         {history.length === 0 ? (
           <p className="text-sm text-slate-500">Aún no hay cambios registrados.</p>
@@ -310,6 +384,7 @@ export function EquipmentPanel() {
                   Estado: <span className="font-semibold">{h.from}</span> →{' '}
                   <span className="font-semibold">{h.to}</span>
                 </p>
+                {h.note && <p className="mt-0.5 text-xs text-slate-500">{h.note}</p>}
               </li>
             ))}
           </ul>
@@ -320,7 +395,7 @@ export function EquipmentPanel() {
         open={editOpen}
         onClose={() => setEditOpen(false)}
         title="Editar equipo"
-        description="Modifica el estado del equipo. No se permitirá si está asociado a una orden activa."
+        description="Modifica estado y fechas de mantención. El estado no se podrá cambiar si el equipo está en una orden activa."
         size="md"
         footer={
           <>
@@ -354,6 +429,24 @@ export function EquipmentPanel() {
                   </option>
                 ))}
               </Select>
+            </FormField>
+
+            <FormField label="Última mantención" htmlFor="equipment-last-maintenance">
+              <Input
+                id="equipment-last-maintenance"
+                type="date"
+                value={draftLastMaintenance}
+                onChange={(e) => setDraftLastMaintenance(e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Próxima mantención" htmlFor="equipment-next-maintenance">
+              <Input
+                id="equipment-next-maintenance"
+                type="date"
+                value={draftNextMaintenance}
+                onChange={(e) => setDraftNextMaintenance(e.target.value)}
+              />
             </FormField>
           </div>
         )}
