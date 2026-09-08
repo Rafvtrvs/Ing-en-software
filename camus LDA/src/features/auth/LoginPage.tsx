@@ -26,8 +26,13 @@ export function LoginPage() {
     try {
       await authService.login(email, password)
       navigate(ROUTES.LOGIN_SUCCESS, { replace: true, state: { from } })
-    } catch {
-      setError('Credenciales inválidas o backend no disponible.')
+    } catch (err) {
+      const code = (err as { code?: string }).code
+      if (code === 'INVALID_CREDENTIALS') {
+        setError('Credenciales inválidas. Revisa el correo y la contraseña.')
+      } else {
+        setError('No fue posible iniciar sesión. Intenta nuevamente.')
+      }
     } finally {
       setLoading(false)
     }
@@ -102,11 +107,18 @@ export function LoginPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-xs text-slate-400">
-          Admin: admin@camus.cl / admin123
-          <br />
-          Operador: operador@camus.cl / operador123
-        </p>
+        <div className="mt-4 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 text-center text-xs text-slate-500">
+          <p className="font-medium text-slate-600">Credenciales de demo</p>
+          <p className="mt-1">
+            <strong>Admin:</strong> admin@camus.cl / admin123
+          </p>
+          <p>
+            <strong>Operador:</strong> operador@camus.cl / operador123
+          </p>
+          <p className="mt-1.5 text-[11px] text-slate-400">
+            Si el backend no está activo, el login usa modo demo automáticamente.
+          </p>
+        </div>
       </div>
     </div>
   )

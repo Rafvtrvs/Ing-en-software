@@ -13,6 +13,7 @@ interface DataTableProps<T> {
   data: T[]
   keyExtractor: (row: T) => string
   className?: string
+  tableClassName?: string
   onRowClick?: (row: T) => void
   selectedKey?: string | null
 }
@@ -22,19 +23,20 @@ export function DataTable<T>({
   data,
   keyExtractor,
   className,
+  tableClassName,
   onRowClick,
   selectedKey,
 }: DataTableProps<T>) {
   return (
     <div className={cn('overflow-x-auto', className)}>
-      <table className="w-full min-w-[500px] text-left text-sm">
+      <table className={cn('w-full text-left text-sm', tableClassName)}>
         <thead>
-          <tr className="border-b border-slate-100">
+          <tr className="border-b border-slate-100 bg-slate-50/80">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={cn(
-                  'pb-3 pr-4 text-xs font-semibold uppercase tracking-wide text-slate-500',
+                  'px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500',
                   col.className,
                 )}
               >
@@ -57,17 +59,17 @@ export function DataTable<T>({
                   isSelected && 'bg-primary/5 ring-1 ring-inset ring-primary/20',
                 )}
               >
-              {columns.map((col) => (
-                <td
-                  key={col.key}
-                  className={cn('py-3.5 pr-4 text-slate-700', col.className)}
-                >
-                  {col.render
-                    ? col.render(row)
-                    : String((row as Record<string, unknown>)[col.key] ?? '')}
-                </td>
-              ))}
-            </tr>
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={cn('px-4 py-3.5 text-slate-700', col.className)}
+                  >
+                    {col.render
+                      ? col.render(row)
+                      : String((row as Record<string, unknown>)[col.key] ?? '')}
+                  </td>
+                ))}
+              </tr>
             )
           })}
         </tbody>

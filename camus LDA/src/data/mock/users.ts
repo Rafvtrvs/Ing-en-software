@@ -72,6 +72,7 @@ export const initialSystemUsers: SystemUser[] = [
     roleId: 'role-admin',
     status: 'Activo',
     lastLogin: '2026-05-25T09:30:00',
+    createdAt: '2024-03-15',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Juan',
   },
   {
@@ -122,6 +123,8 @@ export const initialSystemUsers: SystemUser[] = [
     roleId: 'role-inventario',
     status: 'Inactivo',
     lastLogin: '2026-05-10T14:30:00',
+    createdAt: '2024-08-20',
+    deactivatedAt: '2026-01-15T10:30:00',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Patricia',
   },
 ]

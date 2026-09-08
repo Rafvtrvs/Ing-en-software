@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Eye, Filter, Pencil, Search, Trash2, Upload, X } from 'lucide-react'
+import { Eye, Filter, Pencil, Search, Shield, Trash2, Upload, UserMinus, UserPlus, X } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
@@ -31,6 +31,9 @@ export function UsersTable({ onCreateClick }: UsersTableProps) {
   const openUserViewModal = useUsersStore((s) => s.openUserViewModal)
   const openUserEditModal = useUsersStore((s) => s.openUserEditModal)
   const openUserDeleteModal = useUsersStore((s) => s.openUserDeleteModal)
+  const openUserDeactivateModal = useUsersStore((s) => s.openUserDeactivateModal)
+  const openUserReactivateModal = useUsersStore((s) => s.openUserReactivateModal)
+  const openAssignRoleModal = useUsersStore((s) => s.openAssignRoleModal)
   const addToast = useUsersStore((s) => s.addToast)
 
   const [search, setSearch] = useState('')
@@ -117,6 +120,35 @@ export function UsersTable({ onCreateClick }: UsersTableProps) {
           >
             <Pencil className="h-4 w-4" />
           </button>
+          <button
+            type="button"
+            onClick={() => openAssignRoleModal(row)}
+            disabled={row.status !== 'Activo'}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label={`Asignar rol a ${row.name}`}
+            title="Asignar rol"
+          >
+            <Shield className="h-4 w-4" />
+          </button>
+          {row.status === 'Activo' ? (
+            <button
+              type="button"
+              onClick={() => openUserDeactivateModal(row)}
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-amber-50 hover:text-amber-600"
+              aria-label={`Desactivar ${row.name}`}
+            >
+              <UserMinus className="h-4 w-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => openUserReactivateModal(row)}
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
+              aria-label={`Reactivar ${row.name}`}
+            >
+              <UserPlus className="h-4 w-4" />
+            </button>
+          )}
           <button
             type="button"
             onClick={() => openUserDeleteModal(row)}

@@ -6,6 +6,7 @@ import { findDuplicateClient } from '@/features/clients/utils/clientDuplicates'
 import type { DuplicateField } from '@/features/clients/utils/clientDuplicates'
 import type { Client, ClientStatus } from '@/types'
 import axios from 'axios'
+import { isDemoMode, isOfflineApiError } from '@/utils/demoMode'
 
 export type ClientModalMode = 'create' | 'edit' | 'view' | 'delete' | null
 
@@ -141,11 +142,21 @@ export const useClientsStore = create<ClientsState>()(
           clients: s.clients.map((c) => (c.id === id ? { ...c, ...data } : c)),
         }))
 
+        if (isDemoMode()) {
+          state.addToast('Cliente actualizado correctamente')
+          return { ok: true }
+        }
+
         try {
           await clientsService.update(id, data)
           set({ apiAvailable: true })
+          state.addToast('Cliente actualizado correctamente')
           return { ok: true }
         } catch (err) {
+          if (isOfflineApiError(err)) {
+            state.addToast('Cliente actualizado correctamente (modo demo)')
+            return { ok: true }
+          }
           set((s) => ({
             clients: s.clients.map((c) => (c.id === id ? previous : c)),
           }))

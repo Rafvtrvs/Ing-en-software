@@ -15,6 +15,7 @@ import { CategoriesPanel } from './components/CategoriesPanel'
 import { SuppliersPanel } from './components/SuppliersPanel'
 import { KitsPanel } from './components/KitsPanel'
 import { EquipmentPanel } from './components/EquipmentPanel'
+import { MachineryAvailabilityPanel } from './components/MachineryAvailabilityPanel'
 import { ProductFormModal } from './components/ProductFormModal'
 import { ProductViewModal } from './components/ProductViewModal'
 import { DeleteProductModal } from './components/DeleteProductModal'
@@ -87,7 +88,12 @@ export function InventoryPage() {
           </div>
         )}
 
-        {activeTab === 'equipos' && <EquipmentPanel />}
+        {activeTab === 'equipos' && (
+          <div className="space-y-6">
+            <MachineryAvailabilityPanel />
+            <EquipmentPanel />
+          </div>
+        )}
 
         {activeTab === 'categorias' && <CategoriesPanel />}
         {activeTab === 'proveedores' && <SuppliersPanel />}

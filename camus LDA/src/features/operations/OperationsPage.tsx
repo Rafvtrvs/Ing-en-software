@@ -11,12 +11,19 @@ import { TechniciansList } from './components/TechniciansList'
 import { FieldAlerts } from './components/FieldAlerts'
 import { DaySchedule } from './components/DaySchedule'
 import { FieldOrdersTable } from './components/FieldOrdersTable'
+import { OperatorAvailabilityPanel } from './components/OperatorAvailabilityPanel'
+import { OperatorAssignmentsPanel } from './components/OperatorAssignmentsPanel'
 import { MobileAppCard } from './components/MobileAppCard'
+import { OrderDetailDrawer } from '@/features/orders/components/OrderDetailDrawer'
+import { useOrdersStore } from '@/store/useOrdersStore'
 
 export function OperationsPage() {
   const toasts = useOperationsStore((s) => s.toasts)
   const removeToast = useOperationsStore((s) => s.removeToast)
   const addToast = useOperationsStore((s) => s.addToast)
+  const modalMode = useOrdersStore((s) => s.modalMode)
+  const selectedOrder = useOrdersStore((s) => s.selectedOrder)
+  const closeModal = useOrdersStore((s) => s.closeModal)
   const kpis = getOperationsKpis()
   const today = formatDate(new Date())
 
@@ -61,8 +68,19 @@ export function OperationsPage() {
           </div>
         </div>
 
+        <div className="space-y-6">
+          <OperatorAvailabilityPanel />
+          <OperatorAssignmentsPanel />
+        </div>
+
         <MobileAppCard />
       </div>
+
+      <OrderDetailDrawer
+        order={selectedOrder}
+        open={modalMode === 'view'}
+        onClose={closeModal}
+      />
 
       <ToastContainerView toasts={toasts} onRemove={removeToast} />
     </>

@@ -17,6 +17,12 @@ import { OperatorWorkloadPanel } from '@/features/orders/components/OperatorWork
 import { IncidentsPanel } from '@/features/orders/components/IncidentsPanel'
 import { ThirdPartyMonthlyStats } from '@/features/orders/components/ThirdPartyPanel'
 import { MyAssignedOrdersModal } from '@/features/orders/components/MyAssignedOrdersModal'
+import { CancelOrderModal } from '@/features/orders/components/CancelOrderModal'
+import { AnnulOrderModal } from '@/features/orders/components/AnnulOrderModal'
+import { CompletedOrdersApprovalPanel } from '@/features/orders/components/CompletedOrdersApprovalPanel'
+import { RescheduleOrderModal } from '@/features/orders/components/RescheduleOrderModal'
+import { OrderModificationRequestModal } from '@/features/orders/components/OrderModificationRequestModal'
+import { ModificationRequestsPanel } from '@/features/orders/components/ModificationRequestsPanel'
 import { useSessionUser } from '@/features/auth/useSessionUser'
 import { isFieldOperator } from '@/features/auth/roleAccess'
 import {
@@ -110,6 +116,16 @@ export function OrdersPage() {
           open={modalMode === 'view'}
           onClose={closeModal}
         />
+        <RescheduleOrderModal
+          order={selectedOrder}
+          open={modalMode === 'reschedule'}
+          onClose={closeModal}
+        />
+        <OrderModificationRequestModal
+          order={selectedOrder}
+          open={modalMode === 'modRequest'}
+          onClose={closeModal}
+        />
         <DeleteOrderModal
           order={selectedOrder}
           open={modalMode === 'delete'}
@@ -160,6 +176,8 @@ export function OrdersPage() {
         </div>
 
         <OrdersBoard />
+        <CompletedOrdersApprovalPanel />
+        <ModificationRequestsPanel />
         <OrdersTable />
         <IncidentsPanel />
       </div>
@@ -168,7 +186,19 @@ export function OrdersPage() {
       <OrderFormModal mode="edit" order={selectedOrder} open={modalMode === 'edit'} onClose={closeModal} />
       <OrderDetailDrawer order={selectedOrder} open={modalMode === 'view'} onClose={closeModal} />
       <DeleteOrderModal order={selectedOrder} open={modalMode === 'delete'} onClose={closeModal} />
-      <ToastContainerView toasts={toasts} onRemove={removeToast} />
+        <CancelOrderModal order={selectedOrder} open={modalMode === 'cancel'} onClose={closeModal} />
+        <AnnulOrderModal order={selectedOrder} open={modalMode === 'annul'} onClose={closeModal} />
+        <RescheduleOrderModal
+          order={selectedOrder}
+          open={modalMode === 'reschedule'}
+          onClose={closeModal}
+        />
+        <OrderModificationRequestModal
+          order={selectedOrder}
+          open={modalMode === 'modRequest'}
+          onClose={closeModal}
+        />
+        <ToastContainerView toasts={toasts} onRemove={removeToast} />
     </>
   )
 }

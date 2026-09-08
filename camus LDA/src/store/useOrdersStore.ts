@@ -2,14 +2,26 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { arrayMove } from '@dnd-kit/sortable'
 import type {
+  OrderApprovalRecord,
+  OrderComment,
   OrderIntervention,
+  OrderModificationHistoryEntry,
+  OrderModificationRequest,
   OrderOperator,
   OrderPriority,
+  OrderRescheduleEvent,
   OrderStatus,
+  OrderSupplyUsage,
   ThirdPartyIntervention,
   WorkOrder,
 } from '@/types'
 import { initialOrders } from '@/data/mock/orders'
+import { initialOrderComments } from '@/data/mock/orderComments'
+import { initialRescheduleHistory } from '@/data/mock/orderReschedules'
+import {
+  initialModificationHistory,
+  initialModificationRequests,
+} from '@/data/mock/orderModifications'
 import { ordersService } from '@/services/ordersService'
 import {
   applySortOrderToColumn,
@@ -18,13 +30,27 @@ import {
   ORDER_STATUSES,
 } from '@/features/orders/utils/orderSort'
 import { useNotificationsStore } from '@/store/useNotificationsStore'
+import { useInventoryStore } from '@/store/useInventoryStore'
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
 import { calcDurationHours } from '@/features/orders/utils/orderDates'
+import {
+  getExecutionDate,
+  validateRescheduleDate,
+} from '@/features/orders/utils/rescheduleValidation'
 import {
   resolveOrderPriority,
 } from '@/features/orders/utils/priorityRules'
 
-export type OrderModalMode = 'create' | 'edit' | 'view' | 'delete' | null
+export type OrderModalMode =
+  | 'create'
+  | 'edit'
+  | 'view'
+  | 'delete'
+  | 'cancel'
+  | 'annul'
+  | 'reschedule'
+  | 'modRequest'
+  | null
 
 export interface ToastMessage {
   id: number
@@ -46,6 +72,14 @@ interface OrdersState {
   apiAvailable: boolean
   /** Intervenciones locales por OT (fallback / caché CU-149–151) */
   interventionsByOrderId: Record<string, OrderIntervention[]>
+  /** RF65 — comentarios por OT */
+  commentsByOrderId: Record<string, OrderComment[]>
+  /** RF66 CDS 229 — reprogramaciones por OT */
+  rescheduleHistoryByOrderId: Record<string, OrderRescheduleEvent[]>
+  /** RF68 — solicitudes de modificación */
+  modificationRequests: OrderModificationRequest[]
+  /** RF68 CDS 235 — historial modificaciones por OT */
+  modificationHistoryByOrderId: Record<string, OrderModificationHistoryEntry[]>
   modalMode: OrderModalMode
   selectedOrder: WorkOrder | null
   statusFilter: OrderStatus | 'all'
@@ -102,6 +136,55 @@ interface OrdersState {
   openEditModal: (order: WorkOrder) => void
   openViewModal: (order: WorkOrder) => void
   openDeleteModal: (order: WorkOrder) => void
+  openCancelModal: (order: WorkOrder) => void
+  openAnnulModal: (order: WorkOrder) => void
+  cancelOrder: (orderId: string, reason: string) => void
+  annulOrder: (orderId: string, reason: string) => void
+  registerSupplies: (
+    orderId: string,
+    supplies: Omit<OrderSupplyUsage, 'registeredAt'>[],
+  ) => { ok: boolean; message?: string }
+  approveOrder: (
+    orderId: string,
+    approval: Omit<OrderApprovalRecord, 'approvedAt'> & { approvedAt?: string },
+  ) => { ok: boolean; message?: string }
+  addOrderComment: (
+    orderId: string,
+    content: string,
+    author: { id: string; name: string },
+  ) => { ok: boolean; message?: string }
+  getOrderComments: (orderId: string) => OrderComment[]
+  openRescheduleModal: (order: WorkOrder) => void
+  openModificationRequestModal: (order: WorkOrder) => void
+  rescheduleOrder: (
+    orderId: string,
+    newDate: string,
+    user: { id: string; name: string },
+  ) => { ok: boolean; message?: string }
+  validateReschedule: (orderId: string, newDate: string) => {
+    available: boolean
+    reasons: string[]
+  }
+  getRescheduleHistory: (orderId: string) => OrderRescheduleEvent[]
+  submitModificationRequest: (
+    orderId: string,
+    data: { fieldsToModify: string; reason: string },
+    operator: { id: string; name: string },
+  ) => { ok: boolean; message?: string }
+  approveModificationRequest: (
+    requestId: string,
+    reviewer: { id: string; name: string },
+  ) => { ok: boolean; message?: string }
+  rejectModificationRequest: (
+    requestId: string,
+    reason: string,
+    reviewer: { id: string; name: string },
+  ) => { ok: boolean; message?: string }
+  getModificationHistory: (orderId: string) => OrderModificationHistoryEntry[]
+  addModificationHistory: (
+    orderId: string,
+    entry: Omit<OrderModificationHistoryEntry, 'id' | 'orderId' | 'changedAt'>,
+  ) => void
   closeModal: () => void
   setStatusFilter: (status: OrderStatus | 'all') => void
   setUrgencyFilter: (filter: 'all' | 'urgent') => void
@@ -125,6 +208,41 @@ function thirdPartyId() {
     return `tp-${crypto.randomUUID().split('-')[0]}`
   }
   return `tp-${Date.now()}`
+}
+
+function eventId(prefix: string) {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return `${prefix}-${crypto.randomUUID().split('-')[0]}`
+  }
+  return `${prefix}-${Date.now()}`
+}
+
+function groupCommentsByOrder(comments: OrderComment[]): Record<string, OrderComment[]> {
+  return comments.reduce<Record<string, OrderComment[]>>((acc, c) => {
+    if (!acc[c.orderId]) acc[c.orderId] = []
+    acc[c.orderId].push(c)
+    return acc
+  }, {})
+}
+
+function groupRescheduleByOrder(
+  events: OrderRescheduleEvent[],
+): Record<string, OrderRescheduleEvent[]> {
+  return events.reduce<Record<string, OrderRescheduleEvent[]>>((acc, e) => {
+    if (!acc[e.orderId]) acc[e.orderId] = []
+    acc[e.orderId].push(e)
+    return acc
+  }, {})
+}
+
+function groupModificationHistoryByOrder(
+  entries: OrderModificationHistoryEntry[],
+): Record<string, OrderModificationHistoryEntry[]> {
+  return entries.reduce<Record<string, OrderModificationHistoryEntry[]>>((acc, e) => {
+    if (!acc[e.orderId]) acc[e.orderId] = []
+    acc[e.orderId].push(e)
+    return acc
+  }, {})
 }
 
 const seededOrders = normalizeOrdersSort(
@@ -166,6 +284,11 @@ function mergeApiOrders(
       equipmentId: local.equipmentId ?? api.equipmentId,
       pdfGeneratedAt: local.pdfGeneratedAt ?? api.pdfGeneratedAt,
       queueOrder: local.queueOrder ?? api.queueOrder,
+      executionDate: local.executionDate ?? api.executionDate,
+      suppliesUsed: local.suppliesUsed ?? api.suppliesUsed,
+      approval: local.approval ?? api.approval,
+      cancelReason: local.cancelReason ?? api.cancelReason,
+      annulReason: local.annulReason ?? api.annulReason,
       priority: local.priorityManual
         ? local.priority
         : (api.priority ?? local.priority),
@@ -191,6 +314,12 @@ export const useOrdersStore = create<OrdersState>()(
       orders: seededOrders,
       apiAvailable: false,
       interventionsByOrderId: {},
+      commentsByOrderId: groupCommentsByOrder(initialOrderComments),
+      rescheduleHistoryByOrderId: groupRescheduleByOrder(initialRescheduleHistory),
+      modificationRequests: initialModificationRequests,
+      modificationHistoryByOrderId: groupModificationHistoryByOrder(
+        initialModificationHistory,
+      ),
       modalMode: null,
       selectedOrder: null,
       statusFilter: 'all',
@@ -285,6 +414,18 @@ export const useOrdersStore = create<OrdersState>()(
                 client: merged.client,
                 changes,
               })
+              const userId = 'session'
+              const userName = 'Sistema'
+              for (const change of changes) {
+                get().addModificationHistory(existing.id, {
+                  field: change.field,
+                  fieldLabel: change.label,
+                  previousValue: change.from,
+                  newValue: change.to,
+                  changedById: userId,
+                  changedByName: userName,
+                })
+              }
             }
           } else if (data.status && data.status !== existing.status) {
             useNotificationsStore.getState().pushOrderStatusChange({
@@ -706,6 +847,307 @@ export const useOrdersStore = create<OrdersState>()(
       openViewModal: (order) => set({ modalMode: 'view', selectedOrder: order }),
       openDeleteModal: (order) =>
         set({ modalMode: 'delete', selectedOrder: order }),
+      openCancelModal: (order) =>
+        set({ modalMode: 'cancel', selectedOrder: order }),
+      openAnnulModal: (order) =>
+        set({ modalMode: 'annul', selectedOrder: order }),
+      openRescheduleModal: (order) =>
+        set({ modalMode: 'reschedule', selectedOrder: order }),
+      openModificationRequestModal: (order) =>
+        set({ modalMode: 'modRequest', selectedOrder: order }),
+
+      cancelOrder: (orderId, reason) => {
+        const trimmed = reason.trim()
+        if (!trimmed) return
+        get().updateOrder(orderId, {
+          status: 'Cancelada',
+          cancelReason: trimmed,
+          progress: 0,
+        })
+        get().addToast('Orden cancelada con éxito')
+        set({ modalMode: null, selectedOrder: null })
+      },
+
+      annulOrder: (orderId, reason) => {
+        const trimmed = reason.trim()
+        if (!trimmed) return
+        get().updateOrder(orderId, {
+          status: 'Cancelada',
+          annulled: true,
+          annulReason: trimmed,
+          progress: 0,
+        })
+        get().addToast('Orden anulada con éxito')
+        set({ modalMode: null, selectedOrder: null })
+      },
+
+      registerSupplies: (orderId, supplies) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) {
+          return { ok: false, message: 'Orden de trabajo no encontrada' }
+        }
+        if (supplies.length === 0) {
+          return { ok: false, message: 'Debe ingresar al menos un insumo' }
+        }
+
+        const inventory = useInventoryStore.getState()
+
+        for (const item of supplies) {
+          const product = inventory.products.find((p) => p.id === item.productId)
+          if (!product) {
+            return { ok: false, message: `Insumo "${item.productName}" no encontrado` }
+          }
+          if (item.quantity <= 0) {
+            return { ok: false, message: 'La cantidad debe ser mayor a cero' }
+          }
+          if (product.currentStock < item.quantity) {
+            return {
+              ok: false,
+              message: `Stock insuficiente para "${product.name}": disponible ${product.currentStock}, solicitado ${item.quantity}`,
+            }
+          }
+        }
+
+        const now = new Date().toLocaleString('es-CL')
+        const entries: OrderSupplyUsage[] = supplies.map((s) => ({
+          ...s,
+          registeredAt: now,
+        }))
+
+        for (const item of supplies) {
+          inventory.deductStock(item.productId, item.quantity, orderId)
+        }
+
+        const existing = order.suppliesUsed ?? []
+        get().updateOrder(orderId, { suppliesUsed: [...entries, ...existing] })
+        get().addToast('Insumos registrados correctamente en la orden de trabajo')
+        return { ok: true }
+      },
+
+      approveOrder: (orderId, approval) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) {
+          return { ok: false, message: 'Orden de trabajo no encontrada' }
+        }
+        if (order.status !== 'Completada') {
+          return {
+            ok: false,
+            message: 'Solo se pueden aprobar órdenes con estado Completada',
+          }
+        }
+        if (order.approval) {
+          return { ok: false, message: 'Esta orden ya fue aprobada' }
+        }
+
+        const checks = [
+          Boolean(order.client),
+          Boolean(order.address),
+          Boolean(order.startDate || order.createdAt),
+          Boolean(order.operators?.length || order.technician),
+          Boolean(order.service || order.category),
+        ]
+        if (!checks.every(Boolean)) {
+          return {
+            ok: false,
+            message: 'La orden no cumple con todos los antecedentes requeridos',
+          }
+        }
+
+        const record: OrderApprovalRecord = {
+          approvedAt: approval.approvedAt ?? new Date().toISOString(),
+          approvedBy: approval.approvedBy,
+          approvedByName: approval.approvedByName,
+        }
+        get().updateOrder(orderId, { approval: record })
+        get().addToast('Orden de trabajo aprobada correctamente')
+        return { ok: true }
+      },
+
+      addOrderComment: (orderId, content, author) => {
+        const trimmed = content.trim()
+        if (!trimmed) {
+          return { ok: false, message: 'El comentario no puede estar vacío' }
+        }
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) {
+          return { ok: false, message: 'Orden de trabajo no encontrada' }
+        }
+        const comment: OrderComment = {
+          id: eventId('cmt'),
+          orderId,
+          content: trimmed,
+          authorId: author.id,
+          authorName: author.name,
+          createdAt: new Date().toISOString(),
+        }
+        set((state) => ({
+          commentsByOrderId: {
+            ...state.commentsByOrderId,
+            [orderId]: [comment, ...(state.commentsByOrderId[orderId] ?? [])],
+          },
+        }))
+        return { ok: true }
+      },
+
+      getOrderComments: (orderId) => {
+        const list = get().commentsByOrderId[orderId] ?? []
+        return [...list].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+      },
+
+      validateReschedule: (orderId, newDate) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) return { available: false, reasons: ['Orden no encontrada'] }
+        const products = useInventoryStore.getState().products
+        return validateRescheduleDate(order, newDate, get().orders, products)
+      },
+
+      rescheduleOrder: (orderId, newDate, user) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) return { ok: false, message: 'Orden de trabajo no encontrada' }
+        const validation = get().validateReschedule(orderId, newDate)
+        if (!validation.available) {
+          return {
+            ok: false,
+            message: validation.reasons[0] ?? 'Fecha no disponible',
+          }
+        }
+        const previousDate = getExecutionDate(order) || order.createdAt
+        const event: OrderRescheduleEvent = {
+          id: eventId('rs'),
+          orderId,
+          previousDate,
+          newDate,
+          changedById: user.id,
+          changedByName: user.name,
+          changedAt: new Date().toISOString(),
+        }
+        get().updateOrder(orderId, {
+          executionDate: newDate,
+          startDate: newDate,
+        })
+        set((state) => ({
+          rescheduleHistoryByOrderId: {
+            ...state.rescheduleHistoryByOrderId,
+            [orderId]: [
+              event,
+              ...(state.rescheduleHistoryByOrderId[orderId] ?? []),
+            ],
+          },
+          modalMode: null,
+          selectedOrder: null,
+        }))
+        get().addToast('Fecha de ejecución reprogramada correctamente')
+        return { ok: true }
+      },
+
+      getRescheduleHistory: (orderId) => {
+        const list = get().rescheduleHistoryByOrderId[orderId] ?? []
+        return [...list].sort(
+          (a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime(),
+        )
+      },
+
+      submitModificationRequest: (orderId, data, operator) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) return { ok: false, message: 'Orden no encontrada' }
+        if (!data.fieldsToModify.trim() || !data.reason.trim()) {
+          return { ok: false, message: 'Complete campos y motivo de la solicitud' }
+        }
+        const request: OrderModificationRequest = {
+          id: eventId('mr'),
+          orderId,
+          operatorId: operator.id,
+          operatorName: operator.name,
+          fieldsToModify: data.fieldsToModify.trim(),
+          reason: data.reason.trim(),
+          status: 'Pendiente',
+          requestedAt: new Date().toISOString(),
+        }
+        set((state) => ({
+          modificationRequests: [request, ...state.modificationRequests],
+          modalMode: null,
+          selectedOrder: null,
+        }))
+        get().addToast('Solicitud de modificación enviada — pendiente de aprobación')
+        return { ok: true }
+      },
+
+      approveModificationRequest: (requestId, reviewer) => {
+        const request = get().modificationRequests.find((r) => r.id === requestId)
+        if (!request) return { ok: false, message: 'Solicitud no encontrada' }
+        if (request.status !== 'Pendiente') {
+          return { ok: false, message: 'La solicitud ya fue revisada' }
+        }
+        set((state) => ({
+          modificationRequests: state.modificationRequests.map((r) =>
+            r.id === requestId
+              ? {
+                  ...r,
+                  status: 'Aprobada' as const,
+                  reviewedById: reviewer.id,
+                  reviewedByName: reviewer.name,
+                  reviewedAt: new Date().toISOString(),
+                }
+              : r,
+          ),
+        }))
+        get().addToast('Solicitud aprobada — el operador puede editar la orden')
+        return { ok: true }
+      },
+
+      rejectModificationRequest: (requestId, reason, reviewer) => {
+        const trimmed = reason.trim()
+        if (!trimmed) return { ok: false, message: 'Indique el motivo del rechazo' }
+        const request = get().modificationRequests.find((r) => r.id === requestId)
+        if (!request) return { ok: false, message: 'Solicitud no encontrada' }
+        if (request.status !== 'Pendiente') {
+          return { ok: false, message: 'La solicitud ya fue revisada' }
+        }
+        set((state) => ({
+          modificationRequests: state.modificationRequests.map((r) =>
+            r.id === requestId
+              ? {
+                  ...r,
+                  status: 'Rechazada' as const,
+                  rejectionReason: trimmed,
+                  reviewedById: reviewer.id,
+                  reviewedByName: reviewer.name,
+                  reviewedAt: new Date().toISOString(),
+                }
+              : r,
+          ),
+        }))
+        get().addToast('Solicitud rechazada', 'info')
+        return { ok: true }
+      },
+
+      getModificationHistory: (orderId) => {
+        const list = get().modificationHistoryByOrderId[orderId] ?? []
+        return [...list].sort(
+          (a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime(),
+        )
+      },
+
+      addModificationHistory: (orderId, entry) => {
+        const record: OrderModificationHistoryEntry = {
+          ...entry,
+          id: eventId('mh'),
+          orderId,
+          changedAt: new Date().toISOString(),
+        }
+        set((state) => ({
+          modificationHistoryByOrderId: {
+            ...state.modificationHistoryByOrderId,
+            [orderId]: [
+              record,
+              ...(state.modificationHistoryByOrderId[orderId] ?? []),
+            ],
+          },
+        }))
+      },
+
       closeModal: () => set({ modalMode: null, selectedOrder: null }),
 
       setStatusFilter: (status) => set({ statusFilter: status }),
@@ -728,16 +1170,41 @@ export const useOrdersStore = create<OrdersState>()(
       partialize: (state) => ({
         orders: state.orders,
         interventionsByOrderId: state.interventionsByOrderId,
+        commentsByOrderId: state.commentsByOrderId,
+        rescheduleHistoryByOrderId: state.rescheduleHistoryByOrderId,
+        modificationRequests: state.modificationRequests,
+        modificationHistoryByOrderId: state.modificationHistoryByOrderId,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<OrdersState> | undefined
         const orders = normalizeOrdersSort(p?.orders ?? current.orders)
+        const comments =
+          p?.commentsByOrderId && Object.keys(p.commentsByOrderId).length > 0
+            ? p.commentsByOrderId
+            : groupCommentsByOrder(initialOrderComments)
+        const reschedules =
+          p?.rescheduleHistoryByOrderId &&
+          Object.keys(p.rescheduleHistoryByOrderId).length > 0
+            ? p.rescheduleHistoryByOrderId
+            : groupRescheduleByOrder(initialRescheduleHistory)
+        const modHistory =
+          p?.modificationHistoryByOrderId &&
+          Object.keys(p.modificationHistoryByOrderId).length > 0
+            ? p.modificationHistoryByOrderId
+            : groupModificationHistoryByOrder(initialModificationHistory)
         return {
           ...current,
           ...p,
           orders,
           interventionsByOrderId:
             p?.interventionsByOrderId ?? current.interventionsByOrderId,
+          commentsByOrderId: comments,
+          rescheduleHistoryByOrderId: reschedules,
+          modificationRequests:
+            p?.modificationRequests?.length
+              ? p.modificationRequests
+              : initialModificationRequests,
+          modificationHistoryByOrderId: modHistory,
         }
       },
     },

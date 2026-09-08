@@ -96,6 +96,89 @@ export interface WorkOrder {
   thirdParties?: ThirdPartyIntervention[]
   /** Timestamp última generación PDF resumen — CU-173 */
   pdfGeneratedAt?: string
+  /** RF61 CDS 211 — motivo de cancelación */
+  cancelReason?: string
+  /** RF61 CDS 212 — motivo de anulación (orden duplicada) */
+  annulReason?: string
+  /** RF61 CDS 212 — marca orden anulada por error */
+  annulled?: boolean
+  /** RF62 CDS 213 — insumos utilizados en la OT */
+  suppliesUsed?: OrderSupplyUsage[]
+  /** RF63 CDS 216/218 — registro de aprobación formal */
+  approval?: OrderApprovalRecord
+  /** RF66 — fecha de ejecución programada (reprogramación) */
+  executionDate?: string
+}
+
+/** RF65 CDS 224/226 — comentario en OT con trazabilidad automática */
+export interface OrderComment {
+  id: string
+  orderId: string
+  content: string
+  authorId: string
+  authorName: string
+  createdAt: string
+}
+
+/** RF66 CDS 229 — historial de reprogramación */
+export interface OrderRescheduleEvent {
+  id: string
+  orderId: string
+  previousDate: string
+  newDate: string
+  changedById: string
+  changedByName: string
+  changedAt: string
+}
+
+/** RF68 — solicitud de modificación de OT */
+export type ModificationRequestStatus = 'Pendiente' | 'Aprobada' | 'Rechazada'
+
+export interface OrderModificationRequest {
+  id: string
+  orderId: string
+  operatorId: string
+  operatorName: string
+  fieldsToModify: string
+  reason: string
+  status: ModificationRequestStatus
+  requestedAt: string
+  reviewedById?: string
+  reviewedByName?: string
+  reviewedAt?: string
+  rejectionReason?: string
+}
+
+/** RF68 CDS 235 — historial de modificaciones de OT */
+export interface OrderModificationHistoryEntry {
+  id: string
+  orderId: string
+  field: string
+  fieldLabel: string
+  previousValue: string
+  newValue: string
+  changedById: string
+  changedByName: string
+  changedAt: string
+}
+
+/** RF67 CDS 232 — estado determinado de maquinaria */
+export type MachineryAvailabilityStatus = 'Disponible' | 'En uso' | 'No disponible'
+
+/** RF62 — insumo registrado en una OT */
+export interface OrderSupplyUsage {
+  productId: string
+  productCode: string
+  productName: string
+  quantity: number
+  registeredAt: string
+}
+
+/** RF63 CDS 218 — aprobación formal de OT finalizada */
+export interface OrderApprovalRecord {
+  approvedAt: string
+  approvedBy: string
+  approvedByName: string
 }
 
 /** Intervención registrada en una OT (RF-44 / CU-149–151) */
@@ -277,7 +360,7 @@ export interface AppNotification {
 
 export type SystemUserStatus = 'Activo' | 'Inactivo' | 'Bloqueado'
 
-export type UsersTab = 'usuarios' | 'roles'
+export type UsersTab = 'usuarios' | 'roles' | 'historial' | 'asignaciones'
 
 export type PermissionKey =
   | 'dashboard.view'
@@ -313,6 +396,40 @@ export interface SystemUser {
   status: SystemUserStatus
   lastLogin: string
   avatar?: string
+  /** RF64 — fecha de creación del usuario */
+  createdAt?: string
+  /** RF64 CDS 221/222 — fecha de desactivación */
+  deactivatedAt?: string
+}
+
+/** RF64 CDS 223 — historial de desactivación/eliminación */
+export type UserLifecycleAction = 'eliminado' | 'desactivado' | 'reactivado'
+
+export interface UserLifecycleEvent {
+  id: string
+  userId: string
+  userName: string
+  userEmail: string
+  action: UserLifecycleAction
+  performedBy: string
+  performedByName: string
+  performedAt: string
+  reason?: string
+}
+
+/** RF65 CDS 226 — trazabilidad de asignación de roles */
+export interface RoleAssignmentEvent {
+  id: string
+  userId: string
+  userName: string
+  userEmail: string
+  previousRoleId: string | null
+  previousRoleName: string | null
+  newRoleId: string
+  newRoleName: string
+  performedBy: string
+  performedByName: string
+  performedAt: string
 }
 
 export type ClientStatus = 'Activo' | 'Inactivo' | 'Pendiente' | 'Bloqueado'

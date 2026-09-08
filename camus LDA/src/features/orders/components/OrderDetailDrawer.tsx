@@ -1,5 +1,8 @@
 import {
   Calendar,
+  Ban,
+  CalendarClock,
+  FileEdit,
   MapPin,
   Pencil,
   Play,
@@ -8,6 +11,7 @@ import {
   Truck,
   User,
   Wrench,
+  FileX2,
 } from 'lucide-react'
 import { Drawer } from '@/components/ui/Drawer'
 import { Badge } from '@/components/ui/Badge'
@@ -15,6 +19,7 @@ import { Button } from '@/components/ui/Button'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
+import { isFieldOperator } from '@/features/auth/roleAccess'
 import { InterventionRegisterPanel } from '@/features/orders/components/InterventionRegisterPanel'
 import { InterventionHistoryPanel } from '@/features/orders/components/InterventionHistoryPanel'
 import { OrderAssignmentPanel } from '@/features/orders/components/OrderAssignmentPanel'
@@ -22,8 +27,16 @@ import { OrderDatesPanel } from '@/features/orders/components/OrderDatesPanel'
 import { OrderPhotosPanel } from '@/features/orders/components/OrderPhotosPanel'
 import { OrderPdfPanel } from '@/features/orders/components/OrderPdfPanel'
 import { ThirdPartyPanel } from '@/features/orders/components/ThirdPartyPanel'
+import { OrderSuppliesPanel } from '@/features/orders/components/OrderSuppliesPanel'
+import { OrderApprovalPanel } from '@/features/orders/components/OrderApprovalPanel'
+import { OrderCommentsPanel } from '@/features/orders/components/OrderCommentsPanel'
+import {
+  OrderRescheduleHistoryPanel,
+} from '@/features/orders/components/RescheduleOrderModal'
+import { OrderModificationHistoryPanel } from '@/features/orders/components/OrderModificationHistoryPanel'
 import {
   canEditOrder,
+  isAssignedToOrder,
   orderEditBlockedMessage,
 } from '@/features/orders/utils/canEditOrder'
 import { formatDisplayDate } from '@/features/orders/utils/orderDates'
@@ -106,6 +119,10 @@ export function OrderDetailDrawer({
 }) {
   const openEditModal = useOrdersStore((s) => s.openEditModal)
   const openDeleteModal = useOrdersStore((s) => s.openDeleteModal)
+  const openCancelModal = useOrdersStore((s) => s.openCancelModal)
+  const openAnnulModal = useOrdersStore((s) => s.openAnnulModal)
+  const openRescheduleModal = useOrdersStore((s) => s.openRescheduleModal)
+  const openModificationRequestModal = useOrdersStore((s) => s.openModificationRequestModal)
   const updateOrder = useOrdersStore((s) => s.updateOrder)
   const addToast = useOrdersStore((s) => s.addToast)
   const products = useInventoryStore((s) => s.products)
@@ -118,6 +135,12 @@ export function OrderDetailDrawer({
     ? products.find((p) => p.code === order.truckCode) ?? null
     : null
   const editable = order ? canEditOrder(currentUser, order) : false
+  const canApprove = !isFieldOperator(currentUser)
+  const canManageLifecycle =
+    canApprove && order && order.status !== 'Cancelada'
+  const isAssignedOperator = order ? isAssignedToOrder(currentUser, order) : false
+  const canReschedule =
+    canApprove && order && (order.status === 'Pendiente' || order.status === 'En Curso')
 
   const guardEdit = (action: () => void) => {
     if (!order) return
@@ -163,6 +186,60 @@ export function OrderDetailDrawer({
             >
               Eliminar
             </Button>
+            {canManageLifecycle && (
+              <>
+                <Button
+                  variant="outline"
+                  className="border-amber-200 text-amber-700 hover:bg-amber-50"
+                  leftIcon={<Ban className="h-4 w-4" />}
+                  onClick={() => {
+                    if (!order) return
+                    onClose()
+                    openCancelModal(order)
+                  }}
+                >
+                  Cancelar Orden
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-red-200 text-red-600 hover:bg-red-50"
+                  leftIcon={<FileX2 className="h-4 w-4" />}
+                  onClick={() => {
+                    if (!order) return
+                    onClose()
+                    openAnnulModal(order)
+                  }}
+                >
+                  Anular Orden
+                </Button>
+              </>
+            )}
+            {canReschedule && (
+              <Button
+                variant="outline"
+                leftIcon={<CalendarClock className="h-4 w-4" />}
+                onClick={() => {
+                  if (!order) return
+                  onClose()
+                  openRescheduleModal(order)
+                }}
+              >
+                Reprogramar fecha
+              </Button>
+            )}
+            {isAssignedOperator && isFieldOperator(currentUser) && (
+              <Button
+                variant="outline"
+                leftIcon={<FileEdit className="h-4 w-4" />}
+                onClick={() => {
+                  if (!order) return
+                  onClose()
+                  openModificationRequestModal(order)
+                }}
+              >
+                Solicitar modificación
+              </Button>
+            )}
             {next && (
               <Button
                 leftIcon={<Play className="h-4 w-4" />}
@@ -201,7 +278,7 @@ export function OrderDetailDrawer({
         )
       }
     >
-      {!order ? (
+      {!open ? null : !order ? (
         <p className="text-sm text-slate-500">Selecciona una orden para ver su detalle.</p>
       ) : (
         <div className="space-y-4">
@@ -286,6 +363,30 @@ export function OrderDetailDrawer({
             />
           </div>
 
+          {(order.cancelReason || order.annulReason) && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              {order.cancelReason && (
+                <p>
+                  <strong>Motivo cancelación:</strong> {order.cancelReason}
+                </p>
+              )}
+              {order.annulReason && (
+                <p className={order.cancelReason ? 'mt-1' : ''}>
+                  <strong>Motivo anulación:</strong> {order.annulReason}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* RF65 — comentarios */}
+          <OrderCommentsPanel order={order} />
+
+          {/* RF62 — insumos */}
+          <OrderSuppliesPanel order={order} canEdit={editable || canApprove} />
+
+          {/* RF63 — aprobación */}
+          <OrderApprovalPanel order={order} canApprove={canApprove} />
+
           {/* CU-160–164 */}
           <OrderAssignmentPanel order={order} canEdit={editable} />
 
@@ -306,6 +407,12 @@ export function OrderDetailDrawer({
 
           {/* CU-173–176 */}
           <OrderPdfPanel order={order} />
+
+          {/* RF66 CDS 229 */}
+          <OrderRescheduleHistoryPanel orderId={order.id} />
+
+          {/* RF68 CDS 235 */}
+          <OrderModificationHistoryPanel orderId={order.id} />
 
           <ProgressBar value={order.progress ?? 0} />
           <MapCard address={order.address} />

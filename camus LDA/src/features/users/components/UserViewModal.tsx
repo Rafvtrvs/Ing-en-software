@@ -17,6 +17,7 @@ interface UserViewModalProps {
 export function UserViewModal({ user, open, onClose }: UserViewModalProps) {
   const roles = useUsersStore((s) => s.roles)
   const openUserEditModal = useUsersStore((s) => s.openUserEditModal)
+  const openAssignRoleModal = useUsersStore((s) => s.openAssignRoleModal)
 
   if (!user) return null
 
@@ -25,6 +26,11 @@ export function UserViewModal({ user, open, onClose }: UserViewModalProps) {
   const handleEdit = () => {
     onClose()
     openUserEditModal(user)
+  }
+
+  const handleAssignRole = () => {
+    onClose()
+    openAssignRoleModal(user)
   }
 
   return (
@@ -39,6 +45,15 @@ export function UserViewModal({ user, open, onClose }: UserViewModalProps) {
           <Button variant="outline" onClick={onClose}>
             Cerrar
           </Button>
+          {user.status === 'Activo' && (
+            <Button
+              variant="outline"
+              leftIcon={<Shield className="h-4 w-4" />}
+              onClick={handleAssignRole}
+            >
+              Asignar Rol
+            </Button>
+          )}
           <Button leftIcon={<Pencil className="h-4 w-4" />} onClick={handleEdit}>
             Editar Usuario
           </Button>
