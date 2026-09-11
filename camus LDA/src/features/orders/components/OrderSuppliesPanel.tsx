@@ -155,7 +155,7 @@ export function OrderSuppliesPanel({
     canEdit && validation.status === 'success' && activeLines.length > 0
 
   return (
-    <Card className="overflow-hidden p-0">
+    <Card id="insumos-ot" className="scroll-mt-4 overflow-hidden p-0">
       <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex gap-3">

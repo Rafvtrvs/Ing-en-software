@@ -46,7 +46,10 @@ export function OrderCommentsPanel({ order }: { order: WorkOrder }) {
   }
 
   return (
-    <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+    <div
+      id="comentarios-ot"
+      className="scroll-mt-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm"
+    >
       <div className="mb-3 flex items-center gap-2">
         <MessageSquare className="h-4 w-4 text-slate-400" />
         <div>

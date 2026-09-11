@@ -156,6 +156,7 @@ export function OrderDetailDrawer({
       open={open}
       onClose={onClose}
       title="Detalle de Orden"
+      widthClassName="w-full max-w-2xl"
       footer={
         !isReady ? null : (
           <div className="flex flex-wrap gap-2">
@@ -361,6 +362,20 @@ export function OrderDetailDrawer({
                   : (order.technician ?? 'Sin asignar')
               }
             />
+          </div>
+
+          <div className="flex flex-wrap gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs">
+            <span className="font-medium text-slate-600">Ir a:</span>
+            <a
+              href="#insumos-ot"
+              className="font-semibold text-primary hover:underline"
+            >
+              Insumos de la OT
+            </a>
+            <span className="text-slate-300">|</span>
+            <a href="#comentarios-ot" className="text-slate-600 hover:text-primary hover:underline">
+              Comentarios
+            </a>
           </div>
 
           {(order.cancelReason || order.annulReason) && (
