@@ -1,21 +1,53 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Package, Plus, Trash2 } from 'lucide-react'
-import { Card, CardHeader } from '@/components/ui/Card'
+import {
+  AlertCircle,
+  CheckCircle2,
+  Package,
+  RotateCcw,
+  Search,
+  Wrench,
+} from 'lucide-react'
+import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
-import { FormField } from '@/components/ui/FormField'
+import { Badge } from '@/components/ui/Badge'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
-import type { WorkOrder } from '@/types'
+import type { Product, WorkOrder } from '@/types'
 
-interface SupplyDraft {
+type ValidationState =
+  | { status: 'idle' }
+  | { status: 'success' }
+  | { status: 'error'; failures: SupplyFailure[] }
+
+interface SupplyFailure {
   productId: string
-  quantity: number
+  name: string
+  requested: number
+  available: number
+  unit: string
+}
+
+const EXCLUDED_CATEGORIES = new Set(['Camiones', 'Equipos'])
+
+function formatUnitLabel(product: Product): string {
+  if (product.name.toLowerCase().includes('cemento')) return 'Saco (25 kg)'
+  if (product.unit === 'm') return 'Metro'
+  if (product.unit === 'un') return 'Unidad'
+  if (product.unit === 'kg') return 'Kilogramo'
+  return product.unit
+}
+
+function formatStockObservation(product: Product, requested: number): string {
+  if (requested <= 0) return '—'
+  if (product.currentStock >= requested) {
+    return `Stock disponible: ${product.currentStock} ${product.unit}`
+  }
+  return `Faltan ${requested - product.currentStock} ${product.unit}`
 }
 
 /**
- * RF62 — CDS 213/214/215: Registro de insumos con validación de stock y actualización automática
+ * RF62 — registro, validación de disponibilidad y actualización de stock en OT
  */
 export function OrderSuppliesPanel({
   order,
@@ -29,181 +61,289 @@ export function OrderSuppliesPanel({
   const products = useInventoryStore((s) => s.products)
   const syncProductsFromApi = useInventoryStore((s) => s.syncProductsFromApi)
 
-  const [drafts, setDrafts] = useState<SupplyDraft[]>([{ productId: '', quantity: 1 }])
-  const [validationMsg, setValidationMsg] = useState<string | null>(null)
+  const [quantities, setQuantities] = useState<Record<string, number>>({})
+  const [validation, setValidation] = useState<ValidationState>({ status: 'idle' })
 
   useEffect(() => {
     void syncProductsFromApi()
   }, [syncProductsFromApi])
 
-  const supplyProducts = useMemo(
-    () => products.filter((p) => p.category === 'Insumos' || p.category === 'Repuestos'),
+  const catalogProducts = useMemo(
+    () =>
+      products
+        .filter((p) => !EXCLUDED_CATEGORIES.has(p.category))
+        .sort((a, b) => {
+          if (a.category === 'Insumos' && b.category !== 'Insumos') return -1
+          if (b.category === 'Insumos' && a.category !== 'Insumos') return 1
+          return a.name.localeCompare(b.name, 'es')
+        }),
     [products],
   )
 
-  const validateAvailability = () => {
-    const lines = drafts.filter((d) => d.productId && d.quantity > 0)
-    if (lines.length === 0) {
-      setValidationMsg('Seleccione al menos un insumo')
-      return
+  const activeLines = useMemo(() => {
+    return catalogProducts
+      .map((p) => ({ product: p, quantity: quantities[p.id] ?? 0 }))
+      .filter((line) => line.quantity > 0)
+  }, [catalogProducts, quantities])
+
+  const setQuantity = (productId: string, raw: number) => {
+    const quantity = Math.max(0, raw)
+    setQuantities((prev) => ({ ...prev, [productId]: quantity }))
+    setValidation({ status: 'idle' })
+  }
+
+  const runValidation = (): ValidationState => {
+    if (activeLines.length === 0) {
+      addToast('Ingrese al menos una cantidad mayor a cero', 'error')
+      return { status: 'idle' }
     }
-    const messages: string[] = []
-    for (const line of lines) {
-      const product = products.find((p) => p.id === line.productId)
-      if (!product) continue
-      const ok = product.currentStock >= line.quantity
-      messages.push(
-        `${product.name}: ${ok ? '✓' : '✗'} disponible ${product.currentStock} / solicitado ${line.quantity}`,
-      )
+
+    const failures: SupplyFailure[] = []
+    for (const { product, quantity } of activeLines) {
+      if (product.currentStock < quantity) {
+        failures.push({
+          productId: product.id,
+          name: product.name,
+          requested: quantity,
+          available: product.currentStock,
+          unit: product.unit,
+        })
+      }
     }
-    setValidationMsg(messages.join(' · '))
+
+    if (failures.length > 0) {
+      return { status: 'error', failures }
+    }
+    return { status: 'success' }
+  }
+
+  const handleValidate = () => {
+    const result = runValidation()
+    setValidation(result)
+  }
+
+  const handleClear = () => {
+    setQuantities({})
+    setValidation({ status: 'idle' })
   }
 
   const handleRegister = () => {
-    const lines = drafts
-      .filter((d) => d.productId && d.quantity > 0)
-      .map((d) => {
-        const product = products.find((p) => p.id === d.productId)!
-        return {
-          productId: d.productId,
-          productCode: product.code,
-          productName: product.name,
-          quantity: d.quantity,
-        }
-      })
+    const check = runValidation()
+    if (check.status !== 'success') {
+      setValidation(check.status === 'error' ? check : { status: 'idle' })
+      if (check.status === 'idle') return
+      addToast('Valide la disponibilidad antes de registrar', 'error')
+      return
+    }
+
+    const lines = activeLines.map(({ product, quantity }) => ({
+      productId: product.id,
+      productCode: product.code,
+      productName: product.name,
+      quantity,
+    }))
 
     const result = registerSupplies(order.id, lines)
     if (!result.ok) {
       addToast(result.message ?? 'No fue posible registrar los insumos', 'error')
       return
     }
-    setDrafts([{ productId: '', quantity: 1 }])
-    setValidationMsg(null)
+    handleClear()
   }
 
+  const canRegister =
+    canEdit && validation.status === 'success' && activeLines.length > 0
+
   return (
-    <Card>
-      <CardHeader
-        title="Insumos Utilizados"
-        subtitle="Registro de insumos en la orden de trabajo."
-      />
-
-      {(order.suppliesUsed ?? []).length > 0 && (
-        <div className="mb-4 overflow-x-auto">
-          <table className="w-full min-w-[400px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-xs uppercase text-slate-400">
-                <th className="pb-2 pr-4">Código</th>
-                <th className="pb-2 pr-4">Insumo</th>
-                <th className="pb-2 pr-4">Cantidad</th>
-                <th className="pb-2">Registrado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.suppliesUsed!.map((s, i) => (
-                <tr key={`${s.productId}-${i}`} className="border-b border-slate-50">
-                  <td className="py-2 pr-4 font-mono text-xs">{s.productCode}</td>
-                  <td className="py-2 pr-4">{s.productName}</td>
-                  <td className="py-2 pr-4">{s.quantity}</td>
-                  <td className="py-2 text-xs text-slate-500">{s.registeredAt}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {canEdit && (
-        <div className="space-y-3">
-          {drafts.map((draft, index) => (
-            <div
-              key={index}
-              className="flex flex-col gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 sm:flex-row sm:items-end"
-            >
-              <FormField label="Insumo" className="flex-1">
-                <Select
-                  value={draft.productId}
-                  onChange={(e) => {
-                    const next = [...drafts]
-                    next[index] = { ...next[index], productId: e.target.value }
-                    setDrafts(next)
-                  }}
-                >
-                  <option value="">Seleccionar insumo...</option>
-                  {supplyProducts.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.code} — {p.name} (stock: {p.currentStock})
-                    </option>
-                  ))}
-                </Select>
-              </FormField>
-              <FormField label="Cantidad" className="w-full sm:w-28">
-                <Input
-                  type="number"
-                  min={1}
-                  value={draft.quantity}
-                  onChange={(e) => {
-                    const next = [...drafts]
-                    next[index] = {
-                      ...next[index],
-                      quantity: Math.max(1, Number(e.target.value) || 1),
-                    }
-                    setDrafts(next)
-                  }}
-                />
-              </FormField>
-              {drafts.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label="Quitar línea"
-                  onClick={() => setDrafts(drafts.filter((_, i) => i !== index))}
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              )}
+    <Card className="overflow-hidden p-0">
+      <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Wrench className="h-5 w-5" />
             </div>
-          ))}
-
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              leftIcon={<Plus className="h-4 w-4" />}
-              onClick={() => setDrafts([...drafts, { productId: '', quantity: 1 }])}
-            >
-              Agregar insumo
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={validateAvailability}
-            >
-              Validar disponibilidad
-            </Button>
-            <Button
-              size="sm"
-              leftIcon={<Package className="h-4 w-4" />}
-              onClick={handleRegister}
-            >
-              Registrar insumos
-            </Button>
+            <div>
+              <h3 className="text-base font-semibold text-slate-900">Insumos de la OT</h3>
+              <p className="mt-0.5 text-sm text-slate-500">
+                {order.id} | Cliente: {order.client}
+              </p>
+            </div>
           </div>
-
-          {validationMsg && (
-            <p className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
-              {validationMsg}
-            </p>
-          )}
-          <p className="text-xs text-slate-400">
-            El stock se actualiza automáticamente al registrar insumos.
-          </p>
         </div>
-      )}
+      </div>
 
-      {!canEdit && (order.suppliesUsed ?? []).length === 0 && (
-        <p className="text-sm text-slate-500">Sin insumos registrados.</p>
-      )}
+      <div className="space-y-6 p-6">
+        {(order.suppliesUsed ?? []).length > 0 && (
+          <div>
+            <p className="mb-2 text-sm font-semibold text-slate-800">Insumos ya registrados</p>
+            <div className="overflow-x-auto rounded-lg border border-slate-100">
+              <table className="w-full min-w-[480px] text-left text-sm">
+                <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                  <tr>
+                    <th className="px-3 py-2">Código</th>
+                    <th className="px-3 py-2">Producto</th>
+                    <th className="px-3 py-2">Cantidad</th>
+                    <th className="px-3 py-2">Registrado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {order.suppliesUsed!.map((s, i) => (
+                    <tr key={`${s.productId}-${i}`}>
+                      <td className="px-3 py-2 font-mono text-xs">{s.productCode}</td>
+                      <td className="px-3 py-2">{s.productName}</td>
+                      <td className="px-3 py-2">{s.quantity}</td>
+                      <td className="px-3 py-2 text-xs text-slate-500">{s.registeredAt}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {canEdit ? (
+          <>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">
+                Insumos a utilizar en el trabajo
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                Ingrese las cantidades requeridas y valide la disponibilidad en bodega antes de
+                registrar.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full min-w-[720px] text-left text-sm">
+                <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  <tr>
+                    <th className="px-4 py-3">Producto</th>
+                    <th className="px-4 py-3">Unidad</th>
+                    <th className="px-4 py-3">Stock actual</th>
+                    <th className="px-4 py-3">Cantidad a usar</th>
+                    <th className="px-4 py-3">Estado</th>
+                    <th className="px-4 py-3">Observación</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {catalogProducts.map((product) => {
+                    const qty = quantities[product.id] ?? 0
+                    const hasQty = qty > 0
+                    const sufficient = !hasQty || product.currentStock >= qty
+                    return (
+                      <tr key={product.id} className="bg-white">
+                        <td className="px-4 py-3 font-medium text-slate-800">{product.name}</td>
+                        <td className="px-4 py-3 text-slate-600">{formatUnitLabel(product)}</td>
+                        <td className="px-4 py-3 tabular-nums text-slate-700">
+                          {product.currentStock}
+                        </td>
+                        <td className="px-4 py-3">
+                          <Input
+                            type="number"
+                            min={0}
+                            value={hasQty ? qty : ''}
+                            placeholder="0"
+                            className="max-w-[100px]"
+                            onChange={(e) =>
+                              setQuantity(
+                                product.id,
+                                e.target.value === '' ? 0 : Number(e.target.value),
+                              )
+                            }
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          {!hasQty ? (
+                            <span className="text-xs text-slate-400">Sin solicitar</span>
+                          ) : sufficient ? (
+                            <Badge
+                              label="Disponible"
+                              className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 ring-emerald-600/20"
+                            />
+                          ) : (
+                            <Badge
+                              label="Stock insuficiente"
+                              className="inline-flex items-center gap-1 bg-red-50 text-red-700 ring-red-600/20"
+                            />
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-600">
+                          {formatStockObservation(product, qty)}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Button leftIcon={<Search className="h-4 w-4" />} onClick={handleValidate}>
+                Validar disponibilidad
+              </Button>
+              <Button
+                variant="outline"
+                leftIcon={<RotateCcw className="h-4 w-4" />}
+                onClick={handleClear}
+              >
+                Limpiar cantidades
+              </Button>
+              <Button
+                variant="outline"
+                leftIcon={<Package className="h-4 w-4" />}
+                onClick={handleRegister}
+                disabled={!canRegister}
+              >
+                Registrar insumos en la OT
+              </Button>
+            </div>
+
+            {validation.status === 'error' && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-900">
+                <div className="flex gap-3">
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+                  <div>
+                    <p className="font-semibold">No es posible continuar</p>
+                    <p className="mt-1 text-red-800">
+                      Uno o más insumos no cuentan con stock suficiente. Revise las cantidades
+                      ingresadas.
+                    </p>
+                    <ul className="mt-3 list-inside list-disc space-y-1 text-red-800">
+                      {validation.failures.map((f) => (
+                        <li key={f.productId}>
+                          {f.name}: se solicitaron {f.requested} {f.unit} y solo hay{' '}
+                          {f.available} {f.unit} disponibles.
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {validation.status === 'success' && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-900">
+                <div className="flex gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="font-semibold">Disponibilidad validada correctamente</p>
+                    <p className="mt-1 text-emerald-800">
+                      Todos los insumos cuentan con stock suficiente. Puede proceder a registrar el
+                      uso de insumos en la OT.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-slate-400">
+              El stock en bodega se actualiza automáticamente al confirmar el registro.
+            </p>
+          </>
+        ) : (order.suppliesUsed ?? []).length === 0 ? (
+          <p className="text-sm text-slate-500">Sin insumos registrados en esta orden.</p>
+        ) : null}
+      </div>
     </Card>
   )
 }
