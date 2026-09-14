@@ -1,0 +1,2424 @@
+<mxfile host="app.diagrams.net" pages="10">
+  <diagram name="CU35-DS" id="CU35-DS">
+    <mxGraphModel dx="1626" dy="971" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2080" pageHeight="1150" math="0" shadow="0">
+      <root>
+        <mxCell id="CU35DS0" />
+        <mxCell id="CU35DS1" parent="CU35DS0" />
+        <mxCell id="CU35DSh1" parent="CU35DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSb2" parent="CU35DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSh3" parent="CU35DS1" style="html=1;whiteSpace=wrap;" value="V_orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSb4" parent="CU35DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSh5" parent="CU35DS1" style="html=1;whiteSpace=wrap;" value="C_registrar_ubicacion" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSb6" parent="CU35DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSh7" parent="CU35DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSb8" parent="CU35DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSh9" parent="CU35DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSb10" parent="CU35DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSh11" parent="CU35DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="bitacora_auditoria" vertex="1">
+          <mxGeometry height="50" width="150" x="1580" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSb12" parent="CU35DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="1650" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSe13" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn14" connectable="0" parent="CU35DSe13" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt15" connectable="0" parent="CU35DSe13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="abrir_formulario_ubicacion(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe16" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn17" connectable="0" parent="CU35DSe16" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt18" connectable="0" parent="CU35DSe16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="abrir_formulario_ubicacion(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe19" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1050" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn20" connectable="0" parent="CU35DSe19" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt21" connectable="0" parent="CU35DSe19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="cargar_datos_ot(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe22" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="315" as="sourcePoint" />
+            <mxPoint x="1350" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn23" connectable="0" parent="CU35DSe22" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt24" connectable="0" parent="CU35DSe22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT ID_OT, Direccion FROM orden_trabajo WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe25" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: fila_orden_trabajo">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="360" as="sourcePoint" />
+            <mxPoint x="1060" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe26" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: datos_ot">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="405" as="sourcePoint" />
+            <mxPoint x="760" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe27" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_formulario_ubicacion()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="450" as="sourcePoint" />
+            <mxPoint x="460" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe28" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_formulario_ubicacion()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="495" as="sourcePoint" />
+            <mxPoint x="160" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe29" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="540" as="sourcePoint" />
+            <mxPoint x="450" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn30" connectable="0" parent="CU35DSe29" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt31" connectable="0" parent="CU35DSe29" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="ingresar_ubicacion(direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe32" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="585" as="sourcePoint" />
+            <mxPoint x="750" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn33" connectable="0" parent="CU35DSe32" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="6" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt34" connectable="0" parent="CU35DSe32" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="ingresar_ubicacion(direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe35" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="630" as="sourcePoint" />
+            <mxPoint x="1050" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn36" connectable="0" parent="CU35DSe35" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="7" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt37" connectable="0" parent="CU35DSe35" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="guardar_ubicacion(id_ot, direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe38" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="675" as="sourcePoint" />
+            <mxPoint x="1350" y="675" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn39" connectable="0" parent="CU35DSe38" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="8" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt40" connectable="0" parent="CU35DSe38" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="UPDATE orden_trabajo SET Direccion, Latitud, Longitud WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe41" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: filas_afectadas=1">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="720" as="sourcePoint" />
+            <mxPoint x="1060" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe42" edge="1" parent="CU35DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="765" as="sourcePoint" />
+            <mxPoint x="1650" y="765" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSn43" connectable="0" parent="CU35DSe42" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="9" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU35DSt44" connectable="0" parent="CU35DSe42" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="INSERT INTO bitacora_auditoria(Modulo_Afectado, Accion, Valor_Nuevo, Fecha_Hora, ID_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe45" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ID_Log generado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="810" as="sourcePoint" />
+            <mxPoint x="1060" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe46" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ubicacion_guardada">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="855" as="sourcePoint" />
+            <mxPoint x="760" y="855" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe47" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_mensaje_exito()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="900" as="sourcePoint" />
+            <mxPoint x="460" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU35DSe48" edge="1" parent="CU35DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_mensaje_exito()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="945" as="sourcePoint" />
+            <mxPoint x="160" y="945" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="snxMYFxBLtBYXam3ustk-0" edge="1" parent="CU35DS1" source="CU35DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU35DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="370" y="270" as="sourcePoint" />
+            <mxPoint x="420" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="snxMYFxBLtBYXam3ustk-2" edge="1" parent="CU35DS1" source="CU35DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" target="CU35DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="210" y="140" as="sourcePoint" />
+            <mxPoint x="210" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="snxMYFxBLtBYXam3ustk-3" edge="1" parent="CU35DS1" source="CU35DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU35DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="680" y="150" as="sourcePoint" />
+            <mxPoint x="680" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="snxMYFxBLtBYXam3ustk-4" edge="1" parent="CU35DS1" source="CU35DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU35DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="900" y="160" as="sourcePoint" />
+            <mxPoint x="900" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="snxMYFxBLtBYXam3ustk-5" edge="1" parent="CU35DS1" source="CU35DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU35DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1260" y="170" as="sourcePoint" />
+            <mxPoint x="1260" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="snxMYFxBLtBYXam3ustk-6" edge="1" parent="CU35DS1" source="CU35DSb12" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU35DSh11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1540" y="160" as="sourcePoint" />
+            <mxPoint x="1540" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU36-DS" id="CU36-DS">
+    <mxGraphModel dx="1626" dy="971" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2080" pageHeight="945" math="0" shadow="0">
+      <root>
+        <mxCell id="CU36DS0" />
+        <mxCell id="CU36DS1" parent="CU36DS0" />
+        <mxCell id="CU36DSh1" parent="CU36DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSb2" parent="CU36DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="645" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSh3" parent="CU36DS1" style="html=1;whiteSpace=wrap;" value="V_orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSb4" parent="CU36DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="645" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSh5" parent="CU36DS1" style="html=1;whiteSpace=wrap;" value="C_registrar_ubicacion" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSb6" parent="CU36DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="645" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSh7" parent="CU36DS1" style="html=1;whiteSpace=wrap;" value="C_validar_ubicacion" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSb8" parent="CU36DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="645" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSh9" parent="CU36DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSb10" parent="CU36DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="645" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSh11" parent="CU36DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="150" x="1580" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSb12" parent="CU36DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="645" width="10" x="1650" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSe13" edge="1" parent="CU36DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSn14" connectable="0" parent="CU36DSe13" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSt15" connectable="0" parent="CU36DSe13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="enviar_ubicacion(direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe16" edge="1" parent="CU36DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSn17" connectable="0" parent="CU36DSe16" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSt18" connectable="0" parent="CU36DSe16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="enviar_ubicacion(direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe19" edge="1" parent="CU36DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1050" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSn20" connectable="0" parent="CU36DSe19" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSt21" connectable="0" parent="CU36DSe19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="validar_formato_direccion(direccion)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe22" edge="1" parent="CU36DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: direccion_valida=true">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="315" as="sourcePoint" />
+            <mxPoint x="760" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe23" edge="1" parent="CU36DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="360" as="sourcePoint" />
+            <mxPoint x="1050" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSn24" connectable="0" parent="CU36DSe23" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSt25" connectable="0" parent="CU36DSe23" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="validar_rango_coordenadas(latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe26" edge="1" parent="CU36DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1150" y="405" />
+              <mxPoint x="1150" y="435" />
+            </Array>
+            <mxPoint x="1060" y="405" as="sourcePoint" />
+            <mxPoint x="1060" y="435" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSn27" connectable="0" parent="CU36DSe26" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSt28" connectable="0" parent="CU36DSe26" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="verificar_lat(-90..90) y lon(-180..180)" vertex="1">
+          <mxGeometry relative="1" x="0.4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe29" edge="1" parent="CU36DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: coordenadas_validas=true">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="470" as="sourcePoint" />
+            <mxPoint x="760" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe30" edge="1" parent="CU36DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="515" as="sourcePoint" />
+            <mxPoint x="1350" y="515" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSn31" connectable="0" parent="CU36DSe30" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="6" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSt32" connectable="0" parent="CU36DSe30" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="persistir_ubicacion(id_ot, direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe33" edge="1" parent="CU36DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1360" y="560" as="sourcePoint" />
+            <mxPoint x="1650" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSn34" connectable="0" parent="CU36DSe33" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="7" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU36DSt35" connectable="0" parent="CU36DSe33" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="UPDATE orden_trabajo SET Direccion, Latitud, Longitud WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe36" edge="1" parent="CU36DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: filas_afectadas=1">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="605" as="sourcePoint" />
+            <mxPoint x="1360" y="605" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe37" edge="1" parent="CU36DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ubicacion_actualizada">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="650" as="sourcePoint" />
+            <mxPoint x="760" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe38" edge="1" parent="CU36DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: habilitar_guardar_cambios()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="695" as="sourcePoint" />
+            <mxPoint x="460" y="695" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU36DSe39" edge="1" parent="CU36DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: habilitar_guardar_cambios()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="740" as="sourcePoint" />
+            <mxPoint x="160" y="740" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h3Gnmf7SLxgoW1S2rg0P-0" edge="1" parent="CU36DS1" source="CU36DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU36DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="230" y="140" as="sourcePoint" />
+            <mxPoint x="230" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h3Gnmf7SLxgoW1S2rg0P-1" edge="1" parent="CU36DS1" source="CU36DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU36DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="430" y="140" as="sourcePoint" />
+            <mxPoint x="430" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h3Gnmf7SLxgoW1S2rg0P-2" edge="1" parent="CU36DS1" source="CU36DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU36DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="680" y="140" as="sourcePoint" />
+            <mxPoint x="680" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h3Gnmf7SLxgoW1S2rg0P-3" edge="1" parent="CU36DS1" source="CU36DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU36DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="950" y="150" as="sourcePoint" />
+            <mxPoint x="950" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h3Gnmf7SLxgoW1S2rg0P-4" edge="1" parent="CU36DS1" source="CU36DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU36DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1290" y="160" as="sourcePoint" />
+            <mxPoint x="1290" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="0T14u0EF55fIOFoHlEzV-0" edge="1" parent="CU36DS1" source="CU36DSb12" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="CU36DSh11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1690" y="170" as="sourcePoint" />
+            <mxPoint x="1690" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU37-DS" id="CU37-DS">
+    <mxGraphModel dx="743" dy="444" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1780" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="CU37DS0" />
+        <mxCell id="CU37DS1" parent="CU37DS0" />
+        <mxCell id="CU37DSh1" parent="CU37DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSb2" parent="CU37DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="400" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSh3" parent="CU37DS1" style="html=1;whiteSpace=wrap;" value="V_detalle_orden" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSb4" parent="CU37DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="400" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSh5" parent="CU37DS1" style="html=1;whiteSpace=wrap;" value="C_consultar_ubicacion" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSb6" parent="CU37DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="400" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSh7" parent="CU37DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSb8" parent="CU37DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="400" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSh9" parent="CU37DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSb10" parent="CU37DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="400" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSe11" edge="1" parent="CU37DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSn12" connectable="0" parent="CU37DSe11" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSt13" connectable="0" parent="CU37DSe11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="seleccionar_orden(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSe14" edge="1" parent="CU37DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSn15" connectable="0" parent="CU37DSe14" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSt16" connectable="0" parent="CU37DSe14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="seleccionar_orden(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSe17" edge="1" parent="CU37DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1050" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSn18" connectable="0" parent="CU37DSe17" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSt19" connectable="0" parent="CU37DSe17" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="obtener_ubicacion(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSe20" edge="1" parent="CU37DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="315" as="sourcePoint" />
+            <mxPoint x="1350" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSn21" connectable="0" parent="CU37DSe20" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU37DSt22" connectable="0" parent="CU37DSe20" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT Direccion, Latitud, Longitud FROM orden_trabajo WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSe23" edge="1" parent="CU37DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: fila_ubicacion">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="360" as="sourcePoint" />
+            <mxPoint x="1060" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSe24" edge="1" parent="CU37DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: datos_ubicacion">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="405" as="sourcePoint" />
+            <mxPoint x="760" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSe25" edge="1" parent="CU37DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_detalle_ubicacion()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="450" as="sourcePoint" />
+            <mxPoint x="460" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU37DSe26" edge="1" parent="CU37DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_detalle_ubicacion()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="495" as="sourcePoint" />
+            <mxPoint x="160" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="osEVI2iAjP34cTCEBEsH-0" edge="1" parent="CU37DS1" source="CU37DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU37DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="230" y="160" as="sourcePoint" />
+            <mxPoint x="230" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="osEVI2iAjP34cTCEBEsH-1" edge="1" parent="CU37DS1" source="CU37DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU37DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="490" y="150" as="sourcePoint" />
+            <mxPoint x="490" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="osEVI2iAjP34cTCEBEsH-2" edge="1" parent="CU37DS1" source="CU37DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU37DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="640" y="170" as="sourcePoint" />
+            <mxPoint x="640" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="osEVI2iAjP34cTCEBEsH-3" edge="1" parent="CU37DS1" source="CU37DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU37DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="960" y="160" as="sourcePoint" />
+            <mxPoint x="960" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="osEVI2iAjP34cTCEBEsH-4" edge="1" parent="CU37DS1" source="CU37DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU37DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1290" y="170" as="sourcePoint" />
+            <mxPoint x="1290" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU38-DS" id="CU38-DS">
+    <mxGraphModel dx="2168" dy="1295" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2380" pageHeight="1240" math="0" shadow="0">
+      <root>
+        <mxCell id="CU38DS0" />
+        <mxCell id="CU38DS1" parent="CU38DS0" />
+        <mxCell id="CU38DSh1" parent="CU38DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSb2" parent="CU38DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="940" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSh3" parent="CU38DS1" style="html=1;whiteSpace=wrap;" value="V_detalle_orden" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSb4" parent="CU38DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="940" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSh5" parent="CU38DS1" style="html=1;whiteSpace=wrap;" value="C_editar_ubicacion" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSb6" parent="CU38DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="940" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSh7" parent="CU38DS1" style="html=1;whiteSpace=wrap;" value="C_validar_ubicacion" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSb8" parent="CU38DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="940" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSh9" parent="CU38DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSb10" parent="CU38DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="940" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSh11" parent="CU38DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="150" x="1580" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSb12" parent="CU38DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="940" width="10" x="1650" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSh13" parent="CU38DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="bitacora_auditoria" vertex="1">
+          <mxGeometry height="50" width="150" x="1880" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSb14" parent="CU38DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="940" width="10" x="1950" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSe15" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn16" connectable="0" parent="CU38DSe15" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt17" connectable="0" parent="CU38DSe15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="seleccionar_editar_ubicacion(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe18" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn19" connectable="0" parent="CU38DSe18" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt20" connectable="0" parent="CU38DSe18" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="seleccionar_editar_ubicacion(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe21" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1350" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn22" connectable="0" parent="CU38DSe21" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt23" connectable="0" parent="CU38DSe21" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="obtener_ubicacion_actual(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe24" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1360" y="315" as="sourcePoint" />
+            <mxPoint x="1650" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn25" connectable="0" parent="CU38DSe24" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt26" connectable="0" parent="CU38DSe24" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT Direccion, Latitud, Longitud FROM orden_trabajo WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe27" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ubicacion_actual">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="360" as="sourcePoint" />
+            <mxPoint x="1360" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe28" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: valores_previos">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="405" as="sourcePoint" />
+            <mxPoint x="760" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe29" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: desplegar_campos_edicion()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="450" as="sourcePoint" />
+            <mxPoint x="460" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe30" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: desplegar_campos_edicion()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="495" as="sourcePoint" />
+            <mxPoint x="160" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe31" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="540" as="sourcePoint" />
+            <mxPoint x="450" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn32" connectable="0" parent="CU38DSe31" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt33" connectable="0" parent="CU38DSe31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="modificar_ubicacion(direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe34" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="585" as="sourcePoint" />
+            <mxPoint x="750" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn35" connectable="0" parent="CU38DSe34" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="6" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt36" connectable="0" parent="CU38DSe34" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="modificar_ubicacion(direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe37" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="630" as="sourcePoint" />
+            <mxPoint x="1050" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn38" connectable="0" parent="CU38DSe37" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="7" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt39" connectable="0" parent="CU38DSe37" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="validar_ubicacion(direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe40" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ubicacion_valida=true">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="675" as="sourcePoint" />
+            <mxPoint x="760" y="675" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe41" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="720" as="sourcePoint" />
+            <mxPoint x="1350" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn42" connectable="0" parent="CU38DSe41" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="8" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt43" connectable="0" parent="CU38DSe41" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="actualizar_ubicacion(id_ot, direccion, latitud, longitud)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe44" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1360" y="765" as="sourcePoint" />
+            <mxPoint x="1650" y="765" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn45" connectable="0" parent="CU38DSe44" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="9" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt46" connectable="0" parent="CU38DSe44" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="UPDATE orden_trabajo SET Direccion, Latitud, Longitud WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe47" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: filas_afectadas=1">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="810" as="sourcePoint" />
+            <mxPoint x="1360" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe48" edge="1" parent="CU38DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1360" y="855" as="sourcePoint" />
+            <mxPoint x="1950" y="855" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSn49" connectable="0" parent="CU38DSe48" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="10" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU38DSt50" connectable="0" parent="CU38DSe48" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="INSERT INTO bitacora_auditoria(Modulo_Afectado, Accion, Valor_Anterior, Valor_Nuevo, ID_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe51" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ID_Log generado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1950" y="900" as="sourcePoint" />
+            <mxPoint x="1360" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe52" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ubicacion_actualizada">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="945" as="sourcePoint" />
+            <mxPoint x="760" y="945" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe53" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_mensaje_exito()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="990" as="sourcePoint" />
+            <mxPoint x="460" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU38DSe54" edge="1" parent="CU38DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_mensaje_exito()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="1035" as="sourcePoint" />
+            <mxPoint x="160" y="1035" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WpPdiziAarqpkFVLCFGP-0" edge="1" parent="CU38DS1" source="CU38DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU38DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="210" y="150" as="sourcePoint" />
+            <mxPoint x="210" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WpPdiziAarqpkFVLCFGP-1" edge="1" parent="CU38DS1" source="CU38DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU38DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="560" y="210" as="sourcePoint" />
+            <mxPoint x="560" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WpPdiziAarqpkFVLCFGP-2" edge="1" parent="CU38DS1" source="CU38DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU38DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="700" y="170" as="sourcePoint" />
+            <mxPoint x="700" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WpPdiziAarqpkFVLCFGP-3" edge="1" parent="CU38DS1" source="CU38DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU38DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="960" y="170" as="sourcePoint" />
+            <mxPoint x="960" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WpPdiziAarqpkFVLCFGP-4" edge="1" parent="CU38DS1" source="CU38DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU38DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1250" y="170" as="sourcePoint" />
+            <mxPoint x="1250" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WpPdiziAarqpkFVLCFGP-5" edge="1" parent="CU38DS1" source="CU38DSb12" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU38DSh11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1540" y="180" as="sourcePoint" />
+            <mxPoint x="1540" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="WpPdiziAarqpkFVLCFGP-6" edge="1" parent="CU38DS1" source="CU38DSb14" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU38DSh13" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1860" y="190" as="sourcePoint" />
+            <mxPoint x="1860" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU53-DS" id="CU53-DS">
+    <mxGraphModel dx="1084" dy="648" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2080" pageHeight="1330" math="0" shadow="0">
+      <root>
+        <mxCell id="CU53DS0" />
+        <mxCell id="CU53DS1" parent="CU53DS0" />
+        <mxCell id="CU53DSh1" parent="CU53DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSb2" parent="CU53DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSh3" parent="CU53DS1" style="html=1;whiteSpace=wrap;" value="V_pagos" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSb4" parent="CU53DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSh5" parent="CU53DS1" style="html=1;whiteSpace=wrap;" value="C_estado_pago" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSb6" parent="CU53DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSh7" parent="CU53DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSb8" parent="CU53DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSh9" parent="CU53DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="registro_financiero" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSb10" parent="CU53DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSh11" parent="CU53DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="bitacora_auditoria" vertex="1">
+          <mxGeometry height="50" width="150" x="1580" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSb12" parent="CU53DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="1650" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSe13" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn14" connectable="0" parent="CU53DSe13" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt15" connectable="0" parent="CU53DSe13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="abrir_modulo_pagos(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe16" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn17" connectable="0" parent="CU53DSe16" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt18" connectable="0" parent="CU53DSe16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="abrir_modulo_pagos(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe19" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1050" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn20" connectable="0" parent="CU53DSe19" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt21" connectable="0" parent="CU53DSe19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="consultar_estado_pago(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe22" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="315" as="sourcePoint" />
+            <mxPoint x="1350" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn23" connectable="0" parent="CU53DSe22" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt24" connectable="0" parent="CU53DSe22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT Estado_Pago FROM registro_financiero WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe25" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: estado_actual">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="360" as="sourcePoint" />
+            <mxPoint x="1060" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe26" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: estado_pago">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="405" as="sourcePoint" />
+            <mxPoint x="760" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe27" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_estado_actual()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="450" as="sourcePoint" />
+            <mxPoint x="460" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe28" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_estado_actual()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="495" as="sourcePoint" />
+            <mxPoint x="160" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe29" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="540" as="sourcePoint" />
+            <mxPoint x="450" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn30" connectable="0" parent="CU53DSe29" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt31" connectable="0" parent="CU53DSe29" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="desplegar_selector_estados()" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe32" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="585" as="sourcePoint" />
+            <mxPoint x="750" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn33" connectable="0" parent="CU53DSe32" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="6" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt34" connectable="0" parent="CU53DSe32" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="desplegar_selector_estados()" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe35" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: [Pendiente, Pagado, Abonado, Vencido]">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="630" as="sourcePoint" />
+            <mxPoint x="460" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe36" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: [Pendiente, Pagado, Abonado, Vencido]">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="675" as="sourcePoint" />
+            <mxPoint x="160" y="675" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe37" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="720" as="sourcePoint" />
+            <mxPoint x="450" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn38" connectable="0" parent="CU53DSe37" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="7" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt39" connectable="0" parent="CU53DSe37" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="seleccionar_nuevo_estado(estado)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe40" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="765" as="sourcePoint" />
+            <mxPoint x="750" y="765" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn41" connectable="0" parent="CU53DSe40" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="8" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt42" connectable="0" parent="CU53DSe40" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="seleccionar_nuevo_estado(estado)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe43" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="810" as="sourcePoint" />
+            <mxPoint x="1050" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn44" connectable="0" parent="CU53DSe43" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="9" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt45" connectable="0" parent="CU53DSe43" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="actualizar_estado_pago(id_ot, estado, id_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe46" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="855" as="sourcePoint" />
+            <mxPoint x="1350" y="855" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn47" connectable="0" parent="CU53DSe46" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="10" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt48" connectable="0" parent="CU53DSe46" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="UPDATE registro_financiero SET Estado_Pago=$1 WHERE ID_OT=$2" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe49" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: filas_afectadas=1">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="900" as="sourcePoint" />
+            <mxPoint x="1060" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe50" edge="1" parent="CU53DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="945" as="sourcePoint" />
+            <mxPoint x="1650" y="945" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSn51" connectable="0" parent="CU53DSe50" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="11" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU53DSt52" connectable="0" parent="CU53DSe50" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="INSERT INTO bitacora_auditoria(Modulo_Afectado, Accion, Valor_Anterior, Valor_Nuevo, ID_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe53" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ID_Log generado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="990" as="sourcePoint" />
+            <mxPoint x="1060" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe54" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: estado_actualizado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="1035" as="sourcePoint" />
+            <mxPoint x="760" y="1035" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe55" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: confirmar_modificacion_exitosa()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="1080" as="sourcePoint" />
+            <mxPoint x="460" y="1080" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU53DSe56" edge="1" parent="CU53DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: confirmar_modificacion_exitosa()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="1125" as="sourcePoint" />
+            <mxPoint x="160" y="1125" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4X9MvTfGj9UX2z__5FW7-0" edge="1" parent="CU53DS1" source="CU53DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU53DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="90" y="180" as="sourcePoint" />
+            <mxPoint x="90" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4X9MvTfGj9UX2z__5FW7-1" edge="1" parent="CU53DS1" source="CU53DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU53DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="640" y="140" as="sourcePoint" />
+            <mxPoint x="640" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4X9MvTfGj9UX2z__5FW7-2" edge="1" parent="CU53DS1" source="CU53DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU53DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="690" y="170" as="sourcePoint" />
+            <mxPoint x="690" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4X9MvTfGj9UX2z__5FW7-3" edge="1" parent="CU53DS1" source="CU53DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU53DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1100" y="160" as="sourcePoint" />
+            <mxPoint x="1100" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4X9MvTfGj9UX2z__5FW7-4" edge="1" parent="CU53DS1" source="CU53DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU53DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1300" y="190" as="sourcePoint" />
+            <mxPoint x="1380" y="60" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="4X9MvTfGj9UX2z__5FW7-5" edge="1" parent="CU53DS1" source="CU53DSb12" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU53DSh11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1710" y="190" as="sourcePoint" />
+            <mxPoint x="1710" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU54-DS" id="CU54-DS">
+    <mxGraphModel dx="1301" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2380" pageHeight="1150" math="0" shadow="0">
+      <root>
+        <mxCell id="CU54DS0" />
+        <mxCell id="CU54DS1" parent="CU54DS0" />
+        <mxCell id="CU54DSh1" parent="CU54DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSb2" parent="CU54DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSh3" parent="CU54DS1" style="html=1;whiteSpace=wrap;" value="V_pagos" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSb4" parent="CU54DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSh5" parent="CU54DS1" style="html=1;whiteSpace=wrap;" value="C_detalle_orden" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSb6" parent="CU54DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSh7" parent="CU54DS1" style="html=1;whiteSpace=wrap;" value="C_auditoria" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSb8" parent="CU54DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSh9" parent="CU54DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSb10" parent="CU54DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSh11" parent="CU54DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="150" x="1580" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSb12" parent="CU54DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="1650" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSh13" parent="CU54DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="bitacora_auditoria" vertex="1">
+          <mxGeometry height="50" width="150" x="1880" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSb14" parent="CU54DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="850" width="10" x="1950" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSe15" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="158" as="sourcePoint" />
+            <mxPoint x="450" y="158" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn16" connectable="0" parent="CU54DSe15" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt17" connectable="0" parent="CU54DSe15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="acceder_orden(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe18" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn19" connectable="0" parent="CU54DSe18" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt20" connectable="0" parent="CU54DSe18" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="acceder_orden(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe21" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1350" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn22" connectable="0" parent="CU54DSe21" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt23" connectable="0" parent="CU54DSe21" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="obtener_detalle_orden(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe24" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1360" y="315" as="sourcePoint" />
+            <mxPoint x="1650" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn25" connectable="0" parent="CU54DSe24" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt26" connectable="0" parent="CU54DSe24" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT * FROM orden_trabajo WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe27" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: fila_orden_trabajo">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="360" as="sourcePoint" />
+            <mxPoint x="1360" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe28" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: detalle_orden">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="405" as="sourcePoint" />
+            <mxPoint x="760" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe29" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: desplegar_detalle_ot()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="450" as="sourcePoint" />
+            <mxPoint x="460" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe30" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: desplegar_detalle_ot()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="495" as="sourcePoint" />
+            <mxPoint x="160" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe31" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="540" as="sourcePoint" />
+            <mxPoint x="450" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn32" connectable="0" parent="CU54DSe31" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt33" connectable="0" parent="CU54DSe31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="guardar_cambios(id_ot, campos_modificados)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe34" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="585" as="sourcePoint" />
+            <mxPoint x="750" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn35" connectable="0" parent="CU54DSe34" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="6" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt36" connectable="0" parent="CU54DSe34" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="guardar_cambios(id_ot, campos_modificados)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe37" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="630" as="sourcePoint" />
+            <mxPoint x="1050" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn38" connectable="0" parent="CU54DSe37" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="7" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt39" connectable="0" parent="CU54DSe37" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="registrar_auditoria(id_ot, valor_anterior, valor_nuevo, id_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe40" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="675" as="sourcePoint" />
+            <mxPoint x="1350" y="675" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn41" connectable="0" parent="CU54DSe40" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="8" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt42" connectable="0" parent="CU54DSe40" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="persistir_log(datos_log)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe43" edge="1" parent="CU54DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1360" y="720" as="sourcePoint" />
+            <mxPoint x="1950" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSn44" connectable="0" parent="CU54DSe43" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="9" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU54DSt45" connectable="0" parent="CU54DSe43" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="INSERT INTO bitacora_auditoria(Modulo_Afectado, Accion, Valor_Anterior, Valor_Nuevo, Fecha_Hora, ID_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe46" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ID_Log generado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1950" y="765" as="sourcePoint" />
+            <mxPoint x="1360" y="765" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe47" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: log_persistido">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="810" as="sourcePoint" />
+            <mxPoint x="1060" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe48" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: auditoria_vinculada_a_ot">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="855" as="sourcePoint" />
+            <mxPoint x="760" y="855" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe49" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_mensaje_exito()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="900" as="sourcePoint" />
+            <mxPoint x="460" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU54DSe50" edge="1" parent="CU54DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_mensaje_exito()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="945" as="sourcePoint" />
+            <mxPoint x="160" y="945" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="T3rN_OKiiagl41Y_vL_x-0" edge="1" parent="CU54DS1" source="CU54DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU54DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="260" y="70" as="sourcePoint" />
+            <mxPoint x="260" y="50" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="T3rN_OKiiagl41Y_vL_x-1" edge="1" parent="CU54DS1" source="CU54DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU54DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="580" y="120" as="sourcePoint" />
+            <mxPoint x="580" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="T3rN_OKiiagl41Y_vL_x-2" edge="1" parent="CU54DS1" source="CU54DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU54DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="790" y="160" as="sourcePoint" />
+            <mxPoint x="790" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="T3rN_OKiiagl41Y_vL_x-3" edge="1" parent="CU54DS1" source="CU54DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU54DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1170" y="160" as="sourcePoint" />
+            <mxPoint x="1170" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="T3rN_OKiiagl41Y_vL_x-4" edge="1" parent="CU54DS1" source="CU54DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU54DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1430" y="180" as="sourcePoint" />
+            <mxPoint x="1430" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="T3rN_OKiiagl41Y_vL_x-5" edge="1" parent="CU54DS1" source="CU54DSb12" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU54DSh11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1720" y="170" as="sourcePoint" />
+            <mxPoint x="1720" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="T3rN_OKiiagl41Y_vL_x-6" edge="1" parent="CU54DS1" source="CU54DSb14" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU54DSh13" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="2030" y="180" as="sourcePoint" />
+            <mxPoint x="2030" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU55-DS" id="CU55-DS">
+    <mxGraphModel dx="1084" dy="648" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2380" pageHeight="1330" math="0" shadow="0">
+      <root>
+        <mxCell id="CU55DS0" />
+        <mxCell id="CU55DS1" parent="CU55DS0" />
+        <mxCell id="CU55DSh1" parent="CU55DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSb2" parent="CU55DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSh3" parent="CU55DS1" style="html=1;whiteSpace=wrap;" value="V_pagos" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSb4" parent="CU55DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSh5" parent="CU55DS1" style="html=1;whiteSpace=wrap;" value="C_alertas_pago" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSb6" parent="CU55DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSh7" parent="CU55DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSb8" parent="CU55DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSh9" parent="CU55DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="registro_financiero" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSb10" parent="CU55DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSh11" parent="CU55DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="factura" vertex="1">
+          <mxGeometry height="50" width="150" x="1580" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSb12" parent="CU55DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="1650" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSh13" parent="CU55DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="bitacora_auditoria" vertex="1">
+          <mxGeometry height="50" width="150" x="1880" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSb14" parent="CU55DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="1030" width="10" x="1950" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSe15" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn16" connectable="0" parent="CU55DSe15" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt17" connectable="0" parent="CU55DSe15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="filtrar_pagos_atrasados()" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe18" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn19" connectable="0" parent="CU55DSe18" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt20" connectable="0" parent="CU55DSe18" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="filtrar_pagos_atrasados()" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe21" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1050" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn22" connectable="0" parent="CU55DSe21" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt23" connectable="0" parent="CU55DSe21" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="buscar_ordenes_en_mora(fecha_actual)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe24" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="315" as="sourcePoint" />
+            <mxPoint x="1350" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn25" connectable="0" parent="CU55DSe24" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt26" connectable="0" parent="CU55DSe24" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT ID_OT, Estado_Pago FROM registro_financiero WHERE Estado_Pago=&#39;Pendiente&#39;" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe27" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ordenes_pendientes">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="360" as="sourcePoint" />
+            <mxPoint x="1060" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe28" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="405" as="sourcePoint" />
+            <mxPoint x="1650" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn29" connectable="0" parent="CU55DSe28" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt30" connectable="0" parent="CU55DSe28" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT ID_factura, monto FROM factura WHERE fecha_vencimiento &lt; $1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe31" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: facturas_vencidas">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="450" as="sourcePoint" />
+            <mxPoint x="1060" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe32" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: listado_en_mora">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="495" as="sourcePoint" />
+            <mxPoint x="760" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe33" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_listado_pagos_atrasados()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="540" as="sourcePoint" />
+            <mxPoint x="460" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe34" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_listado_pagos_atrasados()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="585" as="sourcePoint" />
+            <mxPoint x="160" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe35" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="630" as="sourcePoint" />
+            <mxPoint x="450" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn36" connectable="0" parent="CU55DSe35" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="6" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt37" connectable="0" parent="CU55DSe35" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="cambiar_estado(id_ot, &#39;Vencido&#39;)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe38" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="675" as="sourcePoint" />
+            <mxPoint x="750" y="675" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn39" connectable="0" parent="CU55DSe38" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="7" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt40" connectable="0" parent="CU55DSe38" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="cambiar_estado(id_ot, &#39;Vencido&#39;)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe41" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="720" as="sourcePoint" />
+            <mxPoint x="1050" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn42" connectable="0" parent="CU55DSe41" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="8" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt43" connectable="0" parent="CU55DSe41" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="actualizar_estado_mora(id_ot, &#39;Vencido&#39;, id_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe44" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="765" as="sourcePoint" />
+            <mxPoint x="1350" y="765" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn45" connectable="0" parent="CU55DSe44" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="9" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt46" connectable="0" parent="CU55DSe44" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="UPDATE registro_financiero SET Estado_Pago=&#39;Vencido&#39; WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe47" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: filas_afectadas=1">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="810" as="sourcePoint" />
+            <mxPoint x="1060" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe48" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="855" as="sourcePoint" />
+            <mxPoint x="1650" y="855" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn49" connectable="0" parent="CU55DSe48" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="10" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt50" connectable="0" parent="CU55DSe48" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="UPDATE factura SET estado=&#39;Vencida&#39; WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe51" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: saldo_deudor_actualizado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="900" as="sourcePoint" />
+            <mxPoint x="1060" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe52" edge="1" parent="CU55DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="945" as="sourcePoint" />
+            <mxPoint x="1950" y="945" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSn53" connectable="0" parent="CU55DSe52" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="11" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU55DSt54" connectable="0" parent="CU55DSe52" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="INSERT INTO bitacora_auditoria(Modulo_Afectado, Accion, Valor_Anterior, Valor_Nuevo, ID_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe55" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ID_Log generado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1950" y="990" as="sourcePoint" />
+            <mxPoint x="1060" y="990" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe56" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: estado_actualizado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="1035" as="sourcePoint" />
+            <mxPoint x="760" y="1035" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe57" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: resaltar_registro_en_alerta()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="1080" as="sourcePoint" />
+            <mxPoint x="460" y="1080" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU55DSe58" edge="1" parent="CU55DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: resaltar_registro_en_alerta()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="1125" as="sourcePoint" />
+            <mxPoint x="160" y="1125" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wSKfcL5rSxEI9KWfcbbY-0" edge="1" parent="CU55DS1" source="CU55DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;entryX=0.5;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" target="CU55DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="30" y="190" as="sourcePoint" />
+            <mxPoint x="30" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wSKfcL5rSxEI9KWfcbbY-1" edge="1" parent="CU55DS1" source="CU55DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU55DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="600" y="170" as="sourcePoint" />
+            <mxPoint x="600" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wSKfcL5rSxEI9KWfcbbY-2" edge="1" parent="CU55DS1" source="CU55DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU55DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="830" y="170" as="sourcePoint" />
+            <mxPoint x="830" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wSKfcL5rSxEI9KWfcbbY-3" edge="1" parent="CU55DS1" source="CU55DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU55DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1100" y="180" as="sourcePoint" />
+            <mxPoint x="1100" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wSKfcL5rSxEI9KWfcbbY-4" edge="1" parent="CU55DS1" source="CU55DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU55DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1460" y="190" as="sourcePoint" />
+            <mxPoint x="1460" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wSKfcL5rSxEI9KWfcbbY-5" edge="1" parent="CU55DS1" source="CU55DSb12" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU55DSh11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1580" y="210" as="sourcePoint" />
+            <mxPoint x="1580" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="wSKfcL5rSxEI9KWfcbbY-6" edge="1" parent="CU55DS1" source="CU55DSb14" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU55DSh13" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="2030" y="170" as="sourcePoint" />
+            <mxPoint x="2030" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU56-DS" id="CU56-DS">
+    <mxGraphModel dx="1626" dy="971" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2080" pageHeight="920" math="0" shadow="0">
+      <root>
+        <mxCell id="CU56DS0" />
+        <mxCell id="CU56DS1" parent="CU56DS0" />
+        <mxCell id="CU56DSh1" parent="CU56DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSb2" parent="CU56DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSh3" parent="CU56DS1" style="html=1;whiteSpace=wrap;" value="V_pagos" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSb4" parent="CU56DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSh5" parent="CU56DS1" style="html=1;whiteSpace=wrap;" value="C_calculo_costos" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSb6" parent="CU56DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSh7" parent="CU56DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSb8" parent="CU56DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSh9" parent="CU56DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="registro_financiero" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSb10" parent="CU56DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSh11" parent="CU56DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="bitacora_auditoria" vertex="1">
+          <mxGeometry height="50" width="150" x="1580" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSb12" parent="CU56DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="620" width="10" x="1650" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSe13" edge="1" parent="CU56DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSn14" connectable="0" parent="CU56DSe13" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSt15" connectable="0" parent="CU56DSe13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="ingresar_valor_neto(id_ot, valor_neto)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe16" edge="1" parent="CU56DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSn17" connectable="0" parent="CU56DSe16" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSt18" connectable="0" parent="CU56DSe16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="ingresar_valor_neto(id_ot, valor_neto)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe19" edge="1" parent="CU56DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="270" />
+              <mxPoint x="850" y="300" />
+            </Array>
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="760" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSn20" connectable="0" parent="CU56DSe19" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSt21" connectable="0" parent="CU56DSe19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="calcular_iva(valor_neto)" vertex="1">
+          <mxGeometry relative="1" x="0.4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe22" edge="1" parent="CU56DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="335" />
+              <mxPoint x="850" y="365" />
+            </Array>
+            <mxPoint x="760" y="335" as="sourcePoint" />
+            <mxPoint x="760" y="365" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSn23" connectable="0" parent="CU56DSe22" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSt24" connectable="0" parent="CU56DSe22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="calcular_valor_bruto(valor_neto, iva)" vertex="1">
+          <mxGeometry relative="1" x="0.4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe25" edge="1" parent="CU56DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="400" as="sourcePoint" />
+            <mxPoint x="1050" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSn26" connectable="0" parent="CU56DSe25" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSt27" connectable="0" parent="CU56DSe25" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="guardar_calculo(id_ot, valor_neto, iva, valor_bruto)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe28" edge="1" parent="CU56DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="445" as="sourcePoint" />
+            <mxPoint x="1350" y="445" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSn29" connectable="0" parent="CU56DSe28" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="6" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSt30" connectable="0" parent="CU56DSe28" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="UPDATE registro_financiero SET Estimacion_Costo=$1, IVA=$2 WHERE ID_OT=$3" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe31" edge="1" parent="CU56DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: filas_afectadas=1">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="490" as="sourcePoint" />
+            <mxPoint x="1060" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe32" edge="1" parent="CU56DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="535" as="sourcePoint" />
+            <mxPoint x="1650" y="535" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSn33" connectable="0" parent="CU56DSe32" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="7" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU56DSt34" connectable="0" parent="CU56DSe32" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="INSERT INTO bitacora_auditoria(Modulo_Afectado, Accion, Valor_Nuevo, ID_usuario)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe35" edge="1" parent="CU56DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: ID_Log generado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="580" as="sourcePoint" />
+            <mxPoint x="1060" y="580" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe36" edge="1" parent="CU56DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: calculo_guardado">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="625" as="sourcePoint" />
+            <mxPoint x="760" y="625" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe37" edge="1" parent="CU56DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_valor_bruto_y_exito()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="670" as="sourcePoint" />
+            <mxPoint x="460" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU56DSe38" edge="1" parent="CU56DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_valor_bruto_y_exito()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="715" as="sourcePoint" />
+            <mxPoint x="160" y="715" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pyJiETZ0phqzrKrLRIT_-0" edge="1" parent="CU56DS1" source="CU56DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU56DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="250" y="100" as="sourcePoint" />
+            <mxPoint x="250" y="80" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pyJiETZ0phqzrKrLRIT_-1" edge="1" parent="CU56DS1" source="CU56DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU56DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="510" y="150" as="sourcePoint" />
+            <mxPoint x="510" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pyJiETZ0phqzrKrLRIT_-2" edge="1" parent="CU56DS1" source="CU56DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0;exitY=0.065;exitDx=0;exitDy=0;exitPerimeter=0;" target="CU56DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="840" y="160" as="sourcePoint" />
+            <mxPoint x="840" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pyJiETZ0phqzrKrLRIT_-3" edge="1" parent="CU56DS1" source="CU56DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU56DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="970" y="180" as="sourcePoint" />
+            <mxPoint x="970" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pyJiETZ0phqzrKrLRIT_-4" edge="1" parent="CU56DS1" source="CU56DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU56DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1280" y="250" as="sourcePoint" />
+            <mxPoint x="1280" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pyJiETZ0phqzrKrLRIT_-5" edge="1" parent="CU56DS1" source="CU56DSb12" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU56DSh11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1540" y="230" as="sourcePoint" />
+            <mxPoint x="1540" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU57-DS" id="CU57-DS">
+    <mxGraphModel dx="1531" dy="914" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1780" pageHeight="1010" math="0" shadow="0">
+      <root>
+        <mxCell id="CU57DS0" />
+        <mxCell id="CU57DS1" parent="CU57DS0" />
+        <mxCell id="CU57DSh1" parent="CU57DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSb2" parent="CU57DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="710" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSh3" parent="CU57DS1" style="html=1;whiteSpace=wrap;" value="V_pagos" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSb4" parent="CU57DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="710" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSh5" parent="CU57DS1" style="html=1;whiteSpace=wrap;" value="C_calculo_costos" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSb6" parent="CU57DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="710" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSh7" parent="CU57DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSb8" parent="CU57DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="710" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSh9" parent="CU57DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="registro_financiero" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSb10" parent="CU57DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="710" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSe11" edge="1" parent="CU57DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="158" as="sourcePoint" />
+            <mxPoint x="450" y="158" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSn12" connectable="0" parent="CU57DSe11" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSt13" connectable="0" parent="CU57DSe11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="agregar_item_costo(id_ot, descripcion, monto)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe14" edge="1" parent="CU57DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSn15" connectable="0" parent="CU57DSe14" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSt16" connectable="0" parent="CU57DSe14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="agregar_item_costo(id_ot, descripcion, monto)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe17" edge="1" parent="CU57DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1050" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSn18" connectable="0" parent="CU57DSe17" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSt19" connectable="0" parent="CU57DSe17" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="obtener_costos_actuales(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe20" edge="1" parent="CU57DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="315" as="sourcePoint" />
+            <mxPoint x="1350" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSn21" connectable="0" parent="CU57DSe20" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSt22" connectable="0" parent="CU57DSe20" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT Estimacion_Costo, IVA FROM registro_financiero WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe23" edge="1" parent="CU57DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: costos_vigentes">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="360" as="sourcePoint" />
+            <mxPoint x="1060" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe24" edge="1" parent="CU57DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: neto_anterior, iva_anterior">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="405" as="sourcePoint" />
+            <mxPoint x="760" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe25" edge="1" parent="CU57DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="450" />
+              <mxPoint x="850" y="480" />
+            </Array>
+            <mxPoint x="760" y="450" as="sourcePoint" />
+            <mxPoint x="760" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSn26" connectable="0" parent="CU57DSe25" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSt27" connectable="0" parent="CU57DSe25" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="recalcular_neto(neto_anterior, monto_item)" vertex="1">
+          <mxGeometry relative="1" x="0.4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe28" edge="1" parent="CU57DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="515" />
+              <mxPoint x="850" y="545" />
+            </Array>
+            <mxPoint x="760" y="515" as="sourcePoint" />
+            <mxPoint x="760" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSn29" connectable="0" parent="CU57DSe28" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="6" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSt30" connectable="0" parent="CU57DSe28" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="recalcular_iva_proporcional(neto_actualizado)" vertex="1">
+          <mxGeometry relative="1" x="0.4" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe31" edge="1" parent="CU57DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="580" as="sourcePoint" />
+            <mxPoint x="1050" y="580" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSn32" connectable="0" parent="CU57DSe31" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="7" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSt33" connectable="0" parent="CU57DSe31" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="actualizar_costos(id_ot, neto_actualizado, iva, bruto)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe34" edge="1" parent="CU57DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="625" as="sourcePoint" />
+            <mxPoint x="1350" y="625" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSn35" connectable="0" parent="CU57DSe34" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="8" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU57DSt36" connectable="0" parent="CU57DSe34" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="UPDATE registro_financiero SET Estimacion_Costo=$1, IVA=$2 WHERE ID_OT=$3" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe37" edge="1" parent="CU57DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: filas_afectadas=1">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="670" as="sourcePoint" />
+            <mxPoint x="1060" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe38" edge="1" parent="CU57DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: costos_actualizados">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="715" as="sourcePoint" />
+            <mxPoint x="760" y="715" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe39" edge="1" parent="CU57DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_nuevo_valor_bruto()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="760" as="sourcePoint" />
+            <mxPoint x="460" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU57DSe40" edge="1" parent="CU57DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_nuevo_valor_bruto()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="805" as="sourcePoint" />
+            <mxPoint x="160" y="805" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4PbT9H8wwEBR7UiPpbZ-1" edge="1" parent="CU57DS1" source="CU57DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU57DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="230" y="120" as="sourcePoint" />
+            <mxPoint x="230" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4PbT9H8wwEBR7UiPpbZ-2" edge="1" parent="CU57DS1" source="CU57DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU57DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="550" y="150" as="sourcePoint" />
+            <mxPoint x="550" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4PbT9H8wwEBR7UiPpbZ-3" edge="1" parent="CU57DS1" source="CU57DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU57DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="830" y="180" as="sourcePoint" />
+            <mxPoint x="830" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4PbT9H8wwEBR7UiPpbZ-4" edge="1" parent="CU57DS1" source="CU57DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU57DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1110" y="190" as="sourcePoint" />
+            <mxPoint x="1110" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4PbT9H8wwEBR7UiPpbZ-5" edge="1" parent="CU57DS1" source="CU57DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU57DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1450" y="200" as="sourcePoint" />
+            <mxPoint x="1450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="CU58-DS" id="CU58-DS">
+    <mxGraphModel dx="1301" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2080" pageHeight="790" math="0" shadow="0">
+      <root>
+        <mxCell id="CU58DS0" />
+        <mxCell id="CU58DS1" parent="CU58DS0" />
+        <mxCell id="CU58DSh1" parent="CU58DS1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="48" width="30" x="140" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSb2" parent="CU58DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="490" width="10" x="150" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSh3" parent="CU58DS1" style="html=1;whiteSpace=wrap;" value="V_pagos" vertex="1">
+          <mxGeometry height="50" width="150" x="380" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSb4" parent="CU58DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="490" width="10" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSh5" parent="CU58DS1" style="html=1;whiteSpace=wrap;" value="C_resumen_financiero" vertex="1">
+          <mxGeometry height="50" width="150" x="680" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSb6" parent="CU58DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="490" width="10" x="750" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSh7" parent="CU58DS1" style="html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" value="C_POSTGRESQL" vertex="1">
+          <mxGeometry height="50" width="150" x="980" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSb8" parent="CU58DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="490" width="10" x="1050" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSh9" parent="CU58DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="orden_trabajo" vertex="1">
+          <mxGeometry height="50" width="150" x="1280" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSb10" parent="CU58DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="490" width="10" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSh11" parent="CU58DS1" style="html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" value="registro_financiero" vertex="1">
+          <mxGeometry height="50" width="150" x="1580" y="68" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSb12" parent="CU58DS1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="490" width="10" x="1650" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSe13" edge="1" parent="CU58DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="160" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSn14" connectable="0" parent="CU58DSe13" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSt15" connectable="0" parent="CU58DSe13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="abrir_resumen_financiero(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe16" edge="1" parent="CU58DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="460" y="225" as="sourcePoint" />
+            <mxPoint x="750" y="225" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSn17" connectable="0" parent="CU58DSe16" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="2" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSt18" connectable="0" parent="CU58DSe16" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="abrir_resumen_financiero(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe19" edge="1" parent="CU58DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="760" y="270" as="sourcePoint" />
+            <mxPoint x="1050" y="270" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSn20" connectable="0" parent="CU58DSe19" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="3" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSt21" connectable="0" parent="CU58DSe19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="obtener_resumen(id_ot)" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe22" edge="1" parent="CU58DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="315" as="sourcePoint" />
+            <mxPoint x="1350" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSn23" connectable="0" parent="CU58DSe22" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="4" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSt24" connectable="0" parent="CU58DSe22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT ID_OT, Servicio, Estado FROM orden_trabajo WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe25" edge="1" parent="CU58DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: datos_orden">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1350" y="360" as="sourcePoint" />
+            <mxPoint x="1060" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe26" edge="1" parent="CU58DS1" style="endArrow=block;endFill=1;html=1;align=left;verticalAlign=top;rounded=0;" value="">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1060" y="405" as="sourcePoint" />
+            <mxPoint x="1650" y="405" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSn27" connectable="0" parent="CU58DSe26" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=bottom;" value="5" vertex="1">
+          <mxGeometry relative="1" x="-1" as="geometry" />
+        </mxCell>
+        <mxCell id="CU58DSt28" connectable="0" parent="CU58DSe26" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="SELECT Estimacion_Costo, IVA, Estado_Pago FROM registro_financiero WHERE ID_OT=$1" vertex="1">
+          <mxGeometry relative="1" x="-0.0563" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe29" edge="1" parent="CU58DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: datos_financieros">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1650" y="450" as="sourcePoint" />
+            <mxPoint x="1060" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe30" edge="1" parent="CU58DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: resumen_financiero">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="1050" y="495" as="sourcePoint" />
+            <mxPoint x="760" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe31" edge="1" parent="CU58DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_resumen_con_monto_bruto()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="750" y="540" as="sourcePoint" />
+            <mxPoint x="460" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="CU58DSe32" edge="1" parent="CU58DS1" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" value="return: mostrar_resumen_con_monto_bruto()">
+          <mxGeometry relative="1" x="-1" as="geometry">
+            <mxPoint x="450" y="585" as="sourcePoint" />
+            <mxPoint x="160" y="585" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="47vdsWxHgSRCNZLfVg78-0" edge="1" parent="CU58DS1" source="CU58DSb2" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU58DSh1" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="270" y="120" as="sourcePoint" />
+            <mxPoint x="270" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="47vdsWxHgSRCNZLfVg78-1" edge="1" parent="CU58DS1" source="CU58DSb4" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU58DSh3" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="530" y="160" as="sourcePoint" />
+            <mxPoint x="530" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="47vdsWxHgSRCNZLfVg78-2" edge="1" parent="CU58DS1" source="CU58DSb6" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU58DSh5" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="820" y="180" as="sourcePoint" />
+            <mxPoint x="820" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="47vdsWxHgSRCNZLfVg78-3" edge="1" parent="CU58DS1" source="CU58DSb8" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU58DSh7" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1060" y="180" as="sourcePoint" />
+            <mxPoint x="1060" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="47vdsWxHgSRCNZLfVg78-4" edge="1" parent="CU58DS1" source="CU58DSb10" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU58DSh9" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1480" y="190" as="sourcePoint" />
+            <mxPoint x="1480" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="47vdsWxHgSRCNZLfVg78-5" edge="1" parent="CU58DS1" source="CU58DSb12" style="endArrow=none;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;" target="CU58DSh11" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1790" y="200" as="sourcePoint" />
+            <mxPoint x="1790" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
