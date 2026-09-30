@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Eye, Filter, Pencil, Search, Shield, Trash2, Upload, UserMinus, UserPlus, X } from 'lucide-react'
+import { Eye, Filter, Mail, Pencil, Search, Shield, Trash2, Upload, UserMinus, UserPlus, X } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
@@ -34,6 +34,7 @@ export function UsersTable({ onCreateClick }: UsersTableProps) {
   const openUserDeactivateModal = useUsersStore((s) => s.openUserDeactivateModal)
   const openUserReactivateModal = useUsersStore((s) => s.openUserReactivateModal)
   const openAssignRoleModal = useUsersStore((s) => s.openAssignRoleModal)
+  const openUserEmailConsultModal = useUsersStore((s) => s.openUserEmailConsultModal)
   const addToast = useUsersStore((s) => s.addToast)
 
   const [search, setSearch] = useState('')
@@ -129,6 +130,15 @@ export function UsersTable({ onCreateClick }: UsersTableProps) {
             title="Asignar rol"
           >
             <Shield className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => openUserEmailConsultModal(row)}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-primary"
+            aria-label={`Gestionar correo de ${row.name}`}
+            title="Correo electrónico"
+          >
+            <Mail className="h-4 w-4" />
           </button>
           {row.status === 'Activo' ? (
             <button

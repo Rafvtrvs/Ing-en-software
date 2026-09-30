@@ -400,6 +400,45 @@ export interface SystemUser {
   createdAt?: string
   /** RF64 CDS 221/222 — fecha de desactivación */
   deactivatedAt?: string
+  /** RF70 — correo vinculado para notificaciones */
+  emailLinked?: boolean
+}
+
+/** RF55 — trazo sobre evidencia fotográfica */
+export interface PhotoDrawingStroke {
+  points: { x: number; y: number }[]
+  color: string
+  width: number
+}
+
+/** RF55 — anotación guardada sin alterar imagen original */
+export interface OrderPhotoAnnotation {
+  photoUrl: string
+  strokes: PhotoDrawingStroke[]
+  savedAt?: string
+}
+
+/** RF46 — registro offline pendiente de sincronización */
+export type OfflineSyncStatus = 'pendiente' | 'sincronizado' | 'error'
+
+export interface OfflineSyncEntry {
+  id: string
+  module: string
+  summary: string
+  status: OfflineSyncStatus
+  createdAt: string
+  syncedAt?: string
+  errorMessage?: string
+}
+
+/** RF47 — fila de reporte de intervenciones de terceros */
+export interface ThirdPartyReportRow {
+  id: string
+  orderId: string
+  client: string
+  company: string
+  detail: string
+  registeredAt: string
 }
 
 /** RF64 CDS 223 — historial de desactivación/eliminación */
@@ -506,6 +545,7 @@ export type ReportTab =
   | 'activos'
   | 'costos'
   | 'tecnicos'
+  | 'terceros'
   | 'auditoria'
 
 export type ReportPeriod = 'month' | 'quarter' | 'year'

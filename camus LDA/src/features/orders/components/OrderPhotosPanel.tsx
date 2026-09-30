@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { Camera, Trash2 } from 'lucide-react'
+import { Camera, Pencil, Trash2 } from 'lucide-react'
+import { OrderPhotoAnnotationModal } from '@/features/orders/components/OrderPhotoAnnotationModal'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
 import { Input } from '@/components/ui/Input'
@@ -17,6 +18,7 @@ export function OrderPhotosPanel({
   const addPhotoUrl = useOrdersStore((s) => s.addPhotoUrl)
   const removePhotoUrl = useOrdersStore((s) => s.removePhotoUrl)
   const [url, setUrl] = useState('')
+  const [annotatePhoto, setAnnotatePhoto] = useState<string | null>(null)
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -65,14 +67,24 @@ export function OrderPhotosPanel({
                 {photo}
               </a>
               {canEdit && (
-                <button
-                  type="button"
-                  onClick={() => removePhotoUrl(order.id, photo)}
-                  className="absolute right-1 top-1 rounded bg-white/90 p-1 text-red-500 opacity-0 shadow group-hover:opacity-100"
-                  aria-label="Quitar foto"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                <div className="absolute right-1 top-1 flex gap-1 opacity-0 group-hover:opacity-100">
+                  <button
+                    type="button"
+                    onClick={() => setAnnotatePhoto(photo)}
+                    className="rounded bg-white/90 p-1 text-primary shadow"
+                    aria-label="Realizar anotación en imagen"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removePhotoUrl(order.id, photo)}
+                    className="rounded bg-white/90 p-1 text-red-500 shadow"
+                    aria-label="Quitar foto"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               )}
             </div>
           ))}
@@ -95,6 +107,15 @@ export function OrderPhotosPanel({
 
       {photos.length === 0 && (
         <p className="text-sm text-slate-500">Sin evidencias fotográficas.</p>
+      )}
+
+      {annotatePhoto && (
+        <OrderPhotoAnnotationModal
+          orderId={order.id}
+          photoUrl={annotatePhoto}
+          open={Boolean(annotatePhoto)}
+          onClose={() => setAnnotatePhoto(null)}
+        />
       )}
     </div>
   )

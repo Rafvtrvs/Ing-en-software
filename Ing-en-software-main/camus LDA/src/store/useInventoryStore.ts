@@ -20,6 +20,7 @@ import { findDuplicateProductCode } from '@/features/inventory/utils/productDupl
 import { assetsService } from '@/services/assetsService'
 import { useNotificationsStore } from '@/store/useNotificationsStore'
 import axios from 'axios'
+import { isDemoMode, isOfflineApiError } from '@/utils/demoMode'
 
 export type InventoryModalMode = 'create' | 'edit' | 'view' | 'delete' | null
 export type ModalEntity = 'product' | 'category' | 'supplier' | 'kit'
@@ -80,6 +81,7 @@ interface InventoryState {
   setCategoryFilter: (category: string) => void
   toggleFilters: () => void
   getActiveCategoryNames: () => string[]
+  deductStock: (productId: string, quantity: number, orderId?: string) => void
   addToast: (message: string, type?: ToastMessage['type']) => void
   removeToast: (id: number) => void
 }
@@ -220,11 +222,21 @@ export const useInventoryStore = create<InventoryState>()(
           return { products, selectedProduct }
         })
 
+        if (isDemoMode()) {
+          useInventoryStore.getState().addToast('Producto actualizado correctamente')
+          return { ok: true }
+        }
+
         try {
           await assetsService.update(id, data)
           set({ apiAvailable: true })
+          useInventoryStore.getState().addToast('Producto actualizado correctamente')
           return { ok: true }
         } catch (err) {
+          if (isOfflineApiError(err)) {
+            useInventoryStore.getState().addToast('Producto actualizado correctamente (modo demo)')
+            return { ok: true }
+          }
           set((s) => ({
             products: s.products.map((p) => (p.id === id ? previous : p)),
           }))
@@ -392,6 +404,31 @@ export const useInventoryStore = create<InventoryState>()(
       setStatusFilter: (status) => set({ statusFilter: status }),
       setCategoryFilter: (category) => set({ categoryFilter: category }),
       toggleFilters: () => set((state) => ({ showFilters: !state.showFilters })),
+
+      /** RF62 CDS 214 — descuenta stock al registrar insumos en OT */
+      deductStock: (productId, quantity, orderId) => {
+        const now = new Date().toLocaleString('es-CL')
+        set((state) => {
+          const products = state.products.map((p) => {
+            if (p.id !== productId) return p
+            const currentStock = Math.max(0, p.currentStock - quantity)
+            const updated = { ...p, currentStock }
+            return { ...updated, ...withStatus(updated) }
+          })
+          const product = state.products.find((p) => p.id === productId)
+          const movement: StockMovement = {
+            id: safeId('mov-'),
+            productId,
+            product: product?.name ?? 'Insumo',
+            type: 'Salida',
+            quantity,
+            date: now,
+            detail: orderId ? `Uso en OT ${orderId}` : 'Uso en orden de trabajo',
+            user: 'Sistema',
+          }
+          return { products, movements: [movement, ...state.movements] }
+        })
+      },
 
       addToast: (message, type = 'success') => {
         const id = ++toastId

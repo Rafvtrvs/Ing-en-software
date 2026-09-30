@@ -17,9 +17,21 @@ import { RoleFormModal } from './components/RoleFormModal'
 import { RoleViewModal } from './components/RoleViewModal'
 import { DeleteRoleModal } from './components/DeleteRoleModal'
 
+import { DeactivateUserModal } from './components/DeactivateUserModal'
+import { ReactivateUserModal } from './components/ReactivateUserModal'
+import { UserLifecycleHistoryPanel } from './components/UserLifecycleHistoryPanel'
+import { AssignRoleModal } from './components/AssignRoleModal'
+import { RoleAssignmentHistoryPanel } from './components/RoleAssignmentHistoryPanel'
+import { UserEmailConsultModal } from './components/UserEmailConsultModal'
+import { LinkUserEmailModal } from './components/LinkUserEmailModal'
+import { UnlinkUserEmailModal } from './components/UnlinkUserEmailModal'
+import { UserEmailHelpPanel } from './components/UserEmailHelpPanel'
+
 const USERS_TABS: { id: UsersTab; label: string }[] = [
   { id: 'usuarios', label: 'Usuarios' },
   { id: 'roles', label: 'Roles y Permisos' },
+  { id: 'asignaciones', label: 'Asignaciones' },
+  { id: 'historial', label: 'Historial' },
 ]
 
 export function UsersPage() {
@@ -41,6 +53,7 @@ export function UsersPage() {
   const kpis = getUsersKpis(users, roles)
 
   const handleNew = () => {
+    if (activeTab === 'historial' || activeTab === 'asignaciones') return
     if (activeTab === 'usuarios') openUserCreateModal()
     else openRoleCreateModal()
   }
@@ -52,9 +65,11 @@ export function UsersPage() {
           title="Usuarios y Roles"
           subtitle="Administra usuarios, permisos y roles del sistema."
           action={
-            <Button leftIcon={<Plus className="h-4 w-4" />} onClick={handleNew}>
-              {activeTab === 'usuarios' ? 'Nuevo Usuario' : 'Nuevo Rol'}
-            </Button>
+            activeTab !== 'historial' && activeTab !== 'asignaciones' ? (
+              <Button leftIcon={<Plus className="h-4 w-4" />} onClick={handleNew}>
+                {activeTab === 'usuarios' ? 'Nuevo Usuario' : 'Nuevo Rol'}
+              </Button>
+            ) : undefined
           }
         />
 
@@ -68,7 +83,8 @@ export function UsersPage() {
 
         {activeTab === 'usuarios' && (
           <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+            <div className="space-y-4 lg:col-span-2">
+              <UserEmailHelpPanel />
               <UsersTable onCreateClick={openUserCreateModal} />
             </div>
             <UsersByRoleChart />
@@ -76,6 +92,10 @@ export function UsersPage() {
         )}
 
         {activeTab === 'roles' && <RolesPanel onCreateClick={openRoleCreateModal} />}
+
+        {activeTab === 'asignaciones' && <RoleAssignmentHistoryPanel />}
+
+        {activeTab === 'historial' && <UserLifecycleHistoryPanel />}
       </div>
 
       <UserFormModal mode="create" open={userModalMode === 'create'} onClose={closeUserModal} />
@@ -89,6 +109,36 @@ export function UsersPage() {
       <DeleteUserModal
         user={selectedUser}
         open={userModalMode === 'delete'}
+        onClose={closeUserModal}
+      />
+      <DeactivateUserModal
+        user={selectedUser}
+        open={userModalMode === 'deactivate'}
+        onClose={closeUserModal}
+      />
+      <ReactivateUserModal
+        user={selectedUser}
+        open={userModalMode === 'reactivate'}
+        onClose={closeUserModal}
+      />
+      <AssignRoleModal
+        user={selectedUser}
+        open={userModalMode === 'assignRole'}
+        onClose={closeUserModal}
+      />
+      <UserEmailConsultModal
+        user={selectedUser}
+        open={userModalMode === 'consultEmail'}
+        onClose={closeUserModal}
+      />
+      <LinkUserEmailModal
+        user={selectedUser}
+        open={userModalMode === 'linkEmail'}
+        onClose={closeUserModal}
+      />
+      <UnlinkUserEmailModal
+        user={selectedUser}
+        open={userModalMode === 'unlinkEmail'}
         onClose={closeUserModal}
       />
 

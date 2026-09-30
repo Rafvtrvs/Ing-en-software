@@ -11,7 +11,9 @@ import type {
   OrderPriority,
   OrderRescheduleEvent,
   OrderStatus,
+  OrderPhotoAnnotation,
   OrderSupplyUsage,
+  PhotoDrawingStroke,
   ThirdPartyIntervention,
   WorkOrder,
 } from '@/types'
@@ -118,6 +120,14 @@ interface OrdersState {
   ) => void
   addPhotoUrl: (orderId: string, url: string) => void
   removePhotoUrl: (orderId: string, url: string) => void
+  /** RF55 — anotaciones sobre fotos */
+  photoAnnotationsByOrderId: Record<string, OrderPhotoAnnotation[]>
+  getPhotoAnnotation: (orderId: string, photoUrl: string) => OrderPhotoAnnotation | undefined
+  savePhotoAnnotation: (
+    orderId: string,
+    photoUrl: string,
+    strokes: PhotoDrawingStroke[],
+  ) => void
   addThirdParty: (
     orderId: string,
     data: Omit<ThirdPartyIntervention, 'id' | 'orderId' | 'registeredAt'>,
@@ -320,6 +330,7 @@ export const useOrdersStore = create<OrdersState>()(
       modificationHistoryByOrderId: groupModificationHistoryByOrder(
         initialModificationHistory,
       ),
+      photoAnnotationsByOrderId: {},
       modalMode: null,
       selectedOrder: null,
       statusFilter: 'all',
@@ -668,6 +679,29 @@ export const useOrdersStore = create<OrdersState>()(
         if (!order) return
         get().updateOrder(orderId, {
           photoUrls: (order.photoUrls ?? []).filter((u) => u !== url),
+        })
+      },
+
+      getPhotoAnnotation: (orderId, photoUrl) => {
+        const list = get().photoAnnotationsByOrderId[orderId] ?? []
+        return list.find((a) => a.photoUrl === photoUrl)
+      },
+
+      savePhotoAnnotation: (orderId, photoUrl, strokes) => {
+        const entry = {
+          photoUrl,
+          strokes,
+          savedAt: new Date().toISOString(),
+        }
+        set((state) => {
+          const prev = state.photoAnnotationsByOrderId[orderId] ?? []
+          const without = prev.filter((a) => a.photoUrl !== photoUrl)
+          return {
+            photoAnnotationsByOrderId: {
+              ...state.photoAnnotationsByOrderId,
+              [orderId]: [entry, ...without],
+            },
+          }
         })
       },
 
@@ -1174,6 +1208,7 @@ export const useOrdersStore = create<OrdersState>()(
         rescheduleHistoryByOrderId: state.rescheduleHistoryByOrderId,
         modificationRequests: state.modificationRequests,
         modificationHistoryByOrderId: state.modificationHistoryByOrderId,
+        photoAnnotationsByOrderId: state.photoAnnotationsByOrderId,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<OrdersState> | undefined

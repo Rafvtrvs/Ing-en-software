@@ -79,8 +79,10 @@ export const initialOrders: WorkOrder[] = [
     operators: [{ id: 'u3', name: 'Luis Torres' }],
     progress: 0,
     equipmentId: 'eq-3',
+    executionDate: '2026-05-28',
     truckCode: 'CAM-009',
     startDate: '2026-05-22',
+    endDate: '2026-05-23',
     photoUrls: ['https://picsum.photos/seed/ot128/400/280'],
   },
   {
@@ -99,7 +101,8 @@ export const initialOrders: WorkOrder[] = [
     progress: 60,
     equipmentId: 'eq-2',
     truckCode: 'CAM-012',
-    startDate: '2026-05-22',
+    startDate: '2026-05-21',
+    endDate: '2026-05-25',
     photoUrls: [],
   },
   {
@@ -150,7 +153,8 @@ export const initialOrders: WorkOrder[] = [
     ],
     progress: 35,
     truckCode: 'CAM-009',
-    startDate: '2026-05-20',
+    startDate: '2026-05-19',
+    endDate: '2026-05-24',
     photoUrls: [
       'https://picsum.photos/seed/ot124a/400/280',
       'https://picsum.photos/seed/ot124b/400/280',

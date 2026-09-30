@@ -1,4 +1,5 @@
-import { Calendar, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Calendar, ClipboardList } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { KpiCard } from '@/components/ui/KpiCard'
@@ -11,12 +12,21 @@ import { TechniciansList } from './components/TechniciansList'
 import { FieldAlerts } from './components/FieldAlerts'
 import { DaySchedule } from './components/DaySchedule'
 import { FieldOrdersTable } from './components/FieldOrdersTable'
+import { OperatorAvailabilityPanel } from './components/OperatorAvailabilityPanel'
+import { OperatorAssignmentsPanel } from './components/OperatorAssignmentsPanel'
 import { MobileAppCard } from './components/MobileAppCard'
+import { FieldOrderRegisterModal } from './components/FieldOrderRegisterModal'
+import { OfflineSyncPanel } from './components/OfflineSyncPanel'
+import { OrderDetailDrawer } from '@/features/orders/components/OrderDetailDrawer'
+import { useOrdersStore } from '@/store/useOrdersStore'
 
 export function OperationsPage() {
+  const [fieldRegisterOpen, setFieldRegisterOpen] = useState(false)
   const toasts = useOperationsStore((s) => s.toasts)
   const removeToast = useOperationsStore((s) => s.removeToast)
-  const addToast = useOperationsStore((s) => s.addToast)
+  const modalMode = useOrdersStore((s) => s.modalMode)
+  const selectedOrder = useOrdersStore((s) => s.selectedOrder)
+  const closeModal = useOrdersStore((s) => s.closeModal)
   const kpis = getOperationsKpis()
   const today = formatDate(new Date())
 
@@ -33,10 +43,10 @@ export function OperationsPage() {
                 {today}
               </div>
               <Button
-                leftIcon={<Plus className="h-4 w-4" />}
-                onClick={() => addToast('Asignación de operación — próximamente', 'info')}
+                leftIcon={<ClipboardList className="h-4 w-4" />}
+                onClick={() => setFieldRegisterOpen(true)}
               >
-                Asignar Operación
+                Registrar orden de trabajo
               </Button>
             </div>
           }
@@ -61,8 +71,22 @@ export function OperationsPage() {
           </div>
         </div>
 
+        <div className="space-y-6">
+          <OperatorAvailabilityPanel />
+          <OperatorAssignmentsPanel />
+        </div>
+
+        <OfflineSyncPanel />
         <MobileAppCard />
       </div>
+
+      <FieldOrderRegisterModal open={fieldRegisterOpen} onClose={() => setFieldRegisterOpen(false)} />
+
+      <OrderDetailDrawer
+        order={selectedOrder}
+        open={modalMode === 'view'}
+        onClose={closeModal}
+      />
 
       <ToastContainerView toasts={toasts} onRemove={removeToast} />
     </>

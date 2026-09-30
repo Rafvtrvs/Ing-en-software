@@ -1,4 +1,5 @@
-import { Calendar, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Calendar, ClipboardList, Plus } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { KpiCard } from '@/components/ui/KpiCard'
@@ -14,10 +15,13 @@ import { FieldOrdersTable } from './components/FieldOrdersTable'
 import { OperatorAvailabilityPanel } from './components/OperatorAvailabilityPanel'
 import { OperatorAssignmentsPanel } from './components/OperatorAssignmentsPanel'
 import { MobileAppCard } from './components/MobileAppCard'
+import { FieldOrderRegisterModal } from './components/FieldOrderRegisterModal'
+import { OfflineSyncPanel } from './components/OfflineSyncPanel'
 import { OrderDetailDrawer } from '@/features/orders/components/OrderDetailDrawer'
 import { useOrdersStore } from '@/store/useOrdersStore'
 
 export function OperationsPage() {
+  const [fieldRegisterOpen, setFieldRegisterOpen] = useState(false)
   const toasts = useOperationsStore((s) => s.toasts)
   const removeToast = useOperationsStore((s) => s.removeToast)
   const addToast = useOperationsStore((s) => s.addToast)
@@ -40,10 +44,17 @@ export function OperationsPage() {
                 {today}
               </div>
               <Button
+                variant="outline"
                 leftIcon={<Plus className="h-4 w-4" />}
                 onClick={() => addToast('Asignación de operación — próximamente', 'info')}
               >
                 Asignar Operación
+              </Button>
+              <Button
+                leftIcon={<ClipboardList className="h-4 w-4" />}
+                onClick={() => setFieldRegisterOpen(true)}
+              >
+                Registrar orden de trabajo
               </Button>
             </div>
           }
@@ -73,8 +84,14 @@ export function OperationsPage() {
           <OperatorAssignmentsPanel />
         </div>
 
+        <OfflineSyncPanel />
         <MobileAppCard />
       </div>
+
+      <FieldOrderRegisterModal
+        open={fieldRegisterOpen}
+        onClose={() => setFieldRegisterOpen(false)}
+      />
 
       <OrderDetailDrawer
         order={selectedOrder}
