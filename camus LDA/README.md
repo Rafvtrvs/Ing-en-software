@@ -10,7 +10,7 @@ Frontend SaaS para gestión de operaciones, clientes, órdenes, inventario, fact
 - Zustand · Axios · Recharts · React Hook Form · Lucide React
 
 ## Inicio rápido
-
+IMPORTANTE: ejecutar npx prisma db push en /server para agregar las tablas nuevas
 ```bash
 npm install
 npm run dev
