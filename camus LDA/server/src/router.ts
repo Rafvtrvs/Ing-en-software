@@ -9,6 +9,7 @@ import { authController } from './controllers/auth.controller.js'
 import { clientController } from './controllers/client.controller.js'
 import { orderController } from './controllers/order.controller.js'
 import { interventionController } from './controllers/intervention.controller.js'
+import { documentController } from './controllers/document.controller.js'
 import { assetController } from './controllers/asset.controller.js'
 import { reportController } from './controllers/report.controller.js'
 
@@ -48,6 +49,23 @@ router.put(
   '/orders/:id/interventions/:interventionId',
   requireAuth,
   interventionController.update,
+)
+
+// Documentos / contratos / reportes (RF-40..42)
+router.get(
+  '/orders/:orderId/documents',
+  optionalAuth,
+  documentController.listByOrder,
+)
+router.post(
+  '/orders/:orderId/documents',
+  requireAuth,
+  documentController.create,
+)
+router.post(
+  '/documents/:documentId/versions',
+  requireAuth,
+  documentController.addVersion,
 )
 
 // Activos / inventario

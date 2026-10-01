@@ -96,6 +96,8 @@ export interface WorkOrder {
   thirdParties?: ThirdPartyIntervention[]
   /** Timestamp última generación PDF resumen — CU-173 */
   pdfGeneratedAt?: string
+  /** Documentos adjuntos / contratos / reportes — RF-40..42 */
+  documents?: OrderDocument[]
   /** RF61 CDS 211 — motivo de cancelación */
   cancelReason?: string
   /** RF61 CDS 212 — motivo de anulación (orden duplicada) */
@@ -653,11 +655,47 @@ export interface UserProfileSettings {
   avatar?: string
 }
 
+/** Paletas de series para gráficos (RF-37 CU-128) */
+export type ChartColorPalette = 'default' | 'ocean' | 'forest' | 'sunset'
+
 export interface AppAppearanceSettings {
   theme: AppTheme
   compactSidebar: boolean
   language: 'es' | 'en'
   dateFormat: 'dd/mm/yyyy' | 'mm/dd/yyyy'
+  /** Color de acento menú / paneles — RF-37 CU-126 */
+  accentColor: string
+  /** Filas alternas en tablas — RF-37 CU-127 */
+  zebraTables: boolean
+  /** Contraste alto en tablas */
+  highContrastTables: boolean
+  /** Paleta de gráficos — RF-37 CU-128 */
+  chartPalette: ChartColorPalette
+}
+
+/** Tipo de documento vinculado a OT — RF-40 / RF-41 */
+export type OrderDocumentKind = 'general' | 'contrato' | 'reporte'
+
+export interface OrderDocumentVersion {
+  version: number
+  fileName: string
+  url: string
+  mimeType: string
+  sizeBytes: number
+  uploadedAt: string
+  uploadedBy: string
+  note?: string
+}
+
+/** Documento adjunto a una OT con historial de versiones — RF-40..42 */
+export interface OrderDocument {
+  id: string
+  orderId: string
+  kind: OrderDocumentKind
+  title: string
+  currentVersion: number
+  versions: OrderDocumentVersion[]
+  createdAt: string
 }
 
 export interface SecuritySettings {

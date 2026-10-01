@@ -27,6 +27,7 @@ import { OrderDatesPanel } from '@/features/orders/components/OrderDatesPanel'
 import { OrderPhotosPanel } from '@/features/orders/components/OrderPhotosPanel'
 import { OrderPdfPanel } from '@/features/orders/components/OrderPdfPanel'
 import { ThirdPartyPanel } from '@/features/orders/components/ThirdPartyPanel'
+import { OrderDocumentsPanel } from '@/features/orders/components/OrderDocumentsPanel'
 import { OrderSuppliesPanel } from '@/features/orders/components/OrderSuppliesPanel'
 import { OrderApprovalPanel } from '@/features/orders/components/OrderApprovalPanel'
 import { OrderCommentsPanel } from '@/features/orders/components/OrderCommentsPanel'
@@ -419,6 +420,9 @@ export function OrderDetailDrawer({
 
           {/* CU-188–191 */}
           <ThirdPartyPanel order={order} canEdit={editable} />
+
+          {/* RF-40..42 documentos / contratos / versiones */}
+          <OrderDocumentsPanel order={order} canEdit={editable} />
 
           {/* CU-173–176 */}
           <OrderPdfPanel order={order} />

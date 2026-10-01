@@ -32,8 +32,16 @@ export function Sidebar() {
         </p>
       </div>
 
-      <nav className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4">
-        {sections.map((section, idx) => (
+      <nav
+        className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4"
+        aria-label="Menú principal"
+      >
+        {sections.length === 0 ? (
+          <p className="px-3 text-xs text-slate-400">
+            No hay secciones disponibles para tu rol.
+          </p>
+        ) : (
+          sections.map((section, idx) => (
           <div key={idx} className={cn(idx > 0 && 'mt-6')}>
             {section.title && (
               <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
@@ -62,7 +70,8 @@ export function Sidebar() {
               ))}
             </ul>
           </div>
-        ))}
+          ))
+        )}
       </nav>
 
       <div className="border-t border-white/10 p-3">

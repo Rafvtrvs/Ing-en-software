@@ -18,6 +18,7 @@ interface DataTableProps<T> {
   selectedKey?: string | null
 }
 
+/** RF-37 CU-127: respeta zebra / alto contraste desde preferencias (html[data-*]) */
 export function DataTable<T>({
   columns,
   data,
@@ -27,11 +28,29 @@ export function DataTable<T>({
   onRowClick,
   selectedKey,
 }: DataTableProps<T>) {
+  const zebraOn =
+    typeof document !== 'undefined' &&
+    document.documentElement.dataset.zebraTables === 'true'
+  const highContrast =
+    typeof document !== 'undefined' &&
+    document.documentElement.dataset.highContrastTables === 'true'
+
   return (
     <div className={cn('overflow-x-auto', className)}>
-      <table className={cn('w-full text-left text-sm', tableClassName)}>
+      <table
+        className={cn(
+          'w-full text-left text-sm',
+          highContrast && 'border border-slate-300',
+          tableClassName,
+        )}
+      >
         <thead>
-          <tr className="border-b border-slate-100 bg-slate-50/80">
+          <tr
+            className={cn(
+              'border-b border-slate-100 bg-slate-50/80',
+              highContrast && 'border-slate-400 bg-slate-200',
+            )}
+          >
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -46,7 +65,7 @@ export function DataTable<T>({
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-50">
-          {data.map((row) => {
+          {data.map((row, index) => {
             const rowKey = keyExtractor(row)
             const isSelected = selectedKey === rowKey
             return (
@@ -55,6 +74,7 @@ export function DataTable<T>({
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 className={cn(
                   'transition-colors',
+                  zebraOn && index % 2 === 1 && 'bg-slate-50/90',
                   onRowClick && 'cursor-pointer hover:bg-slate-50/80',
                   isSelected && 'bg-primary/5 ring-1 ring-inset ring-primary/20',
                 )}
