@@ -25,6 +25,9 @@ import { InterventionHistoryPanel } from '@/features/orders/components/Intervent
 import { OrderAssignmentPanel } from '@/features/orders/components/OrderAssignmentPanel'
 import { OrderDatesPanel } from '@/features/orders/components/OrderDatesPanel'
 import { OrderPhotosPanel } from '@/features/orders/components/OrderPhotosPanel'
+import { StatusHistoryPanel } from '@/features/orders/components/StatusHistoryPanel'
+import { OrderEvidencePanel } from '@/features/orders/components/OrderEvidencePanel'
+import { OrderLocationCard } from '@/features/orders/components/OrderLocationCard'
 import { OrderPdfPanel } from '@/features/orders/components/OrderPdfPanel'
 import { ThirdPartyPanel } from '@/features/orders/components/ThirdPartyPanel'
 import { OrderSuppliesPanel } from '@/features/orders/components/OrderSuppliesPanel'
@@ -78,26 +81,6 @@ function ProgressBar({ value }: { value: number }) {
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
         <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
       </div>
-    </div>
-  )
-}
-
-function MapCard({ address }: { address: string }) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-        <MapPin className="h-4 w-4 text-slate-400" />
-        Ubicación
-      </div>
-      <div className="mt-3 overflow-hidden rounded-lg border border-slate-100 bg-slate-50">
-        <div className="flex h-32 items-center justify-center">
-          <div className="text-center">
-            <MapPin className="mx-auto h-6 w-6 text-slate-300" />
-            <p className="mt-2 text-xs text-slate-500">Mapa (placeholder)</p>
-          </div>
-        </div>
-      </div>
-      <p className="mt-3 text-sm text-slate-600">{address}</p>
     </div>
   )
 }
@@ -414,7 +397,14 @@ export function OrderDetailDrawer({
           {/* CU-150–151 */}
           <InterventionHistoryPanel orderId={order.id} canEdit={editable} />
 
-          {/* Evidencia fotográfica */}
+          {/* RF09 CU-30–34: evidencia visual en servidor */}
+          <OrderEvidencePanel
+            order={order}
+            canUpload={editable}
+            canManage={canApprove}
+          />
+
+          {/* Evidencia fotográfica por URL */}
           <OrderPhotosPanel order={order} canEdit={editable} />
 
           {/* CU-188–191 */}
@@ -429,8 +419,11 @@ export function OrderDetailDrawer({
           {/* RF68 CDS 235 */}
           <OrderModificationHistoryPanel orderId={order.id} />
 
+          {/* RF29 CU-99 */}
+          {canApprove && <StatusHistoryPanel orderId={order.id} refreshKey={order.status} />}
+
           <ProgressBar value={order.progress ?? 0} />
-          <MapCard address={order.address} />
+          <OrderLocationCard order={order} />
         </div>
       )}
     </Drawer>

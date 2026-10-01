@@ -23,6 +23,48 @@ interface OrderInput {
   technician?: string
   operatorIds?: string[]
   idOperador?: number | null
+  // Nuevos: coordenadas (opcionales)
+  latitude?: number
+  longitude?: number
+  dueDate?: string
+}
+
+function validateCoordinates(lat?: number, lon?: number) {
+  if (lat === undefined && lon === undefined) return
+  if (lat !== undefined) {
+    if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+      const e: any = new Error('Invalid coordinates: latitude must be between -90 and 90')
+      e.status = 400
+      e.field = 'latitude'
+      throw e
+    }
+  }
+  if (lon !== undefined) {
+    if (!Number.isFinite(lon) || lon < -180 || lon > 180) {
+      const e: any = new Error('Invalid coordinates: longitude must be between -180 and 180')
+      e.status = 400
+      e.field = 'longitude'
+      throw e
+    }
+  }
+}
+
+function requireAddressOrCoordinates(address?: string, lat?: number, lon?: number) {
+  const hasAddress = typeof address === 'string' && address.trim().length > 0
+  const hasCoords = lat !== undefined || lon !== undefined
+  if (!hasAddress && !hasCoords) {
+    const e: any = new Error('Se requiere dirección o coordenadas')
+    e.status = 400
+    e.field = 'address'
+    throw e
+  }
+  // si viene address, validación mínima
+  if (hasAddress && address!.trim().length < 5) {
+    const e: any = new Error('Dirección demasiado corta')
+    e.status = 400
+    e.field = 'address'
+    throw e
+  }
 }
 
 function genId() {
@@ -72,9 +114,23 @@ export const orderService = {
     return rows.map(toOrderDto)
   },
 
+  async get(id: string) {
+    const row = await prisma.ordenTrabajo.findUnique({ where: { id }, include: { cliente: true, operador: true } })
+    if (!row) {
+      const e: any = new Error('Orden no encontrada')
+      e.status = 404
+      throw e
+    }
+    return toOrderDto(row)
+  },
+
   async create(input: OrderInput, userId?: number) {
     const idCliente = input.idCliente ?? (await resolveCliente(input.client))
     const idOperador = await resolveOperador(input)
+    // Validar que exista dirección o coordenadas y que tengan formato válido
+    requireAddressOrCoordinates(input.address, input.latitude, input.longitude)
+    validateCoordinates(input.latitude, input.longitude)
+
     const row = await prisma.ordenTrabajo.create({
       data: {
         id: input.id || genId(),
@@ -85,6 +141,8 @@ export const orderService = {
         prioridad: input.priority ?? 'Media',
         progreso: input.progress ?? 0,
         ordenVisual: input.sortOrder ?? 0,
+        latitud: input.latitude ?? null,
+        longitud: input.longitude ?? null,
         idCliente,
         idOperador: idOperador ?? null,
       },
@@ -117,6 +175,12 @@ export const orderService = {
         ? await resolveCliente(input.client)
         : undefined)
     const idOperador = await resolveOperador(input)
+    // Validar ubicación solo si la actualización la toca (p. ej. un cambio de estado no la envía)
+    if (input.address !== undefined || input.latitude !== undefined || input.longitude !== undefined) {
+      requireAddressOrCoordinates(input.address, input.latitude, input.longitude)
+      validateCoordinates(input.latitude, input.longitude)
+    }
+
     const row = await prisma.ordenTrabajo.update({
       where: { id },
       data: {
@@ -129,6 +193,8 @@ export const orderService = {
         ordenVisual: input.sortOrder,
         idCliente,
         ...(idOperador !== undefined ? { idOperador } : null),
+        ...(input.latitude !== undefined ? { latitud: input.latitude } : null),
+        ...(input.longitude !== undefined ? { longitud: input.longitude } : null),
       },
       include: { cliente: true, operador: true },
     })
@@ -139,6 +205,22 @@ export const orderService = {
       valorNuevo: row,
       idUsuario: userId,
     })
+    // RF29 CU-97: registrar el cambio de estado en la bitácora
+    if (before && row.estado !== before.estado) {
+      await auditService.log({
+        modulo: 'ordenes',
+        accion: 'cambio_estado',
+        valorAnterior: { orderId: id, estado: before.estado },
+        valorNuevo: { orderId: id, estado: row.estado },
+        idUsuario: userId,
+      })
+      // RF29 CU-98: notificar el cambio de estado
+      await pushService.notify({
+        token: 'admin',
+        title: 'Cambio de estado en orden',
+        body: `${id}: ${before.estado} → ${row.estado}`,
+      })
+    }
     return toOrderDto(row)
   },
 

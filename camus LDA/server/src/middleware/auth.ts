@@ -28,6 +28,24 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+/**
+ * Restringe la ruta a ciertos roles. Coincide si el nombre del rol contiene alguno
+ * de los indicados, sin distinguir mayúsculas/acentos (p. ej. 'tecnico' acepta
+ * 'Técnico de Campo'). Debe usarse después de requireAuth.
+ */
+export function requireRole(...roles: string[]) {
+  const norm = (s: string) =>
+    s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+  const allowed = roles.map(norm)
+  return (req: Request, res: Response, next: NextFunction) => {
+    const rol = req.user?.rol ? norm(req.user.rol) : ''
+    if (!rol || !allowed.some((a) => rol.includes(a))) {
+      return res.status(403).json({ error: 'No tiene permisos para esta acción' })
+    }
+    next()
+  }
+}
+
 /** Variante que no bloquea: adjunta el usuario si hay token válido. */
 export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
   const header = req.headers.authorization

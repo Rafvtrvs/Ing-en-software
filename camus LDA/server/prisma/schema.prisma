@@ -161,6 +161,9 @@ model OrdenTrabajo {
   servicio     String   @default("") @db.VarChar(150)
   categoria    String   @default("") @db.VarChar(100)
   direccion    String   @default("") @db.VarChar(255)
+  latitud      Float?   @map("latitud")
+  longitud     Float?   @map("longitud")
+  fechaLimite  DateTime? @map("fecha_limite") @db.Date
   progreso     Int      @default(0)
   ordenVisual  Int      @default(0) @map("orden_visual")
   idCliente    Int?     @map("id_cliente")
@@ -275,4 +278,30 @@ model Consume {
 
   @@id([idOt, idInsumo])
   @@map("consume")
+}
+
+// RF16: tarifas unitarias usadas para estimar costos (insumos, maquinaria, combustible, personal)
+model TarifaCosto {
+  id            Int      @id @default(autoincrement()) @map("id_tarifa")
+  tipo          String   @db.VarChar(20)
+  nombre        String   @db.VarChar(120)
+  unidad        String   @default("unidad") @db.VarChar(30)
+  valorUnitario Decimal  @map("valor_unitario") @db.Decimal(12, 2)
+
+  @@map("tarifa_costo")
+}
+
+// RF16: estimación de costos guardada (detalle como JSON serializado)
+model Estimacion {
+  id            Int      @id @default(autoincrement()) @map("id_estimacion")
+  descripcion   String   @default("") @db.VarChar(200)
+  subtotal      Decimal  @db.Decimal(12, 2)
+  tasaIva       Decimal  @map("tasa_iva") @db.Decimal(5, 2)
+  iva           Decimal  @db.Decimal(12, 2)
+  total         Decimal  @db.Decimal(12, 2)
+  detalle       String   @db.Text
+  idUsuario     Int?     @map("id_usuario")
+  fechaCreacion DateTime @default(now()) @map("fecha_creacion")
+
+  @@map("estimacion")
 }

@@ -12,7 +12,8 @@
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",
-    "ensure-operador": "tsx prisma/ensure-operador.ts"
+    "ensure-operador": "tsx prisma/ensure-operador.ts",
+    "test": "vitest"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -33,8 +34,11 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.15.21",
+    "@types/supertest": "^2.0.12",
     "prisma": "^5.22.0",
+    "supertest": "^6.3.3",
     "tsx": "^4.19.2",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "vitest": "^5.0.1"
   }
 }

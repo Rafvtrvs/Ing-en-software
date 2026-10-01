@@ -1,0 +1,14 @@
+{
+  "name": "Camus Ltda. - Terreno",
+  "short_name": "Camus Terreno",
+  "description": "Gestión de órdenes de trabajo en terreno",
+  "start_url": "/terreno",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    { "src": "/images/logo-camus.png", "sizes": "any", "type": "image/png", "purpose": "any" }
+  ]
+}

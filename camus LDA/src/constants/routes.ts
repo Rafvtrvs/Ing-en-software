@@ -13,4 +13,5 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/recuperar-contrasena',
   RESET_PASSWORD: '/restablecer-contrasena',
   LOGIN_SUCCESS: '/login-exitoso',
+  TERRENO: '/terreno',
 } as const
