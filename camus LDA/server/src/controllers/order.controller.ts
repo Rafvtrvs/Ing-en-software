@@ -11,6 +11,15 @@ export const orderController = {
     }
   },
 
+  async get(req: Request, res: Response, next: NextFunction) {
+    try {
+      const row = await orderService.get(req.params.id)
+      res.json(row)
+    } catch (err) {
+      next(err)
+    }
+  },
+
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const created = await orderService.create(req.body, req.user?.sub)

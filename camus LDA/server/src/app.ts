@@ -27,7 +27,8 @@ export function createApp() {
       credentials: true,
     }),
   )
-  app.use(express.json())
+  // Límite ampliado: las evidencias (RF09) viajan como base64 en JSON
+  app.use(express.json({ limit: '10mb' }))
   app.use(morgan('dev'))
 
   // Todas las solicitudes HTTPS (JSON) cuelgan de /api

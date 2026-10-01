@@ -9,6 +9,7 @@ import { InvoicesTable } from './components/InvoicesTable'
 import { BillingSummaryChart } from './components/BillingSummaryChart'
 import { UpcomingInvoices } from './components/UpcomingInvoices'
 import { RecentPayments } from './components/RecentPayments'
+import { EstimatesPanel } from './components/EstimatesPanel'
 import { InvoiceFormModal } from './components/InvoiceFormModal'
 import { InvoiceViewModal } from './components/InvoiceViewModal'
 import { DeleteInvoiceModal } from './components/DeleteInvoiceModal'
@@ -55,6 +56,9 @@ export function BillingPage() {
           <UpcomingInvoices />
           <RecentPayments />
         </div>
+
+        {/* RF16 CU-60/61 */}
+        <EstimatesPanel />
       </div>
 
       <InvoiceFormModal mode="create" open={modalMode === 'create'} onClose={closeModal} />

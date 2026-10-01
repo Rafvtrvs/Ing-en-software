@@ -12,6 +12,8 @@ import { OrdersTable } from '@/features/orders/components/OrdersTable'
 import { OrderFormModal } from '@/features/orders/components/OrderFormModal'
 import { DeleteOrderModal } from '@/features/orders/components/DeleteOrderModal'
 import { OrderDetailDrawer } from '@/features/orders/components/OrderDetailDrawer'
+import { DelayedOrdersPanel } from '@/features/orders/components/DelayedOrdersPanel'
+import { StatusHistoryPanel } from '@/features/orders/components/StatusHistoryPanel'
 import { PriorityQueuePanel } from '@/features/orders/components/PriorityQueuePanel'
 import { OperatorWorkloadPanel } from '@/features/orders/components/OperatorWorkloadPanel'
 import { IncidentsPanel } from '@/features/orders/components/IncidentsPanel'
@@ -179,6 +181,8 @@ export function OrdersPage() {
         </div>
 
         <OrdersBoard />
+        <DelayedOrdersPanel />
+        <StatusHistoryPanel refreshKey={String(allOrders.length)} />
         <CompletedOrdersApprovalPanel />
         <ModificationRequestsPanel />
         <OrdersTable />

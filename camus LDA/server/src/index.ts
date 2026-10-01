@@ -9,6 +9,7 @@
 import { createApp } from './app.js'
 import { env } from './config/env.js'
 import { connectDb, disconnectDb } from './db/prisma.js'
+import { delayService } from './services/delay.service.js'
 
 async function main() {
   await connectDb()
@@ -18,6 +19,12 @@ async function main() {
     console.log(`[server] escuchando en http://localhost:${env.port}/api`)
     console.log(`[server] auth=${env.auth.provider} storage=${env.external.storageProvider} mail=${env.external.mailProvider} push=${env.external.pushProvider}`)
   })
+
+  // RF28 CU-95: revisión automática de retrasos (cada hora; el servicio evita repetir alertas)
+  const delayTimer = setInterval(() => {
+    delayService.notifyHighDelays().catch((err) => console.error('[delay] revisión fallida', err))
+  }, 60 * 60 * 1000)
+  delayTimer.unref()
 
   const shutdown = async () => {
     console.log('\n[server] cerrando...')

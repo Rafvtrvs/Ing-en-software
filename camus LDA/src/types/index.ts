@@ -61,6 +61,11 @@ export interface WorkOrder {
   id: string
   client: string
   address: string
+  /** Fecha límite de la OT (RF28), AAAA-MM-DD */
+  dueDate?: string
+  /** Coordenadas del lugar del trabajo (RF10) */
+  latitude?: number
+  longitude?: number
   service?: string
   category: string
   status: OrderStatus
@@ -181,6 +186,15 @@ export interface OrderApprovalRecord {
   approvedAt: string
   approvedBy: string
   approvedByName: string
+}
+
+/** Imagen de evidencia cargada en una OT (RF09 / CU-30–34) */
+export interface OrderEvidence {
+  id: number
+  orderId: string
+  fileName: string
+  mimeType: string
+  uploadedAt: string
 }
 
 /** Intervención registrada en una OT (RF-44 / CU-149–151) */
@@ -735,4 +749,71 @@ export interface SupportTicket {
   priority: SupportTicketPriority
   createdAt: string
   updatedAt: string
+}
+
+/** RF16 — tarifas unitarias para estimar costos */
+export type CostRateType = 'insumo' | 'maquinaria' | 'combustible' | 'personal'
+
+export interface CostRate {
+  id: number
+  type: CostRateType
+  name: string
+  unit: string
+  unitPrice: number
+}
+
+export interface EstimateLine {
+  rateId: number
+  type: CostRateType
+  name: string
+  unit: string
+  unitPrice: number
+  quantity: number
+  amount: number
+}
+
+/** RF16 CU-60 — resultado del cálculo de costos */
+export interface EstimateTotals {
+  lines: EstimateLine[]
+  subtotal: number
+  taxRate: number
+  tax: number
+  total: number
+}
+
+/** RF16 CU-61 — estimación guardada */
+export interface CostEstimate extends EstimateTotals {
+  id: number
+  description: string
+  createdAt: string
+}
+
+/** RF28 — nivel de retraso de una OT */
+export type DelayLevel = 'Bajo' | 'Medio' | 'Alto'
+export type DelayAction = 'reprogramar' | 'priorizar' | 'intervenir'
+
+export interface DelayedOrder {
+  id: string
+  client: string
+  address: string
+  status: string
+  priority: string
+  dueDate: string
+  daysLate: number
+  level: DelayLevel
+}
+
+export interface DelaysResponse {
+  summary: Record<DelayLevel, number>
+  orders: DelayedOrder[]
+}
+
+/** RF29 — cambio de estado registrado en bitácora */
+export interface StatusChange {
+  id: string
+  orderId: string
+  from: string
+  to: string
+  user: string
+  at: string
 }

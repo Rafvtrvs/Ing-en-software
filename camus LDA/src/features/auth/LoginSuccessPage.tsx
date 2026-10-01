@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { CheckCircle2, Droplets, Loader2 } from 'lucide-react'
 import { authService } from '@/services/authService'
 import { useAppStore } from '@/store/useAppStore'
+import { isFieldOperator } from '@/features/auth/roleAccess'
 import { ROUTES } from '@/constants/routes'
 
 const REDIRECT_DELAY_MS = 2000
@@ -29,8 +30,12 @@ export function LoginSuccessPage() {
       })
     }
 
+    // RF35 CU-115: el operario de terreno entra a la vista móvil
+    const target =
+      from === ROUTES.DASHBOARD && isFieldOperator(authUser) ? ROUTES.TERRENO : from
+
     const timer = window.setTimeout(() => {
-      navigate(from, { replace: true })
+      navigate(target, { replace: true })
     }, REDIRECT_DELAY_MS)
 
     return () => window.clearTimeout(timer)
