@@ -172,12 +172,33 @@ model OrdenTrabajo {
   operador     Usuario? @relation(fields: [idOperador], references: [id])
   intervenciones Intervencion[]
   evidencias   EvidenciaMultimedia[]
+  documentos   DocumentoOrden[]
   registros    RegistroFinanciero[]
   facturas     Factura[]
   usos         Utiliza[]
   consumos     Consume[]
 
   @@map("orden_trabajo")
+}
+
+/// RF-40..42 — documentos / contratos / reportes versionados por OT
+model DocumentoOrden {
+  id             Int      @id @default(autoincrement()) @map("id_documento")
+  titulo         String   @db.VarChar(150)
+  tipo           String   @default("general") @db.VarChar(30)
+  versionActual  Int      @default(1) @map("version_actual")
+  nombreArchivo  String   @map("nombre_archivo") @db.VarChar(255)
+  mimeType       String   @default("application/pdf") @map("mime_type") @db.VarChar(100)
+  tamanioBytes   Int      @default(0) @map("tamanio_bytes")
+  urlArchivo     String   @map("url_archivo") @db.VarChar(500)
+  subidoPor      String?  @map("subido_por") @db.VarChar(120)
+  nota           String?  @db.VarChar(255)
+  fechaCarga     DateTime @default(now()) @map("fecha_carga")
+  idOt           String?  @map("id_ot") @db.VarChar(30)
+  orden          OrdenTrabajo? @relation(fields: [idOt], references: [id], onDelete: Cascade)
+
+  @@index([idOt])
+  @@map("documento_orden")
 }
 
 model Intervencion {

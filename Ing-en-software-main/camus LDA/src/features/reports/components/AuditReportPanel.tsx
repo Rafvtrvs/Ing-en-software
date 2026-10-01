@@ -48,6 +48,19 @@ function isSecurityFilter(filter: string): boolean {
   return filter === 'Autenticación' || filter === 'Seguridad'
 }
 
+const CRITICAL_MODULES = ['Clientes', 'Órdenes', 'Usuarios', 'Facturación', 'Seguridad'] as const
+
+function isCriticalChange(log: AuditLogEntry): boolean {
+  const moduleMatch = CRITICAL_MODULES.some(
+    (m) => m.toLowerCase() === log.moduloAfectado.trim().toLowerCase(),
+  )
+  return (
+    moduleMatch &&
+    Boolean(log.valorAnterior?.trim()) &&
+    Boolean(log.valorNuevo?.trim())
+  )
+}
+
 function exportAuditLogsCsv(logs: AuditLogEntry[]) {
   const headers = [
     'Fecha y hora',
@@ -85,8 +98,15 @@ export function AuditReportPanel() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [moduleFilter, setModuleFilter] = useState<string>('Todos')
+  const [userFilter, setUserFilter] = useState<string>('Todos')
+  const [criticalOnly, setCriticalOnly] = useState(false)
   const [showFilters, setShowFilters] = useState(true)
   const [selectedLog, setSelectedLog] = useState<AuditLogEntry | null>(null)
+
+  const userOptions = useMemo(() => {
+    const names = [...new Set(logs.map((l) => l.usuario))].sort()
+    return names
+  }, [logs])
 
   useEffect(() => {
     let active = true
@@ -114,9 +134,11 @@ export function AuditReportPanel() {
         log.moduloAfectado.toLowerCase().includes(q) ||
         log.usuario.toLowerCase().includes(q) ||
         (log.valorNuevo?.toLowerCase().includes(q) ?? false)
-      return matchesModule && matchesSearch
+      const matchesUser = userFilter === 'Todos' || log.usuario === userFilter
+      const matchesCritical = !criticalOnly || isCriticalChange(log)
+      return matchesModule && matchesSearch && matchesUser && matchesCritical
     })
-  }, [logs, search, moduleFilter])
+  }, [logs, search, moduleFilter, userFilter, criticalOnly])
 
   useEffect(() => {
     if (selectedLog && !filtered.some((log) => log.id === selectedLog.id)) {
@@ -137,11 +159,13 @@ export function AuditReportPanel() {
 
   const bitacoraTitle = isSecurityFilter(moduleFilter)
     ? 'Bitácora de seguridad'
-    : 'Bitácora de auditoría'
+    : 'Bitácora general'
 
   const bitacoraSubtitle = isSecurityFilter(moduleFilter)
     ? 'Registro de inicios de sesión y eventos de autenticación.'
-    : 'Haz clic en un registro para ver fecha, hora, ubicación y responsable.'
+    : criticalOnly
+      ? 'Cambios en registros críticos con valor anterior y nuevo.'
+      : 'Consulta la bitácora general y filtra por usuario o módulo.'
 
   const kpis = [
     {
@@ -297,6 +321,30 @@ export function AuditReportPanel() {
                   </option>
                 ))}
               </Select>
+            </div>
+            <div className="min-w-[180px]">
+              <label className="mb-1.5 block text-xs font-medium text-slate-600">
+                Usuario
+              </label>
+              <Select value={userFilter} onChange={(e) => setUserFilter(e.target.value)}>
+                <option value="Todos">Todos</option>
+                {userOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="flex min-w-[200px] flex-col justify-end pb-0.5">
+              <label className="mb-1.5 flex cursor-pointer items-center gap-2 text-xs font-medium text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={criticalOnly}
+                  onChange={(e) => setCriticalOnly(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                />
+                Solo registros críticos con cambios
+              </label>
             </div>
           </div>
         )}

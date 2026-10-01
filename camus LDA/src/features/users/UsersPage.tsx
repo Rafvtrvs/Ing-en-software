@@ -22,6 +22,9 @@ import { ReactivateUserModal } from './components/ReactivateUserModal'
 import { UserLifecycleHistoryPanel } from './components/UserLifecycleHistoryPanel'
 import { AssignRoleModal } from './components/AssignRoleModal'
 import { RoleAssignmentHistoryPanel } from './components/RoleAssignmentHistoryPanel'
+import { UserEmailConsultModal } from './components/UserEmailConsultModal'
+import { LinkUserEmailModal } from './components/LinkUserEmailModal'
+import { UnlinkUserEmailModal } from './components/UnlinkUserEmailModal'
 
 const USERS_TABS: { id: UsersTab; label: string }[] = [
   { id: 'usuarios', label: 'Usuarios' },
@@ -119,6 +122,21 @@ export function UsersPage() {
       <AssignRoleModal
         user={selectedUser}
         open={userModalMode === 'assignRole'}
+        onClose={closeUserModal}
+      />
+      <UserEmailConsultModal
+        user={selectedUser}
+        open={userModalMode === 'consultEmail'}
+        onClose={closeUserModal}
+      />
+      <LinkUserEmailModal
+        user={selectedUser}
+        open={userModalMode === 'linkEmail'}
+        onClose={closeUserModal}
+      />
+      <UnlinkUserEmailModal
+        user={selectedUser}
+        open={userModalMode === 'unlinkEmail'}
         onClose={closeUserModal}
       />
 

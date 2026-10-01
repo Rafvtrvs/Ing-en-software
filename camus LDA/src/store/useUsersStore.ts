@@ -5,7 +5,18 @@ import { initialUserLifecycleEvents } from '@/data/mock/userLifecycle'
 import { initialRoleAssignmentEvents } from '@/data/mock/roleAssignments'
 import type { AppRole, RoleAssignmentEvent, SystemUser, SystemUserStatus, UserLifecycleEvent, UsersTab } from '@/types'
 
-export type UserModalMode = 'create' | 'edit' | 'view' | 'delete' | 'deactivate' | 'reactivate' | 'assignRole' | null
+export type UserModalMode =
+  | 'create'
+  | 'edit'
+  | 'view'
+  | 'delete'
+  | 'deactivate'
+  | 'reactivate'
+  | 'assignRole'
+  | 'consultEmail'
+  | 'linkEmail'
+  | 'unlinkEmail'
+  | null
 export type RoleModalMode = 'create' | 'edit' | 'view' | 'delete' | null
 
 export interface ToastMessage {
@@ -51,6 +62,11 @@ interface UsersState {
   openUserDeactivateModal: (user: SystemUser) => void
   openUserReactivateModal: (user: SystemUser) => void
   openAssignRoleModal: (user: SystemUser) => void
+  openUserEmailConsultModal: (user: SystemUser) => void
+  openLinkEmailModal: (user: SystemUser) => void
+  openUnlinkEmailModal: (user: SystemUser) => void
+  linkUserEmail: (userId: string, email: string) => { ok: true } | { ok: false; message: string }
+  unlinkUserEmail: (userId: string) => { ok: true } | { ok: false; message: string }
   openRoleCreateModal: () => void
   openRoleEditModal: (role: AppRole) => void
   openRoleViewModal: (role: AppRole) => void
@@ -249,6 +265,36 @@ export const useUsersStore = create<UsersState>()(
         set({ userModalMode: 'reactivate', selectedUser: user, roleModalMode: null }),
       openAssignRoleModal: (user) =>
         set({ userModalMode: 'assignRole', selectedUser: user, roleModalMode: null }),
+
+      openUserEmailConsultModal: (user) =>
+        set({ userModalMode: 'consultEmail', selectedUser: user, roleModalMode: null }),
+      openLinkEmailModal: (user) =>
+        set({ userModalMode: 'linkEmail', selectedUser: user, roleModalMode: null }),
+      openUnlinkEmailModal: (user) =>
+        set({ userModalMode: 'unlinkEmail', selectedUser: user, roleModalMode: null }),
+
+      linkUserEmail: (userId, email) => {
+        const trimmed = email.trim()
+        if (!trimmed) return { ok: false, message: 'Ingrese un correo electrónico' }
+        const duplicate = get().users.some(
+          (u) => u.id !== userId && u.email.toLowerCase() === trimmed.toLowerCase(),
+        )
+        if (duplicate) {
+          return { ok: false, message: 'Ese correo ya está asociado a otro usuario' }
+        }
+        get().updateUser(userId, { email: trimmed, emailLinked: true })
+        return { ok: true }
+      },
+
+      unlinkUserEmail: (userId) => {
+        const user = get().users.find((u) => u.id === userId)
+        if (!user) return { ok: false, message: 'Usuario no encontrado' }
+        if (user.emailLinked === false && !user.email?.trim()) {
+          return { ok: false, message: 'El usuario no tiene correo vinculado' }
+        }
+        get().updateUser(userId, { email: '', emailLinked: false })
+        return { ok: true }
+      },
 
       openRoleCreateModal: () =>
         set({ roleModalMode: 'create', selectedRole: null, userModalMode: null }),

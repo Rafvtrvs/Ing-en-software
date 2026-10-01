@@ -4,6 +4,8 @@ import { arrayMove } from '@dnd-kit/sortable'
 import type {
   OrderApprovalRecord,
   OrderComment,
+  OrderDocument,
+  OrderDocumentKind,
   OrderIntervention,
   OrderModificationHistoryEntry,
   OrderModificationRequest,
@@ -11,7 +13,9 @@ import type {
   OrderPriority,
   OrderRescheduleEvent,
   OrderStatus,
+  OrderPhotoAnnotation,
   OrderSupplyUsage,
+  PhotoDrawingStroke,
   ThirdPartyIntervention,
   WorkOrder,
 } from '@/types'
@@ -118,6 +122,14 @@ interface OrdersState {
   ) => void
   addPhotoUrl: (orderId: string, url: string) => void
   removePhotoUrl: (orderId: string, url: string) => void
+  /** RF55 — anotaciones sobre fotos */
+  photoAnnotationsByOrderId: Record<string, OrderPhotoAnnotation[]>
+  getPhotoAnnotation: (orderId: string, photoUrl: string) => OrderPhotoAnnotation | undefined
+  savePhotoAnnotation: (
+    orderId: string,
+    photoUrl: string,
+    strokes: PhotoDrawingStroke[],
+  ) => void
   addThirdParty: (
     orderId: string,
     data: Omit<ThirdPartyIntervention, 'id' | 'orderId' | 'registeredAt'>,
@@ -129,6 +141,45 @@ interface OrdersState {
   ) => void
   getOperatorWorkload: (technicians: OrderOperator[]) => OperatorWorkload[]
   markPdfGenerated: (orderId: string) => void
+  /** RF-40..42 documentos / contratos / reportes versionados */
+  addOrderDocument: (
+    orderId: string,
+    data: {
+      kind: OrderDocumentKind
+      title: string
+      fileName: string
+      url: string
+      mimeType: string
+      sizeBytes: number
+      uploadedBy: string
+      note?: string
+    },
+  ) => OrderDocument
+  addDocumentVersion: (
+    orderId: string,
+    documentId: string,
+    data: {
+      fileName: string
+      url: string
+      mimeType: string
+      sizeBytes: number
+      uploadedBy: string
+      note?: string
+    },
+  ) => void
+  /** RF-43 — alta rápida de OT en terreno */
+  createFieldOrder: (data: {
+    client: string
+    address: string
+    service: string
+    category: string
+    technician: string
+    notes?: string
+  }) => WorkOrder
+  completeFieldOrderForm: (
+    orderId: string,
+    data: Partial<Pick<WorkOrder, 'service' | 'startDate' | 'endDate' | 'durationHours' | 'progress'>>,
+  ) => void
   moveOrderOnBoard: (activeId: string, overId: string) => void
   /** Reordena la cola de atención por IDs en el nuevo orden visual */
   reorderPriorityQueue: (orderedIds: string[]) => void
@@ -280,6 +331,7 @@ function mergeApiOrders(
       priorityManual: local.priorityManual ?? api.priorityManual,
       photoUrls: local.photoUrls ?? api.photoUrls,
       thirdParties: local.thirdParties ?? api.thirdParties,
+      documents: local.documents ?? api.documents,
       truckCode: local.truckCode ?? api.truckCode,
       equipmentId: local.equipmentId ?? api.equipmentId,
       pdfGeneratedAt: local.pdfGeneratedAt ?? api.pdfGeneratedAt,
@@ -320,6 +372,7 @@ export const useOrdersStore = create<OrdersState>()(
       modificationHistoryByOrderId: groupModificationHistoryByOrder(
         initialModificationHistory,
       ),
+      photoAnnotationsByOrderId: {},
       modalMode: null,
       selectedOrder: null,
       statusFilter: 'all',
@@ -671,6 +724,29 @@ export const useOrdersStore = create<OrdersState>()(
         })
       },
 
+      getPhotoAnnotation: (orderId, photoUrl) => {
+        const list = get().photoAnnotationsByOrderId[orderId] ?? []
+        return list.find((a) => a.photoUrl === photoUrl)
+      },
+
+      savePhotoAnnotation: (orderId, photoUrl, strokes) => {
+        const entry = {
+          photoUrl,
+          strokes,
+          savedAt: new Date().toISOString(),
+        }
+        set((state) => {
+          const prev = state.photoAnnotationsByOrderId[orderId] ?? []
+          const without = prev.filter((a) => a.photoUrl !== photoUrl)
+          return {
+            photoAnnotationsByOrderId: {
+              ...state.photoAnnotationsByOrderId,
+              [orderId]: [entry, ...without],
+            },
+          }
+        })
+      },
+
       addThirdParty: (orderId, data) => {
         const order = get().orders.find((o) => o.id === orderId)
         if (!order) throw new Error('Orden no encontrada')
@@ -727,6 +803,119 @@ export const useOrdersStore = create<OrdersState>()(
         get().updateOrder(orderId, {
           pdfGeneratedAt: new Date().toISOString(),
         })
+      },
+
+      addOrderDocument: (orderId, data) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) throw new Error('Orden no encontrada')
+        const now = new Date().toISOString()
+        const doc: OrderDocument = {
+          id: eventId('doc'),
+          orderId,
+          kind: data.kind,
+          title: data.title.trim(),
+          currentVersion: 1,
+          createdAt: now,
+          versions: [
+            {
+              version: 1,
+              fileName: data.fileName.trim(),
+              url: data.url.trim(),
+              mimeType: data.mimeType,
+              sizeBytes: data.sizeBytes,
+              uploadedAt: now,
+              uploadedBy: data.uploadedBy,
+              note: data.note,
+            },
+          ],
+        }
+        get().updateOrder(orderId, {
+          documents: [doc, ...(order.documents ?? [])],
+        })
+        const kindLabel =
+          data.kind === 'contrato'
+            ? 'Contrato'
+            : data.kind === 'reporte'
+              ? 'Reporte'
+              : 'Documento'
+        get().addToast(`${kindLabel} adjunto correctamente`)
+        return doc
+      },
+
+      addDocumentVersion: (orderId, documentId, data) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) return
+        const docs = order.documents ?? []
+        const target = docs.find((d) => d.id === documentId)
+        if (!target) {
+          get().addToast('Documento no encontrado', 'error')
+          return
+        }
+        const nextVersion = target.currentVersion + 1
+        const now = new Date().toISOString()
+        const updated: OrderDocument = {
+          ...target,
+          currentVersion: nextVersion,
+          versions: [
+            {
+              version: nextVersion,
+              fileName: data.fileName.trim(),
+              url: data.url.trim(),
+              mimeType: data.mimeType,
+              sizeBytes: data.sizeBytes,
+              uploadedAt: now,
+              uploadedBy: data.uploadedBy,
+              note: data.note,
+            },
+            ...target.versions,
+          ],
+        }
+        get().updateOrder(orderId, {
+          documents: docs.map((d) => (d.id === documentId ? updated : d)),
+        })
+        get().addToast(`Versión ${nextVersion} guardada`)
+      },
+
+      createFieldOrder: (data) => {
+        const id = eventId('OT-T')
+        const order: WorkOrder = {
+          id,
+          client: data.client.trim(),
+          address: data.address.trim(),
+          service: data.service.trim(),
+          category: data.category.trim() || 'Terreno',
+          status: 'En Curso',
+          createdAt: new Date().toISOString().slice(0, 10),
+          priority: 'Media',
+          technician: data.technician.trim(),
+          operators: data.technician
+            ? [{ id: 'field', name: data.technician.trim() }]
+            : [],
+          progress: 10,
+          startDate: new Date().toISOString().slice(0, 10),
+        }
+        get().addOrder(order)
+        if (data.notes?.trim()) {
+          get().addToast(`OT en terreno creada: ${id}`)
+        } else {
+          get().addToast(`OT en terreno creada: ${id}`)
+        }
+        return order
+      },
+
+      completeFieldOrderForm: (orderId, data) => {
+        const progress = data.progress
+        get().updateOrder(orderId, {
+          service: data.service,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          durationHours: data.durationHours,
+          progress,
+          ...(progress != null && progress >= 100
+            ? { status: 'Completada' as const }
+            : {}),
+        })
+        get().addToast('Formulario de terreno actualizado')
       },
 
       moveOrderOnBoard: (activeId, overId) => {
@@ -1174,6 +1363,7 @@ export const useOrdersStore = create<OrdersState>()(
         rescheduleHistoryByOrderId: state.rescheduleHistoryByOrderId,
         modificationRequests: state.modificationRequests,
         modificationHistoryByOrderId: state.modificationHistoryByOrderId,
+        photoAnnotationsByOrderId: state.photoAnnotationsByOrderId,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<OrdersState> | undefined

@@ -87,6 +87,14 @@ export function DashboardPage() {
               ))}
             </Select>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="self-end"
+            onClick={() => setPriorityFilter('Todas')}
+          >
+            Limpiar filtros
+          </Button>
           <div className="flex items-center gap-2 self-end rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm">
             <Calendar className="h-4 w-4 text-slate-400" />
             {today}

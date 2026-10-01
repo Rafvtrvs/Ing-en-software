@@ -24,7 +24,7 @@ export function ChartLegend({ items, total, className }: ChartLegendProps) {
         return (
           <li
             key={item.name}
-            className="flex w-full items-center justify-between gap-6"
+            className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3"
           >
             <div className="flex min-w-0 items-center gap-2.5">
               <span
@@ -32,7 +32,7 @@ export function ChartLegend({ items, total, className }: ChartLegendProps) {
                 style={{ backgroundColor: item.color }}
                 aria-hidden
               />
-              <span className="text-sm leading-5 text-slate-600">{item.name}</span>
+              <span className="truncate text-sm leading-5 text-slate-600">{item.name}</span>
             </div>
             <span className="shrink-0 text-right text-sm font-semibold leading-5 tabular-nums text-slate-900">
               {item.value} ({pct}%)

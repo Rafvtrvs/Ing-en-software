@@ -1,17 +1,30 @@
 import type { ChartDataPoint, OrderStatus, WorkOrder } from '@/types'
 import { parseOrderDate } from '@/features/reports/utils/clientTraceabilityReport'
+import { CHART_PALETTES } from '@/store/useSettingsStore'
 
 export type PriorityFilter = 'Todas' | 'Baja' | 'Media' | 'Alta'
 
 /** Días sin avance para considerar una OT atrasada (CU-181) */
 export const OVERDUE_DAYS_THRESHOLD = 7
 
-const STATUS_COLORS: Record<OrderStatus, string> = {
-  Pendiente: '#3b82f6',
-  'En Curso': '#eab308',
-  Completada: '#22c55e',
-  Abonado: '#8b5cf6',
-  Cancelada: '#94a3b8',
+const STATUS_ORDER: OrderStatus[] = [
+  'Pendiente',
+  'En Curso',
+  'Completada',
+  'Abonado',
+  'Cancelada',
+]
+
+function paletteColors(): string[] {
+  try {
+    const key =
+      (typeof document !== 'undefined' &&
+        (document.documentElement.dataset.chartPalette as keyof typeof CHART_PALETTES)) ||
+      'default'
+    return CHART_PALETTES[key] ?? CHART_PALETTES.default
+  } catch {
+    return CHART_PALETTES.default
+  }
 }
 
 export function filterOrdersByPriority(
@@ -23,17 +36,11 @@ export function filterOrdersByPriority(
 }
 
 export function buildOrdersByStatus(orders: WorkOrder[]): ChartDataPoint[] {
-  const statuses: OrderStatus[] = [
-    'Pendiente',
-    'En Curso',
-    'Completada',
-    'Abonado',
-    'Cancelada',
-  ]
-  return statuses.map((status) => ({
+  const colors = paletteColors()
+  return STATUS_ORDER.map((status, index) => ({
     name: status,
     value: orders.filter((o) => o.status === status).length,
-    color: STATUS_COLORS[status],
+    color: colors[index % colors.length],
   }))
 }
 

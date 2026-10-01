@@ -24,7 +24,7 @@ export function OrdersByStatusChart({ orders }: OrdersByStatusChartProps) {
         </p>
       ) : (
         <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
-          <div className="relative h-52 w-52 shrink-0">
+          <div className="chart-mobile-safe relative mx-auto flex w-full max-w-[14rem] items-center justify-center sm:h-52 sm:w-52 sm:max-w-none">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie

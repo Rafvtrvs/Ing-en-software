@@ -101,6 +101,8 @@ export interface WorkOrder {
   thirdParties?: ThirdPartyIntervention[]
   /** Timestamp última generación PDF resumen — CU-173 */
   pdfGeneratedAt?: string
+  /** Documentos adjuntos / contratos / reportes — RF-40..42 */
+  documents?: OrderDocument[]
   /** RF61 CDS 211 — motivo de cancelación */
   cancelReason?: string
   /** RF61 CDS 212 — motivo de anulación (orden duplicada) */
@@ -414,6 +416,45 @@ export interface SystemUser {
   createdAt?: string
   /** RF64 CDS 221/222 — fecha de desactivación */
   deactivatedAt?: string
+  /** RF70 — correo vinculado para notificaciones */
+  emailLinked?: boolean
+}
+
+/** RF55 — trazo sobre evidencia fotográfica */
+export interface PhotoDrawingStroke {
+  points: { x: number; y: number }[]
+  color: string
+  width: number
+}
+
+/** RF55 — anotación guardada sin alterar imagen original */
+export interface OrderPhotoAnnotation {
+  photoUrl: string
+  strokes: PhotoDrawingStroke[]
+  savedAt?: string
+}
+
+/** RF46 — registro offline pendiente de sincronización */
+export type OfflineSyncStatus = 'pendiente' | 'sincronizado' | 'error'
+
+export interface OfflineSyncEntry {
+  id: string
+  module: string
+  summary: string
+  status: OfflineSyncStatus
+  createdAt: string
+  syncedAt?: string
+  errorMessage?: string
+}
+
+/** RF47 — fila de reporte de intervenciones de terceros */
+export interface ThirdPartyReportRow {
+  id: string
+  orderId: string
+  client: string
+  company: string
+  detail: string
+  registeredAt: string
 }
 
 /** RF64 CDS 223 — historial de desactivación/eliminación */
@@ -520,6 +561,7 @@ export type ReportTab =
   | 'activos'
   | 'costos'
   | 'tecnicos'
+  | 'terceros'
   | 'auditoria'
 
 export type ReportPeriod = 'month' | 'quarter' | 'year'
@@ -627,11 +669,47 @@ export interface UserProfileSettings {
   avatar?: string
 }
 
+/** Paletas de series para gráficos (RF-37 CU-128) */
+export type ChartColorPalette = 'default' | 'ocean' | 'forest' | 'sunset'
+
 export interface AppAppearanceSettings {
   theme: AppTheme
   compactSidebar: boolean
   language: 'es' | 'en'
   dateFormat: 'dd/mm/yyyy' | 'mm/dd/yyyy'
+  /** Color de acento menú / paneles — RF-37 CU-126 */
+  accentColor: string
+  /** Filas alternas en tablas — RF-37 CU-127 */
+  zebraTables: boolean
+  /** Contraste alto en tablas */
+  highContrastTables: boolean
+  /** Paleta de gráficos — RF-37 CU-128 */
+  chartPalette: ChartColorPalette
+}
+
+/** Tipo de documento vinculado a OT — RF-40 / RF-41 */
+export type OrderDocumentKind = 'general' | 'contrato' | 'reporte'
+
+export interface OrderDocumentVersion {
+  version: number
+  fileName: string
+  url: string
+  mimeType: string
+  sizeBytes: number
+  uploadedAt: string
+  uploadedBy: string
+  note?: string
+}
+
+/** Documento adjunto a una OT con historial de versiones — RF-40..42 */
+export interface OrderDocument {
+  id: string
+  orderId: string
+  kind: OrderDocumentKind
+  title: string
+  currentVersion: number
+  versions: OrderDocumentVersion[]
+  createdAt: string
 }
 
 export interface SecuritySettings {

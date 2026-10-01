@@ -30,4 +30,16 @@
     scrollbar-width: thin;
     scrollbar-color: #cbd5e1 transparent;
   }
+
+  /* RF-36: gráficos legibles en móvil */
+  .chart-mobile-safe {
+    min-height: 220px;
+    width: 100%;
+  }
+
+  @media (max-width: 640px) {
+    .chart-mobile-safe {
+      min-height: 260px;
+    }
+  }
 }

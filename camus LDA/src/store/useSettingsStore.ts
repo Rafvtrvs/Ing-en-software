@@ -17,15 +17,28 @@ export interface ToastMessage {
   message: string
 }
 
+type AppearanceSection = 'theme' | 'colors' | 'tables' | 'charts' | 'layout'
+
 interface SettingsState {
   config: AppConfiguration
   activeTab: SettingsTab
   toasts: ToastMessage[]
+  /** RF-38 CU-133 — orden de bloques del dashboard */
+  dashboardBlockOrder: string[]
   setActiveTab: (tab: SettingsTab) => void
   updateProfile: (data: Partial<UserProfileSettings>) => void
   updateAppearance: (data: Partial<AppAppearanceSettings>) => void
   updateSecurity: (data: Partial<SecuritySettings>) => void
   updateSystem: (data: Partial<PlatformSystemSettings>) => void
+  /** RF-37 CU-129 — apariencia de fábrica */
+  resetAppearance: () => void
+  /** RF-38 CU-131 — restaurar solo una sección visual */
+  resetAppearanceSection: (section: AppearanceSection) => void
+  /** RF-38 CU-130 — restablecimiento total de preferencias UI */
+  factoryResetUi: () => void
+  /** RF-38 CU-133 */
+  resetDashboardLayout: () => void
+  setDashboardBlockOrder: (order: string[]) => void
   runBackup: () => void
   clearLocalData: () => void
   addToast: (message: string, type?: ToastMessage['type']) => void
@@ -44,6 +57,21 @@ const STORE_KEYS = [
   'camus_settings_store_v1',
   'camus_support_store_v1',
 ]
+
+export const DEFAULT_DASHBOARD_BLOCKS = [
+  'kpis',
+  'alerts',
+  'charts',
+  'recent',
+  'inventory',
+  'finance',
+  'availability',
+  'actions',
+] as const
+
+const FACTORY_APPEARANCE: AppAppearanceSettings = {
+  ...defaultAppConfiguration.appearance,
+}
 
 function syncHeaderUser(profile: UserProfileSettings) {
   useAppStore.setState({
@@ -68,12 +96,70 @@ function applyTheme(theme: AppAppearanceSettings['theme']) {
   }
 }
 
+/** Aplica variables CSS de acento / tablas (RF-37) */
+export function applyAppearanceVars(appearance: AppAppearanceSettings) {
+  const root = document.documentElement
+  applyTheme(appearance.theme)
+  root.style.setProperty('--color-primary', appearance.accentColor)
+  root.style.setProperty('--color-sidebar-active', appearance.accentColor)
+  root.dataset.zebraTables = appearance.zebraTables ? 'true' : 'false'
+  root.dataset.highContrastTables = appearance.highContrastTables
+    ? 'true'
+    : 'false'
+  root.dataset.chartPalette = appearance.chartPalette
+}
+
+/** RF-38 CU-132 — si la config viene corrupta, vuelve a fábrica */
+export function sanitizeAppearance(
+  raw: Partial<AppAppearanceSettings> | undefined,
+): AppAppearanceSettings {
+  try {
+    if (!raw || typeof raw !== 'object') return { ...FACTORY_APPEARANCE }
+    const theme = raw.theme
+    if (theme && !['light', 'dark', 'system'].includes(theme)) {
+      throw new Error('tema inválido')
+    }
+    return {
+      ...FACTORY_APPEARANCE,
+      ...raw,
+      accentColor:
+        typeof raw.accentColor === 'string' && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw.accentColor)
+          ? raw.accentColor
+          : FACTORY_APPEARANCE.accentColor,
+      chartPalette: (['default', 'ocean', 'forest', 'sunset'] as const).includes(
+        raw.chartPalette as AppAppearanceSettings['chartPalette'],
+      )
+        ? (raw.chartPalette as AppAppearanceSettings['chartPalette'])
+        : 'default',
+    }
+  } catch {
+    return { ...FACTORY_APPEARANCE }
+  }
+}
+
+export const CHART_PALETTES: Record<
+  AppAppearanceSettings['chartPalette'],
+  string[]
+> = {
+  default: ['#3b82f6', '#eab308', '#22c55e', '#8b5cf6', '#94a3b8', '#f97316'],
+  ocean: ['#0ea5e9', '#0284c7', '#0369a1', '#38bdf8', '#7dd3fc', '#bae6fd'],
+  forest: ['#16a34a', '#15803d', '#65a30d', '#84cc16', '#a3e635', '#4d7c0f'],
+  sunset: ['#f97316', '#ea580c', '#e11d48', '#f43f5e', '#fb923c', '#fdba74'],
+}
+
+export function getActiveChartPalette(): string[] {
+  const palette =
+    useSettingsStore.getState().config.appearance.chartPalette ?? 'default'
+  return CHART_PALETTES[palette] ?? CHART_PALETTES.default
+}
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       config: defaultAppConfiguration,
       activeTab: 'perfil',
       toasts: [],
+      dashboardBlockOrder: [...DEFAULT_DASHBOARD_BLOCKS],
 
       setActiveTab: (tab) => set({ activeTab: tab }),
 
@@ -87,8 +173,11 @@ export const useSettingsStore = create<SettingsState>()(
 
       updateAppearance: (data) => {
         set((state) => {
-          const appearance = { ...state.config.appearance, ...data }
-          applyTheme(appearance.theme)
+          const appearance = sanitizeAppearance({
+            ...state.config.appearance,
+            ...data,
+          })
+          applyAppearanceVars(appearance)
           useAppStore.setState({ sidebarOpen: !appearance.compactSidebar })
           return { config: { ...state.config, appearance } }
         })
@@ -109,6 +198,48 @@ export const useSettingsStore = create<SettingsState>()(
             system: { ...state.config.system, ...data },
           },
         })),
+
+      resetAppearance: () => {
+        get().updateAppearance({ ...FACTORY_APPEARANCE })
+        get().addToast('Apariencia restablecida a valores de fábrica')
+      },
+
+      resetAppearanceSection: (section) => {
+        const current = get().config.appearance
+        if (section === 'theme') {
+          get().updateAppearance({ theme: FACTORY_APPEARANCE.theme })
+        } else if (section === 'colors') {
+          get().updateAppearance({ accentColor: FACTORY_APPEARANCE.accentColor })
+        } else if (section === 'tables') {
+          get().updateAppearance({
+            zebraTables: FACTORY_APPEARANCE.zebraTables,
+            highContrastTables: FACTORY_APPEARANCE.highContrastTables,
+          })
+        } else if (section === 'charts') {
+          get().updateAppearance({
+            chartPalette: FACTORY_APPEARANCE.chartPalette,
+          })
+        } else {
+          get().updateAppearance({
+            compactSidebar: FACTORY_APPEARANCE.compactSidebar,
+          })
+        }
+        void current
+        get().addToast(`Sección “${section}” restaurada`, 'info')
+      },
+
+      factoryResetUi: () => {
+        get().updateAppearance({ ...FACTORY_APPEARANCE })
+        set({ dashboardBlockOrder: [...DEFAULT_DASHBOARD_BLOCKS] })
+        get().addToast('Restablecimiento total de interfaz aplicado')
+      },
+
+      resetDashboardLayout: () => {
+        set({ dashboardBlockOrder: [...DEFAULT_DASHBOARD_BLOCKS] })
+        get().addToast('Posición de módulos del dashboard restaurada')
+      },
+
+      setDashboardBlockOrder: (order) => set({ dashboardBlockOrder: order }),
 
       runBackup: () => {
         const backup = {
@@ -158,10 +289,35 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'camus_settings_store_v1',
-      partialize: (state) => ({ config: state.config }),
-      onRehydrateStorage: () => (state) => {
-        if (state?.config.appearance.theme) {
-          applyTheme(state.config.appearance.theme)
+      partialize: (state) => ({
+        config: state.config,
+        dashboardBlockOrder: state.dashboardBlockOrder,
+      }),
+      onRehydrateStorage: () => (state, error) => {
+        // RF-38 CU-132: ante error de carga, fábrica
+        if (error || !state) {
+          try {
+            applyAppearanceVars(FACTORY_APPEARANCE)
+          } catch {
+            /* ignore */
+          }
+          return
+        }
+        try {
+          const appearance = sanitizeAppearance(state.config.appearance)
+          state.config.appearance = appearance
+          applyAppearanceVars(appearance)
+        } catch {
+          state.config.appearance = { ...FACTORY_APPEARANCE }
+          applyAppearanceVars(FACTORY_APPEARANCE)
+          queueMicrotask(() => {
+            useSettingsStore
+              .getState()
+              .addToast(
+                'Preferencias corruptas: se restableció la apariencia',
+                'info',
+              )
+          })
         }
       },
     },

@@ -10,21 +10,21 @@ export function BillingSummaryChart() {
   const total = chartData.reduce((sum, item) => sum + item.value, 0)
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader title="Facturas por Estado" />
       {total === 0 ? (
         <p className="py-8 text-center text-sm text-slate-500">Sin facturas registradas</p>
       ) : (
-        <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
-          <div className="relative h-48 w-48 shrink-0">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative mx-auto h-52 w-52 shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={55}
-                  outerRadius={78}
+                  innerRadius={58}
+                  outerRadius={82}
                   paddingAngle={3}
                   dataKey="value"
                 >
@@ -40,7 +40,7 @@ export function BillingSummaryChart() {
             </div>
           </div>
           <ChartLegend
-            className="md:min-w-[200px] md:flex-1 md:max-w-[240px]"
+            className="w-full"
             items={chartData.map((item) => ({
               name: item.name,
               value: item.value,

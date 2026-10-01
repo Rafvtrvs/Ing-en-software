@@ -14,6 +14,7 @@ import { authController } from './controllers/auth.controller.js'
 import { clientController } from './controllers/client.controller.js'
 import { orderController } from './controllers/order.controller.js'
 import { interventionController } from './controllers/intervention.controller.js'
+import { documentController } from './controllers/document.controller.js'
 import { assetController } from './controllers/asset.controller.js'
 import { reportController } from './controllers/report.controller.js'
 
@@ -95,6 +96,23 @@ router.post('/estimates/calculate', requireAuth, costRoles, estimateController.c
 router.post('/estimates', requireAuth, costRoles, estimateController.create)
 router.get('/estimates', requireAuth, costRoles, estimateController.list)
 router.get('/estimates/:id', requireAuth, costRoles, estimateController.get)
+
+// Documentos / contratos / reportes (RF-40..42)
+router.get(
+  '/orders/:orderId/documents',
+  optionalAuth,
+  documentController.listByOrder,
+)
+router.post(
+  '/orders/:orderId/documents',
+  requireAuth,
+  documentController.create,
+)
+router.post(
+  '/documents/:documentId/versions',
+  requireAuth,
+  documentController.addVersion,
+)
 
 // Activos / inventario
 router.get('/assets', optionalAuth, assetController.list)

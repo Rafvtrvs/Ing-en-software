@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { Footer } from './Footer'
+import { ConnectivityBanner } from './ConnectivityBanner'
 import { useAppStore } from '@/store/useAppStore'
 import { RequirePermission } from '@/components/auth/RequirePermission'
 import { useSessionUser } from '@/features/auth/useSessionUser'
@@ -22,6 +23,7 @@ export function AppLayout() {
         )}
       >
         <Header />
+        <ConnectivityBanner />
         <main className="flex flex-1 flex-col px-4 py-6 lg:px-8">
           <RequirePermission>
             <Outlet />
