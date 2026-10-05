@@ -57,11 +57,6 @@ El backend queda en [http://localhost:4000/api](http://localhost:4000/api).
 docker run --name camus-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=camus_lda -p 5432:5432 -d postgres:16
 ```
 
-**Credenciales de prueba**
-
-- Usuario: `admin@camus.cl`
-- Clave: `admin123`
-
 ### 2. Frontend (interfaz)
 
 Abre **otra** terminal en la carpeta del frontend:
@@ -103,4 +98,4 @@ Abre [http://localhost:5173](http://localhost:5173).
     └── server/        ← backend Express + Prisma + PostgreSQL
 ```
 
-Para más detalle técnico del frontend o del backend, revisa los README dentro de `camus LDA/` y `camus LDA/server/`.
+
