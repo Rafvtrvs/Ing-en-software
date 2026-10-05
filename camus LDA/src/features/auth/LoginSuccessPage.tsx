@@ -30,9 +30,11 @@ export function LoginSuccessPage() {
       })
     }
 
-    // RF35 CU-115: el operario de terreno entra a la vista móvil
+    // Operador/técnico: vista PC (Órdenes con kanban/cola), no forzar /terreno móvil
     const target =
-      from === ROUTES.DASHBOARD && isFieldOperator(authUser) ? ROUTES.TERRENO : from
+      from === ROUTES.DASHBOARD && isFieldOperator(authUser)
+        ? ROUTES.ORDENES
+        : from
 
     const timer = window.setTimeout(() => {
       navigate(target, { replace: true })

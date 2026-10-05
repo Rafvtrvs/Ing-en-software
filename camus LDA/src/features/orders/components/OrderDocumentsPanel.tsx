@@ -4,10 +4,14 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Badge } from '@/components/ui/Badge'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
-import { validateOrderDocumentFile } from '@/features/orders/utils/validateDocument'
+import {
+  validateDocumentUrlOrPath,
+  validateOrderDocumentFile,
+} from '@/features/orders/utils/validateDocument'
 import type { OrderDocument, OrderDocumentKind, WorkOrder } from '@/types'
 
 /**
@@ -57,8 +61,9 @@ export function OrderDocumentsPanel({
       addToast('Indica un título para el documento', 'error')
       return
     }
-    if (!url.trim()) {
-      addToast('Indica la URL o ruta del archivo', 'error')
+    const urlCheck = validateDocumentUrlOrPath(url)
+    if (!urlCheck.ok) {
+      addToast(urlCheck.errors.join(' · '), 'error')
       return
     }
 
@@ -92,8 +97,9 @@ export function OrderDocumentsPanel({
       addToast(validation.errors.join(' · '), 'error')
       return
     }
-    if (!url.trim()) {
-      addToast('Indica la URL de la nueva versión', 'error')
+    const urlCheck = validateDocumentUrlOrPath(url)
+    if (!urlCheck.ok) {
+      addToast(urlCheck.errors.join(' · '), 'error')
       return
     }
     addDocumentVersion(order.id, doc.id, {
@@ -124,7 +130,7 @@ export function OrderDocumentsPanel({
 
       {canEdit && (
         <div className="mb-4 space-y-3 rounded-lg border border-dashed border-slate-200 bg-slate-50/60 p-3">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <FormGrid cols={2}>
             <FormField label="Tipo">
               <Select
                 value={kind}
@@ -159,12 +165,15 @@ export function OrderDocumentsPanel({
                 </option>
               </Select>
             </FormField>
-            <FormField label="URL / ruta" className="sm:col-span-2">
+            <FormField label="URL / ruta del archivo" className="sm:col-span-2">
               <Input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://… o /uploads/…"
+                placeholder="https://ejemplo.com/docs/contrato.pdf o /uploads/contrato.pdf"
               />
+              <p className="mt-1 text-xs text-slate-500">
+                Debe ser URL o ruta a un archivo (.pdf, .png, .jpg, .docx, .xlsx…)
+              </p>
             </FormField>
             <FormField label="Tamaño (bytes)">
               <Input
@@ -174,7 +183,7 @@ export function OrderDocumentsPanel({
                 onChange={(e) => setSizeBytes(Number(e.target.value) || 0)}
               />
             </FormField>
-          </div>
+          </FormGrid>
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"

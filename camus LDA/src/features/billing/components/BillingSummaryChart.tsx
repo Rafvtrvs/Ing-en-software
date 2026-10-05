@@ -34,13 +34,15 @@ export function BillingSummaryChart() {
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-slate-900">{total}</span>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-2">
+              <span className="max-w-full truncate text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                {total.toLocaleString('es-CL')}
+              </span>
               <span className="text-xs text-slate-500">Total</span>
             </div>
           </div>
           <ChartLegend
-            className="w-full"
+            className="w-full min-w-0"
             items={chartData.map((item) => ({
               name: item.name,
               value: item.value,

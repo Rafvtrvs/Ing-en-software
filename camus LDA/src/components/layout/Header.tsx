@@ -22,11 +22,11 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 dark:border-slate-700 dark:bg-slate-900 lg:px-6">
       <button
         type="button"
         onClick={toggleSidebar}
-        className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+        className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
         aria-label="Abrir menú"
       >
         <Menu className="h-5 w-5" />
@@ -35,7 +35,7 @@ export function Header() {
       <button
         type="button"
         onClick={toggleSidebar}
-        className="hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:block"
+        className="hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:block"
         aria-label="Alternar sidebar"
       >
         <Menu className="h-5 w-5" />
@@ -48,18 +48,22 @@ export function Header() {
           <img
             src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(session.name ?? 'user')}`}
             alt={session.name}
-            className="h-9 w-9 rounded-full bg-slate-100 object-cover ring-2 ring-slate-100"
+            className="h-9 w-9 rounded-full bg-slate-100 object-cover ring-2 ring-slate-100 dark:bg-slate-700 dark:ring-slate-700"
           />
           <div className="hidden text-left sm:block">
-            <p className="text-sm font-semibold text-slate-900">{session.name}</p>
-            <p className="text-xs text-slate-500">{session.role || 'Sin rol'}</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              {session.name}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {session.role || 'Sin rol'}
+            </p>
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleLogout}
-          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
           aria-label="Cerrar sesión"
           title="Cerrar sesión"
         >

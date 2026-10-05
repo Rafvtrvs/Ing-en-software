@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/Switch'
@@ -40,7 +41,7 @@ export function InventorySettingsPanel() {
         subtitle="Umbrales de alerta y unidades por defecto."
         footer={<Button type="submit">Guardar cambios</Button>}
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Umbral stock bajo (% del mínimo)">
             <Input type="number" min={1} max={100} {...register('lowStockPercent', { valueAsNumber: true })} />
           </FormField>
@@ -52,7 +53,7 @@ export function InventorySettingsPanel() {
               {...register('criticalStockPercent', { valueAsNumber: true })}
             />
           </FormField>
-        </div>
+        </FormGrid>
         <FormField label="Unidad por defecto (productos nuevos)">
           <Select {...register('defaultUnit')}>
             {UNITS.map((u) => (

@@ -140,7 +140,7 @@ export function OrderDetailDrawer({
       open={open}
       onClose={onClose}
       title="Detalle de Orden"
-      widthClassName="w-full max-w-2xl"
+      widthClassName="w-full sm:max-w-2xl"
       footer={
         !isReady ? null : (
           <div className="flex flex-wrap gap-2">

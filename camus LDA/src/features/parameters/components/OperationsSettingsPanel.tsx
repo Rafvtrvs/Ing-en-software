@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
 import { useParametersStore } from '@/store/useParametersStore'
@@ -38,7 +39,7 @@ export function OperationsSettingsPanel() {
         subtitle="App móvil, GPS y límites operativos."
         footer={<Button type="submit">Guardar cambios</Button>}
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Intervalo GPS (minutos)">
             <Input
               type="number"
@@ -53,7 +54,7 @@ export function OperationsSettingsPanel() {
               {...register('maxOrdersPerTechnician', { valueAsNumber: true })}
             />
           </FormField>
-        </div>
+        </FormGrid>
         <FormField label="Radio geocerca (metros)">
           <Input type="number" min={50} {...register('geofenceRadiusMeters', { valueAsNumber: true })} />
         </FormField>

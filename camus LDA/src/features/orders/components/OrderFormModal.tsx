@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useOrdersStore } from '@/store/useOrdersStore'
@@ -268,13 +269,13 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
             Cancelar
           </Button>
           <Button type="submit" form="order-form" disabled={isSubmitting}>
-            {mode === 'create' ? 'Crear Orden' : 'Guardar Cambios'}
+            {mode === 'create' ? 'Crear Orden' : 'Guardar'}
           </Button>
         </>
       }
     >
       <form id="order-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="ID Orden (opcional)" htmlFor="id">
             <Input id="id" placeholder="Ej: OT-2026-0130" {...register('id')} />
           </FormField>
@@ -286,7 +287,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
               className={errors.client ? 'border-red-300' : undefined}
             />
           </FormField>
-        </div>
+        </FormGrid>
 
         <FormField label="Dirección" htmlFor="address" error={errors.address?.message} required>
           <Input
@@ -306,7 +307,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
           />
         </FormField>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Tipo de incidente" htmlFor="incidentType" required>
             <Select id="incidentType" {...register('incidentType')}>
               {INCIDENT_TYPES.map((t) => (
@@ -325,9 +326,9 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
               <option value="Cancelada">Cancelada</option>
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <FormGrid cols={3}>
           <FormField label="Prioridad" htmlFor="priority" required>
             <Select
               id="priority"
@@ -341,7 +342,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
             </Select>
           </FormField>
           <FormField label="Prioridad manual" htmlFor="priorityManual">
-            <label className="flex h-10 items-center gap-2 text-sm text-slate-700">
+            <label className="flex min-h-11 items-center gap-2 text-sm text-slate-700">
               <input
                 id="priorityManual"
                 type="checkbox"
@@ -366,7 +367,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
               ))}
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
 
         <FormField
           label="Operadores / técnicos (cuadrilla)"
@@ -400,7 +401,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
           </div>
         </FormField>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <FormGrid cols={4}>
           <FormField label="Fecha inicio" htmlFor="startDate">
             <Input id="startDate" type="date" {...register('startDate')} />
           </FormField>
@@ -425,7 +426,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
               {...register('progress', { valueAsNumber: true })}
             />
           </FormField>
-        </div>
+        </FormGrid>
       </form>
     </Modal>
   )

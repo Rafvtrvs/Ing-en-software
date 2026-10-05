@@ -44,12 +44,17 @@ export function FinancialIncomeBlock({ invoices, payments }: FinancialIncomeBloc
         {rows.map((row) => (
           <div
             key={row.label}
-            className="rounded-lg border border-slate-100 bg-slate-50/60 px-4 py-3"
+            className="rounded-lg border border-slate-100 bg-slate-50/60 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/60"
           >
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
               {row.label}
             </p>
-            <p className="mt-1 text-lg font-semibold text-slate-900">{row.value}</p>
+            <p
+              className="mt-1 text-base font-semibold tabular-nums leading-snug text-slate-900 break-words sm:text-lg"
+              title={row.value}
+            >
+              {row.value}
+            </p>
             <p className="mt-0.5 text-xs text-slate-500">{row.hint}</p>
           </div>
         ))}

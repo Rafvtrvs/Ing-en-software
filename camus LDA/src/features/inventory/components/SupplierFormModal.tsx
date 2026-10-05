@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useInventoryStore } from '@/store/useInventoryStore'
@@ -49,7 +50,7 @@ export function SupplierFormModal({
       phone: '',
       email: '',
       address: '',
-      paymentTerms: '30 días',
+      paymentTerms: '30 dÃ­as',
       status: 'Activo',
     },
   })
@@ -75,7 +76,7 @@ export function SupplierFormModal({
         phone: '',
         email: '',
         address: '',
-        paymentTerms: '30 días',
+        paymentTerms: '30 dÃ­as',
         status: 'Activo',
       })
     }
@@ -111,7 +112,7 @@ export function SupplierFormModal({
       }
     >
       <form id="supplier-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Razón social" htmlFor="sup-name" error={errors.name?.message} required>
             <Input
               id="sup-name"
@@ -125,15 +126,15 @@ export function SupplierFormModal({
               {...register('rut', { required: 'Obligatorio' })}
             />
           </FormField>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        </FormGrid>
+        <FormGrid cols={2}>
           <FormField label="Contacto" htmlFor="sup-contact" required>
             <Input id="sup-contact" {...register('contact', { required: true })} />
           </FormField>
           <FormField label="Teléfono" htmlFor="sup-phone" required>
             <Input id="sup-phone" {...register('phone', { required: true })} />
           </FormField>
-        </div>
+        </FormGrid>
         <FormField label="Email" htmlFor="sup-email" required>
           <Input
             id="sup-email"
@@ -147,9 +148,9 @@ export function SupplierFormModal({
         <FormField label="Dirección" htmlFor="sup-address">
           <Input id="sup-address" {...register('address')} />
         </FormField>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Condiciones de pago" htmlFor="sup-terms">
-            <Input id="sup-terms" placeholder="30 días" {...register('paymentTerms')} />
+            <Input id="sup-terms" placeholder="30 dÃ­as" {...register('paymentTerms')} />
           </FormField>
           <FormField label="Estado" htmlFor="sup-status">
             <Select id="sup-status" {...register('status')}>
@@ -157,7 +158,7 @@ export function SupplierFormModal({
               <option value="Inactivo">Inactivo</option>
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
       </form>
     </Modal>
   )

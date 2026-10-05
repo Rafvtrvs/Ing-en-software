@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Droplets, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { MobileFormsMode } from '@/components/layout/MobileFormsMode'
 import { authService } from '@/services/authService'
 import { ROUTES } from '@/constants/routes'
 
@@ -40,6 +41,7 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+      <MobileFormsMode />
       <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <div className="mb-6 flex flex-col items-center text-center">
           <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">

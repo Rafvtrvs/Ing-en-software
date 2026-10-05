@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useUsersStore } from '@/store/useUsersStore'
@@ -94,7 +95,7 @@ export function RoleFormModal({ mode, role, open, onClose }: RoleFormModalProps)
       }
     >
       <form id="role-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Nombre del rol" error={errors.name?.message} required>
             <Input
               placeholder="Ej: Coordinador"
@@ -108,7 +109,7 @@ export function RoleFormModal({ mode, role, open, onClose }: RoleFormModalProps)
               <option value="Inactivo">Inactivo</option>
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
         <FormField label="Descripción" error={errors.description?.message} required>
           <Input
             placeholder="Describe las responsabilidades de este rol"

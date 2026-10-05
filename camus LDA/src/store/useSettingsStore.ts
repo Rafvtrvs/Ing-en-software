@@ -84,16 +84,57 @@ function syncHeaderUser(profile: UserProfileSettings) {
   })
 }
 
+let systemThemeMql: MediaQueryList | null = null
+let systemThemeHandler: ((e: MediaQueryListEvent) => void) | null = null
+
+function stopSystemThemeListener() {
+  if (systemThemeMql && systemThemeHandler) {
+    systemThemeMql.removeEventListener('change', systemThemeHandler)
+  }
+  systemThemeMql = null
+  systemThemeHandler = null
+}
+
 function applyTheme(theme: AppAppearanceSettings['theme']) {
   const root = document.documentElement
+  stopSystemThemeListener()
+
   if (theme === 'dark') {
     root.classList.add('dark')
-  } else if (theme === 'light') {
-    root.classList.remove('dark')
-  } else {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    root.classList.toggle('dark', prefersDark)
+    return
   }
+  if (theme === 'light') {
+    root.classList.remove('dark')
+    return
+  }
+
+  const mq = window.matchMedia('(prefers-color-scheme: dark)')
+  root.classList.toggle('dark', mq.matches)
+  systemThemeHandler = (e) => {
+    const current = useSettingsStore.getState().config.appearance.theme
+    if (current === 'system') {
+      root.classList.toggle('dark', e.matches)
+    }
+  }
+  mq.addEventListener('change', systemThemeHandler)
+  systemThemeMql = mq
+}
+
+function darkenHex(hex: string, amount = 0.15): string {
+  const raw = hex.replace('#', '')
+  const full =
+    raw.length === 3
+      ? raw
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : raw
+  if (!/^[0-9a-f]{6}$/i.test(full)) return hex
+  const num = parseInt(full, 16)
+  const r = Math.max(0, Math.round(((num >> 16) & 255) * (1 - amount)))
+  const g = Math.max(0, Math.round(((num >> 8) & 255) * (1 - amount)))
+  const b = Math.max(0, Math.round((num & 255) * (1 - amount)))
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`
 }
 
 /** Aplica variables CSS de acento / tablas (RF-37) */
@@ -101,6 +142,7 @@ export function applyAppearanceVars(appearance: AppAppearanceSettings) {
   const root = document.documentElement
   applyTheme(appearance.theme)
   root.style.setProperty('--color-primary', appearance.accentColor)
+  root.style.setProperty('--color-primary-hover', darkenHex(appearance.accentColor))
   root.style.setProperty('--color-sidebar-active', appearance.accentColor)
   root.dataset.zebraTables = appearance.zebraTables ? 'true' : 'false'
   root.dataset.highContrastTables = appearance.highContrastTables
@@ -131,6 +173,15 @@ export function sanitizeAppearance(
       )
         ? (raw.chartPalette as AppAppearanceSettings['chartPalette'])
         : 'default',
+      // CU-127: si el storage viejo no traía flags, quedan activos por defecto
+      zebraTables:
+        typeof raw.zebraTables === 'boolean'
+          ? raw.zebraTables
+          : FACTORY_APPEARANCE.zebraTables,
+      highContrastTables:
+        typeof raw.highContrastTables === 'boolean'
+          ? raw.highContrastTables
+          : FACTORY_APPEARANCE.highContrastTables,
     }
   } catch {
     return { ...FACTORY_APPEARANCE }
@@ -178,7 +229,11 @@ export const useSettingsStore = create<SettingsState>()(
             ...data,
           })
           applyAppearanceVars(appearance)
-          useAppStore.setState({ sidebarOpen: !appearance.compactSidebar })
+          // Solo colapsa el menú si el usuario pide barra compacta;
+          // no fuerza cierre en cada carga (mantiene vista PC usable).
+          if (appearance.compactSidebar) {
+            useAppStore.setState({ sidebarOpen: false })
+          }
           return { config: { ...state.config, appearance } }
         })
       },
@@ -288,7 +343,7 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
     }),
     {
-      name: 'camus_settings_store_v1',
+      name: 'camus_settings_store_v2',
       partialize: (state) => ({
         config: state.config,
         dashboardBlockOrder: state.dashboardBlockOrder,
@@ -307,10 +362,15 @@ export const useSettingsStore = create<SettingsState>()(
           const appearance = sanitizeAppearance(state.config.appearance)
           state.config.appearance = appearance
           applyAppearanceVars(appearance)
+          // Vista escritorio usable al iniciar (menú visible)
+          queueMicrotask(() => {
+            useAppStore.setState({ sidebarOpen: true })
+          })
         } catch {
           state.config.appearance = { ...FACTORY_APPEARANCE }
           applyAppearanceVars(FACTORY_APPEARANCE)
           queueMicrotask(() => {
+            useAppStore.setState({ sidebarOpen: true })
             useSettingsStore
               .getState()
               .addToast(

@@ -122,7 +122,7 @@ export function InvoiceFormModal({ mode, invoice, open, onClose }: InvoiceFormMo
         </>
       }
     >
-      <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
+      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <FormField label="Cliente" error={errors.client?.message}>
           <Input
             {...register('client', { required: 'Cliente requerido' })}

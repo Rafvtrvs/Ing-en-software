@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useParametersStore } from '@/store/useParametersStore'
@@ -41,26 +42,26 @@ export function GeneralSettingsPanel() {
           <Button type="submit">Guardar cambios</Button>
         }
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Razón social" required>
             <Input {...register('companyName', { required: true })} />
           </FormField>
           <FormField label="RUT" required>
             <Input {...register('rut', { required: true })} />
           </FormField>
-        </div>
+        </FormGrid>
         <FormField label="Dirección">
           <Input {...register('address')} />
         </FormField>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Teléfono">
             <Input {...register('phone')} />
           </FormField>
           <FormField label="Email corporativo">
             <Input type="email" {...register('email')} />
           </FormField>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-3">
+        </FormGrid>
+        <FormGrid cols={3}>
           <FormField label="Horario inicio">
             <Input type="time" {...register('businessHoursStart')} />
           </FormField>
@@ -76,7 +77,7 @@ export function GeneralSettingsPanel() {
               ))}
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
       </ParameterCard>
     </form>
   )

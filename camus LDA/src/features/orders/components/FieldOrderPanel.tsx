@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { MapPin, Save } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useOrdersStore } from '@/store/useOrdersStore'
@@ -94,7 +95,7 @@ export function FieldOrderPanel() {
             </p>
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Cliente" required>
             <Input
               value={client}
@@ -137,7 +138,7 @@ export function FieldOrderPanel() {
               />
             </FormField>
           )}
-        </div>
+        </FormGrid>
         <Button
           type="button"
           className="mt-3"
@@ -153,7 +154,7 @@ export function FieldOrderPanel() {
         <p className="mb-2 text-sm font-semibold text-slate-900">
           Completar formulario de OT en terreno
         </p>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <FormGrid cols={3}>
           <FormField label="Orden activa">
             <Select
               value={completeId}
@@ -183,7 +184,7 @@ export function FieldOrderPanel() {
               onChange={(e) => setProgress(Number(e.target.value) || 0)}
             />
           </FormField>
-        </div>
+        </FormGrid>
         <Button type="button" className="mt-3" variant="outline" onClick={handleComplete}>
           Guardar avance en terreno
         </Button>

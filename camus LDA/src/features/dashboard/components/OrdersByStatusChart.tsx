@@ -24,7 +24,7 @@ export function OrdersByStatusChart({ orders }: OrdersByStatusChartProps) {
         </p>
       ) : (
         <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
-          <div className="chart-mobile-safe relative mx-auto flex w-full max-w-[14rem] items-center justify-center sm:h-52 sm:w-52 sm:max-w-none">
+          <div className="relative h-52 w-52 shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -42,13 +42,15 @@ export function OrdersByStatusChart({ orders }: OrdersByStatusChartProps) {
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-slate-900">{total}</span>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-2">
+              <span className="max-w-full truncate text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                {total.toLocaleString('es-CL')}
+              </span>
               <span className="text-xs text-slate-500">Total</span>
             </div>
           </div>
           <ChartLegend
-            className="md:min-w-[220px] md:flex-1 md:max-w-[260px]"
+            className="w-full min-w-0 md:flex-1 md:max-w-[240px]"
             items={data.map((item) => ({
               name: item.name,
               value: item.value,

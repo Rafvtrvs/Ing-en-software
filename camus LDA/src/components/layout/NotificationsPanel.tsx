@@ -63,7 +63,12 @@ function NotificationItem({
   )
 }
 
-export function NotificationsPanel() {
+export function NotificationsPanel({
+  variant = 'default',
+}: {
+  /** onPrimary: campanita sobre header azul (vista móvil) */
+  variant?: 'default' | 'onPrimary'
+} = {}) {
   const navigate = useNavigate()
   const panelRef = useRef<HTMLDivElement>(null)
   const items = useNotificationsStore((s) => s.items)
@@ -73,6 +78,7 @@ export function NotificationsPanel() {
   const markAsRead = useNotificationsStore((s) => s.markAsRead)
   const markAllAsRead = useNotificationsStore((s) => s.markAllAsRead)
   const unread = items.filter((n) => !n.read).length
+  const onPrimary = variant === 'onPrimary'
 
   useEffect(() => {
     if (!panelOpen) return
@@ -104,31 +110,53 @@ export function NotificationsPanel() {
   }
 
   return (
-    <div ref={panelRef} className="relative">
+    <div ref={panelRef} className="relative shrink-0">
       <button
         type="button"
         onClick={togglePanel}
         className={cn(
-          'relative rounded-lg p-2 text-slate-600 hover:bg-slate-100',
-          panelOpen && 'bg-slate-100',
+          'relative flex h-9 w-9 items-center justify-center rounded-lg',
+          onPrimary
+            ? cn(
+                'text-white hover:bg-white/15',
+                panelOpen && 'bg-white/20',
+              )
+            : cn(
+                'text-slate-600 hover:bg-slate-100',
+                panelOpen && 'bg-slate-100',
+              ),
         )}
         aria-label="Notificaciones"
         aria-expanded={panelOpen}
       >
         <Bell className="h-5 w-5" />
         {unread > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+          <span
+            className={cn(
+              'absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white',
+              onPrimary ? 'right-0 top-0' : 'right-1 top-1',
+            )}
+          >
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </button>
 
       {panelOpen && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+        <div
+          className={cn(
+            'absolute right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900 shadow-xl dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100',
+            onPrimary
+              ? 'w-[min(calc(100vw-1.5rem),20rem)]'
+              : 'w-[min(100vw-2rem,22rem)]',
+          )}
+        >
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-700">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Notificaciones</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Notificaciones
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {unread > 0 ? `${unread} sin leer` : 'Todo al día'}
               </p>
             </div>

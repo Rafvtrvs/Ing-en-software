@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { useSettingsStore } from '@/store/useSettingsStore'
 import type { UserProfileSettings } from '@/types'
@@ -45,14 +46,14 @@ export function ProfileSettingsPanel() {
             El avatar se genera automáticamente según tu nombre.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Nombre completo" required>
             <Input {...register('name', { required: true })} />
           </FormField>
           <FormField label="Teléfono">
             <Input {...register('phone')} />
           </FormField>
-        </div>
+        </FormGrid>
         <FormField label="Email">
           <Input type="email" {...register('email')} />
         </FormField>

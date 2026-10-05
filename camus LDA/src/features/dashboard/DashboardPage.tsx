@@ -59,19 +59,21 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
             ¡Bienvenido, {user.name}!
           </h1>
-          <p className="mt-1 text-slate-500">Resumen general de operaciones</p>
+          <p className="mt-1 text-sm text-slate-500 sm:text-base">
+            Resumen general de operaciones
+          </p>
           <p className="mt-1 text-xs text-slate-400">
             Última actualización: {formatDateTime(lastUpdated)}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="min-w-[160px]">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end sm:gap-3">
+          <div className="w-full sm:min-w-[160px] sm:w-auto">
             <label className="mb-1 block text-xs font-medium text-slate-600">
               Prioridad / urgencia
             </label>
@@ -79,6 +81,7 @@ export function DashboardPage() {
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as PriorityFilter)}
               aria-label="Filtrar por prioridad"
+              className="w-full"
             >
               {PRIORITY_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -87,34 +90,36 @@ export function DashboardPage() {
               ))}
             </Select>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="self-end"
-            onClick={() => setPriorityFilter('Todas')}
-          >
-            Limpiar filtros
-          </Button>
-          <div className="flex items-center gap-2 self-end rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm">
-            <Calendar className="h-4 w-4 text-slate-400" />
-            {today}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => setPriorityFilter('Todas')}
+            >
+              Limpiar filtros
+            </Button>
+            <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm sm:px-4">
+              <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
+              <span className="truncate">{today}</span>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="col-span-2 w-full sm:col-span-1 sm:w-auto"
+              leftIcon={
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              }
+              onClick={() => void handleRefresh()}
+              disabled={refreshing}
+            >
+              Actualizar panel
+            </Button>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="self-end"
-            leftIcon={
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            }
-            onClick={() => void handleRefresh()}
-            disabled={refreshing}
-          >
-            Actualizar panel
-          </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-5">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.title} data={kpi} />
         ))}

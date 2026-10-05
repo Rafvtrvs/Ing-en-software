@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useOperationsStore } from '@/store/useOperationsStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
@@ -193,7 +194,7 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
           <FormField label="Descripción del trabajo" required error={errors.service}>
             <Input value={service} onChange={(e) => setService(e.target.value)} placeholder="Ej. Desobstrucción de ducto" />
           </FormField>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <FormGrid cols={2}>
             <FormField label="Tipo de incidente">
               <Select value={incidentType} onChange={(e) => setIncidentType(e.target.value as IncidentType)}>
                 {INCIDENT_TYPES.map((t) => (
@@ -211,7 +212,7 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
                 <option value="Urgente">Urgente</option>
               </Select>
             </FormField>
-          </div>
+          </FormGrid>
           <FormField label="Observaciones (opcional)">
             <textarea
               value={notes}

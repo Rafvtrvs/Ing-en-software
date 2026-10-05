@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Tema oscuro por clase `html.dark` (no solo prefers-color-scheme) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
@@ -7,6 +10,11 @@
   --color-sidebar-hover: #1e293b;
   --color-sidebar-active: #2563eb;
   --color-surface: #f8fafc;
+  --color-card: #ffffff;
+  --color-foreground: #1e293b;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-input: #ffffff;
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
 }
@@ -16,13 +24,188 @@
     @apply border-slate-200;
   }
 
+  html {
+    color-scheme: light;
+  }
+
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
   body {
     @apply bg-surface font-sans text-slate-800 antialiased;
   }
 
-  html.dark body {
-    @apply bg-slate-900 text-slate-100;
+  html.dark {
+    color-scheme: dark;
+    --color-surface: #0b1220;
+    --color-card: #1e293b;
+    --color-foreground: #f1f5f9;
+    --color-muted: #94a3b8;
+    --color-border: #334155;
+    --color-input: #0f172a;
+    --color-sidebar: #020617;
+    --color-sidebar-hover: #0f172a;
   }
+
+  html.dark body {
+    @apply bg-surface text-slate-100;
+  }
+
+  html.dark * {
+    @apply border-slate-700;
+  }
+}
+
+/*
+ * Capa global: corrige superficies claras hardcodeadas (bg-white, slate-50, etc.)
+ * cuando el tema oscuro está activo. Los componentes UI también tienen dark:.
+ */
+html.dark .bg-white:not(.switch-thumb) {
+  background-color: var(--color-card) !important;
+}
+
+html.dark .switch-thumb {
+  background-color: #ffffff !important;
+}
+
+html.dark .bg-surface {
+  background-color: var(--color-surface) !important;
+}
+
+/* Todas las opacidades: bg-slate-50, bg-slate-50/50, /60, /80, etc. */
+html.dark [class*='bg-slate-50'] {
+  background-color: rgb(30 41 59 / 0.75) !important;
+}
+
+html.dark [class*='bg-slate-100'] {
+  background-color: #334155 !important;
+}
+
+/* Badges / chips pastel en oscuro */
+html.dark [class*='bg-emerald-50'],
+html.dark [class*='bg-green-50'] {
+  background-color: rgb(6 78 59 / 0.45) !important;
+}
+html.dark [class*='bg-amber-50'],
+html.dark [class*='bg-yellow-50'] {
+  background-color: rgb(120 53 15 / 0.45) !important;
+}
+html.dark [class*='bg-red-50'],
+html.dark [class*='bg-rose-50'] {
+  background-color: rgb(127 29 29 / 0.45) !important;
+}
+html.dark [class*='bg-blue-50'],
+html.dark [class*='bg-sky-50'],
+html.dark [class*='bg-indigo-50'] {
+  background-color: rgb(30 58 138 / 0.45) !important;
+}
+html.dark [class*='bg-violet-50'],
+html.dark [class*='bg-purple-50'] {
+  background-color: rgb(76 29 149 / 0.45) !important;
+}
+
+html.dark [class*='hover:bg-slate-50']:hover,
+html.dark [class*='hover:bg-slate-100']:hover {
+  background-color: #334155 !important;
+}
+
+html.dark [class*='active:bg-slate-50']:active {
+  background-color: #334155 !important;
+}
+
+html.dark .text-slate-900 {
+  color: #f1f5f9 !important;
+}
+
+html.dark .text-slate-800 {
+  color: #e2e8f0 !important;
+}
+
+html.dark .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-600 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.dark .border-slate-50,
+html.dark .border-slate-100,
+html.dark .border-slate-200 {
+  border-color: #334155 !important;
+}
+
+html.dark .divide-slate-50 > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #334155 !important;
+}
+
+html.dark .ring-slate-100,
+html.dark .ring-slate-200 {
+  --tw-ring-color: #334155 !important;
+}
+
+html.dark .shadow-sm,
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+  --tw-shadow-color: rgb(0 0 0 / 0.45);
+}
+
+/* Inputs / selects / textarea en modales y páginas */
+html.dark input:not([type='checkbox']):not([type='radio']):not([type='color']),
+html.dark select,
+html.dark textarea {
+  background-color: var(--color-input) !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+/* Color picker: no forzar fondo oscuro (rompe el control nativo) */
+html.dark input[type='color'] {
+  background-color: transparent !important;
+  border-color: #475569 !important;
+  padding: 0.15rem !important;
+  min-height: 2.5rem !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+html.dark option {
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+
+/* Tablas */
+html.dark thead tr {
+  background-color: rgb(15 23 42 / 0.95) !important;
+}
+
+html.dark tbody tr:hover {
+  background-color: rgb(51 65 85 / 0.45) !important;
+}
+
+html[data-zebra-tables='true'].dark tbody tr:nth-child(even),
+html.dark[data-zebra-tables='true'] tbody tr:nth-child(even) {
+  background-color: rgb(15 23 42 / 0.55);
+}
+
+/* Scrollbar */
+html.dark .scrollbar-thin {
+  scrollbar-color: #475569 transparent;
 }
 
 @layer utilities {
@@ -31,7 +214,6 @@
     scrollbar-color: #cbd5e1 transparent;
   }
 
-  /* RF-36: gráficos legibles en móvil */
   .chart-mobile-safe {
     min-height: 220px;
     width: 100%;
@@ -41,5 +223,67 @@
     .chart-mobile-safe {
       min-height: 260px;
     }
+  }
+}
+
+/*
+ * Formularios en móvil/tablet: SIEMPRE columna (CSS media query, sin JS).
+ */
+@media (max-width: 1023px) {
+  [role='dialog'] form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+
+  [role='dialog'] .grid,
+  [role='dialog'] [class*='grid-cols'] {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+
+  [role='dialog'] input,
+  [role='dialog'] select,
+  [role='dialog'] textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 2.75rem !important;
+    font-size: 1rem !important;
+    box-sizing: border-box !important;
+  }
+
+  [role='dialog'] label {
+    display: block !important;
+    width: 100% !important;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  html.dark [role='dialog'] label {
+    color: #f1f5f9;
+  }
+
+  [role='dialog'] .modal-footer {
+    display: flex !important;
+    flex-direction: column-reverse !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+
+  [role='dialog'] .modal-footer button {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: 2.75rem !important;
+    flex: 0 0 auto !important;
+    justify-content: center !important;
+    align-items: center !important;
+    font-size: 1rem !important;
   }
 }

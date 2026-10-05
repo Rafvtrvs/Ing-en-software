@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/Switch'
@@ -42,7 +43,7 @@ export function OrdersSettingsPanel() {
         subtitle="Prefijos, prioridades y tiempos de respuesta (SLA)."
         footer={<Button type="submit">Guardar cambios</Button>}
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Prefijo de orden">
             <Input {...register('orderPrefix')} placeholder="OT" />
           </FormField>
@@ -53,9 +54,9 @@ export function OrdersSettingsPanel() {
               <option value="Alta">Alta</option>
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <FormGrid cols={3}>
           <FormField label="SLA prioridad Alta (horas)">
             <Input type="number" min={1} {...register('slaHoursHigh', { valueAsNumber: true })} />
           </FormField>
@@ -65,7 +66,7 @@ export function OrdersSettingsPanel() {
           <FormField label="SLA prioridad Baja (horas)">
             <Input type="number" min={1} {...register('slaHoursLow', { valueAsNumber: true })} />
           </FormField>
-        </div>
+        </FormGrid>
 
         <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
           <Switch

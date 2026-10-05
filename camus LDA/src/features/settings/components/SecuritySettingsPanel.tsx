@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
 import { useSettingsStore } from '@/store/useSettingsStore'
@@ -95,7 +96,7 @@ export function SecuritySettingsPanel() {
               onChange={(e) => setPasswords((p) => ({ ...p, current: e.target.value }))}
             />
           </FormField>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <FormGrid cols={2}>
             <FormField label="Nueva contraseña">
               <Input
                 type="password"
@@ -110,7 +111,7 @@ export function SecuritySettingsPanel() {
                 onChange={(e) => setPasswords((p) => ({ ...p, confirm: e.target.value }))}
               />
             </FormField>
-          </div>
+          </FormGrid>
         </SettingsCard>
       </form>
     </div>

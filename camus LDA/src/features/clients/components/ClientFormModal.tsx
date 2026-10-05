@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useClientsStore } from '@/store/useClientsStore'
@@ -90,7 +91,7 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
     if (mode === 'create') {
       const result = await addClient({
         ...data,
-        lastOrder: '—',
+        lastOrder: 'â€”',
         createdAt: new Date().toISOString(),
       })
       if (!result.ok) {
@@ -121,7 +122,7 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
       description={
         mode === 'create'
           ? 'Completa los datos para registrar un nuevo cliente.'
-          : 'Modifica la información del cliente seleccionado.'
+          : 'Modifica la informaciÃ³n del cliente seleccionado.'
       }
       size="lg"
       footer={
@@ -140,7 +141,7 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
       }
     >
       <form id="client-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Nombre completo" htmlFor="name" error={errors.name?.message} required>
             <Input
               id="name"
@@ -157,9 +158,9 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
               className={errors.company ? 'border-red-300' : undefined}
             />
           </FormField>
-        </div>
+        </FormGrid>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="RUT" htmlFor="rut" error={errors.rut?.message} required>
             <Input
               id="rut"
@@ -196,9 +197,9 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
               className={errors.phone ? 'border-red-300' : undefined}
             />
           </FormField>
-        </div>
+        </FormGrid>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Email" htmlFor="email" error={errors.email?.message} required>
             <Input
               id="email"
@@ -230,7 +231,7 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
               <option value="Bloqueado">Bloqueado</option>
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
       </form>
     </Modal>
   )

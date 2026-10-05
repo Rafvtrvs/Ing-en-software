@@ -11,7 +11,9 @@ import { SettingsCard } from './SettingsCard'
 
 export function SystemSettingsPanel() {
   const system = useSettingsStore((s) => s.config.system)
+  const appearance = useSettingsStore((s) => s.config.appearance)
   const updateSystem = useSettingsStore((s) => s.updateSystem)
+  const updateAppearance = useSettingsStore((s) => s.updateAppearance)
   const runBackup = useSettingsStore((s) => s.runBackup)
   const clearLocalData = useSettingsStore((s) => s.clearLocalData)
   const addToast = useSettingsStore((s) => s.addToast)
@@ -75,6 +77,40 @@ export function SystemSettingsPanel() {
           </div>
         </SettingsCard>
       </form>
+
+      <SettingsCard
+        title="Tablas de datos"
+        subtitle="CU-127 — filas alternas y contraste en listados del sistema."
+      >
+        <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-700">
+          <Switch
+            id="sys-zebraTables"
+            label="Filas alternas"
+            description="Activa el sombreado de filas pares/impares en las tablas."
+            checked={appearance.zebraTables}
+            onChange={(v) => {
+              updateAppearance({ zebraTables: v })
+              addToast(
+                v ? 'Filas alternas activadas' : 'Filas alternas desactivadas',
+                'info',
+              )
+            }}
+          />
+          <Switch
+            id="sys-highContrastTables"
+            label="Alto contraste"
+            description="Resalta encabezados y bordes de las tablas."
+            checked={appearance.highContrastTables}
+            onChange={(v) => {
+              updateAppearance({ highContrastTables: v })
+              addToast(
+                v ? 'Alto contraste activado' : 'Alto contraste desactivado',
+                'info',
+              )
+            }}
+          />
+        </div>
+      </SettingsCard>
 
       <SettingsCard title="Datos y respaldo" subtitle="Exporta o restablece la información local.">
         <div className="flex flex-wrap gap-3">

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
 import { useParametersStore } from '@/store/useParametersStore'
@@ -38,22 +39,22 @@ export function BillingSettingsPanel() {
         subtitle="Numeración, plazos e impuestos aplicables."
         footer={<Button type="submit">Guardar cambios</Button>}
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Prefijo de factura">
             <Input {...register('invoicePrefix')} placeholder="F" />
           </FormField>
           <FormField label="Días de vencimiento por defecto">
             <Input type="number" min={1} {...register('defaultDueDays', { valueAsNumber: true })} />
           </FormField>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        </FormGrid>
+        <FormGrid cols={2}>
           <FormField label="IVA (%)">
             <Input type="number" min={0} max={100} {...register('taxRate', { valueAsNumber: true })} />
           </FormField>
           <FormField label="Condiciones de pago">
             <Input {...register('defaultPaymentTerms')} placeholder="30 días" />
           </FormField>
-        </div>
+        </FormGrid>
         <FormField label="Recordatorio antes del vencimiento (días)">
           <Input
             type="number"

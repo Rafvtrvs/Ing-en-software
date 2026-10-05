@@ -52,10 +52,15 @@ function OrderCard({
     'En Curso': 'Completada',
   }
 
+  const canAdvance =
+    order.status !== 'Cancelada' &&
+    order.status !== 'Completada' &&
+    order.status !== 'Abonado'
+
   return (
     <div
       className={cn(
-        'w-full rounded-xl border border-slate-100 bg-white p-4 text-left shadow-sm',
+        'w-full min-w-0 rounded-xl border border-slate-100 bg-white p-3 text-left shadow-sm sm:p-4',
         'transition hover:border-primary/30 hover:bg-slate-50/50',
       )}
     >
@@ -63,7 +68,7 @@ function OrderCard({
         <button
           type="button"
           ref={dragHandleRef}
-          className="mt-0.5 cursor-grab touch-none rounded p-0.5 text-slate-300 hover:text-slate-500 active:cursor-grabbing"
+          className="mt-0.5 shrink-0 cursor-grab touch-none rounded p-0.5 text-slate-300 hover:text-slate-500 active:cursor-grabbing"
           aria-label="Arrastrar orden"
           onClick={(e) => e.stopPropagation()}
           {...dragListeners}
@@ -73,31 +78,31 @@ function OrderCard({
         </button>
         <button
           type="button"
-          className="min-w-0 flex-1 text-left"
+          className="min-w-0 flex-1 overflow-hidden text-left"
           onClick={() => openViewModal(order)}
         >
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-slate-900">{order.id}</p>
               <p className="mt-1 truncate text-xs text-slate-500">{order.client}</p>
             </div>
             <Badge
               label={order.priority ?? 'Media'}
-              className="bg-slate-100 text-slate-700 ring-slate-500/20"
+              className="max-w-[40%] shrink-0 truncate bg-slate-100 text-slate-700 ring-slate-500/20"
             />
           </div>
-          <p className="mt-3 line-clamp-2 text-sm text-slate-700">
+          <p className="mt-2 line-clamp-2 text-sm text-slate-700 sm:mt-3">
             {order.service ?? order.category}
           </p>
-          <p className="mt-2 text-xs text-slate-500">{order.address}</p>
+          <p className="mt-1 truncate text-xs text-slate-500 sm:mt-2">{order.address}</p>
         </button>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 pl-6">
-        <Badge label={order.status} context="order" />
-        {order.status !== 'Cancelada' &&
-          order.status !== 'Completada' &&
-          order.status !== 'Abonado' && (
+      <div className="mt-3 flex min-w-0 flex-col gap-2 pl-6">
+        <div className="min-w-0">
+          <Badge label={order.status} context="order" />
+        </div>
+        {canAdvance && (
           <button
             type="button"
             onClick={(e) => {
@@ -105,7 +110,7 @@ function OrderCard({
               const next = nextStatus[order.status]
               if (next) updateOrder(order.id, { status: next })
             }}
-            className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+            className="w-full shrink-0 rounded-lg bg-slate-100 px-2.5 py-1.5 text-center text-xs font-semibold text-slate-700 hover:bg-slate-200"
           >
             {order.status === 'Pendiente' ? 'Iniciar' : 'Completar'}
           </button>
@@ -170,8 +175,11 @@ function DroppableColumn({
 
 export function OrdersBoard({
   ordersOverride,
+  /** En vista móvil: columnas en fila con scroll horizontal */
+  horizontalScroll = false,
 }: {
   ordersOverride?: WorkOrder[]
+  horizontalScroll?: boolean
 } = {}) {
   const storeOrders = useOrdersStore((s) => s.orders)
   const orders = ordersOverride ?? storeOrders
@@ -217,13 +225,22 @@ export function OrdersBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid gap-4 lg:grid-cols-4">
+      <div
+        className={
+          horizontalScroll
+            ? 'flex gap-3'
+            : 'grid gap-4 sm:grid-cols-2 xl:grid-cols-5'
+        }
+      >
         {columns.map((col) => {
           const items = grouped[col.title]
           return (
             <div
               key={col.title}
-              className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+              className={cn(
+                'rounded-2xl border border-slate-100 bg-white p-4 shadow-sm',
+                horizontalScroll && 'w-[260px] shrink-0',
+              )}
             >
               <div className="mb-3 flex items-center justify-between">
                 <div>

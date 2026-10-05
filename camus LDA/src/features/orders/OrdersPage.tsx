@@ -19,7 +19,6 @@ import { OperatorWorkloadPanel } from '@/features/orders/components/OperatorWork
 import { IncidentsPanel } from '@/features/orders/components/IncidentsPanel'
 import { ThirdPartyMonthlyStats } from '@/features/orders/components/ThirdPartyPanel'
 import { MyAssignedOrdersModal } from '@/features/orders/components/MyAssignedOrdersModal'
-import { FieldOrderPanel } from '@/features/orders/components/FieldOrderPanel'
 import { CancelOrderModal } from '@/features/orders/components/CancelOrderModal'
 import { AnnulOrderModal } from '@/features/orders/components/AnnulOrderModal'
 import { CompletedOrdersApprovalPanel } from '@/features/orders/components/CompletedOrdersApprovalPanel'
@@ -96,8 +95,7 @@ export function OrdersPage() {
             Órdenes asignadas: <strong>{visibleOrders.length}</strong>
           </div>
 
-          <FieldOrderPanel />
-
+          {/* Vista PC original del operador: cola + kanban (sin panel móvil de terreno) */}
           <PriorityQueuePanel ordersOverride={visibleOrders} />
           <OrdersBoard ordersOverride={visibleOrders} />
         </div>

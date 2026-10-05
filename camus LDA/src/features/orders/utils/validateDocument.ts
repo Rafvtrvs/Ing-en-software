@@ -13,6 +13,9 @@ export const ALLOWED_DOCUMENT_MIME = [
 
 export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024 // 10 MB
 
+/** Extensiones de archivo aceptadas en URL / ruta */
+const FILE_EXT_RE = /\.(pdf|jpe?g|png|webp|docx?|xlsx?)(?:$|[?#])/i
+
 export type DocumentValidationResult =
   | { ok: true }
   | { ok: false; errors: string[] }
@@ -33,6 +36,78 @@ export function validateOrderDocumentFile(file: {
     errors.push('Formato no permitido (PDF, imágenes o Office)')
   }
   return errors.length ? { ok: false, errors } : { ok: true }
+}
+
+/**
+ * Valida que el valor sea URL o ruta de un archivo (no texto libre).
+ * Acepta: https://…/archivo.pdf, /uploads/doc.pdf, ./files/x.png, C:\docs\a.pdf
+ */
+export function validateDocumentUrlOrPath(raw: string): DocumentValidationResult {
+  const value = raw.trim()
+  if (!value) {
+    return { ok: false, errors: ['La URL o ruta del archivo es obligatoria'] }
+  }
+
+  // Bloquear esquemas peligrosos o basura
+  if (/^(javascript|data|vbscript):/i.test(value)) {
+    return { ok: false, errors: ['Esquema de URL no permitido'] }
+  }
+
+  // URL http(s) o file:
+  if (/^(https?|file):\/\//i.test(value)) {
+    try {
+      const u = new URL(value)
+      const path = decodeURIComponent(u.pathname || '')
+      if (!path || path === '/') {
+        return {
+          ok: false,
+          errors: ['La URL debe incluir la ruta de un archivo (ej. …/contrato.pdf)'],
+        }
+      }
+      if (!FILE_EXT_RE.test(path)) {
+        return {
+          ok: false,
+          errors: [
+            'La URL debe apuntar a un archivo PDF, imagen u Office (ej. .pdf, .png, .docx)',
+          ],
+        }
+      }
+      return { ok: true }
+    } catch {
+      return { ok: false, errors: ['URL inválida'] }
+    }
+  }
+
+  // Ruta relativa / absoluta / Windows
+  const looksLikePath =
+    value.startsWith('/') ||
+    value.startsWith('./') ||
+    value.startsWith('../') ||
+    value.startsWith('uploads/') ||
+    value.startsWith('files/') ||
+    value.startsWith('docs/') ||
+    /^[A-Za-z]:[\\/]/.test(value)
+
+  if (!looksLikePath) {
+    return {
+      ok: false,
+      errors: [
+        'Ingresá una URL (https://…/archivo.pdf) o una ruta (ej. /uploads/contrato.pdf)',
+      ],
+    }
+  }
+
+  const pathOnly = value.split(/[?#]/)[0] ?? value
+  if (!FILE_EXT_RE.test(pathOnly)) {
+    return {
+      ok: false,
+      errors: [
+        'La ruta debe terminar en un archivo válido (.pdf, .jpg, .png, .docx, .xlsx, …)',
+      ],
+    }
+  }
+
+  return { ok: true }
 }
 
 function guessMimeFromName(name: string): string {

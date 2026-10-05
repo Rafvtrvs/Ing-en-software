@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useInventoryStore } from '@/store/useInventoryStore'
@@ -53,7 +54,7 @@ export function ProductFormModal({
     defaultValues: {
       code: '',
       name: '',
-      category: 'Tuberías',
+      category: 'TuberÃ­as',
       currentStock: 0,
       minStock: 0,
       unit: 'un',
@@ -75,7 +76,7 @@ export function ProductFormModal({
       reset({
         code: '',
         name: '',
-        category: 'Tuberías',
+        category: 'TuberÃ­as',
         currentStock: 0,
         minStock: 0,
         unit: 'un',
@@ -129,7 +130,7 @@ export function ProductFormModal({
       open={open}
       onClose={onClose}
       title={mode === 'create' ? 'Nuevo Producto' : 'Editar Producto'}
-      description="Registra o actualiza la información del producto en inventario."
+      description="Registra o actualiza la informaciÃ³n del producto en inventario."
       size="lg"
       footer={
         <>
@@ -143,7 +144,7 @@ export function ProductFormModal({
       }
     >
       <form id="product-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Código" htmlFor="code" error={errors.code?.message} required>
             <Input
               id="code"
@@ -162,10 +163,10 @@ export function ProductFormModal({
               className={errors.code ? 'border-red-300' : undefined}
             />
           </FormField>
-          <FormField label="Categoría" htmlFor="category" required>
+          <FormField label="CategorÃ­a" htmlFor="category" required>
             <Select id="category" {...register('category')}>
               {categoryNames.length === 0 ? (
-                <option value="">Sin categorías activas</option>
+                <option value="">Sin categorÃ­as activas</option>
               ) : (
                 categoryNames.map((c) => (
                   <option key={c} value={c}>
@@ -175,18 +176,18 @@ export function ProductFormModal({
               )}
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
 
         <FormField label="Nombre del producto" htmlFor="name" error={errors.name?.message} required>
           <Input
             id="name"
-            placeholder="Ej: Tubería PVC 110mm"
+            placeholder="Ej: TuberÃ­a PVC 110mm"
             {...register('name', { required: 'El nombre es obligatorio' })}
             className={errors.name ? 'border-red-300' : undefined}
           />
         </FormField>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <FormGrid cols={3}>
           <FormField
             label="Stock actual"
             htmlFor="currentStock"
@@ -200,12 +201,12 @@ export function ProductFormModal({
               {...register('currentStock', {
                 required: true,
                 valueAsNumber: true,
-                min: { value: 0, message: 'Mínimo 0' },
+                min: { value: 0, message: 'MÃ­nimo 0' },
               })}
             />
           </FormField>
           <FormField
-            label="Stock mínimo"
+            label="Stock mÃ­nimo"
             htmlFor="minStock"
             error={errors.minStock?.message}
             required
@@ -217,7 +218,7 @@ export function ProductFormModal({
               {...register('minStock', {
                 required: true,
                 valueAsNumber: true,
-                min: { value: 0, message: 'Mínimo 0' },
+                min: { value: 0, message: 'MÃ­nimo 0' },
               })}
             />
           </FormField>
@@ -229,7 +230,7 @@ export function ProductFormModal({
               <option value="lt">lt</option>
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
       </form>
     </Modal>
   )

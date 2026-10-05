@@ -14,7 +14,7 @@ export const defaultAppConfiguration: AppConfiguration = {
     dateFormat: 'dd/mm/yyyy',
     accentColor: '#2563eb',
     zebraTables: true,
-    highContrastTables: false,
+    highContrastTables: true,
     chartPalette: 'default',
   },
   security: {

@@ -22,11 +22,18 @@ export function Switch({
       {(label || description) && (
         <div className="min-w-0">
           {label && (
-            <label htmlFor={id} className="text-sm font-medium text-slate-900">
+            <label
+              htmlFor={id}
+              className="text-sm font-medium text-slate-900 dark:text-slate-100"
+            >
               {label}
             </label>
           )}
-          {description && <p className="mt-0.5 text-xs text-slate-500">{description}</p>}
+          {description && (
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+              {description}
+            </p>
+          )}
         </div>
       )}
       <button
@@ -38,12 +45,12 @@ export function Switch({
         onClick={() => onChange(!checked)}
         className={cn(
           'relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50',
-          checked ? 'bg-primary' : 'bg-slate-200',
+          checked ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-600',
         )}
       >
         <span
           className={cn(
-            'pointer-events-none inline-block h-5 w-5 translate-y-0.5 rounded-full bg-white shadow transition-transform',
+            'switch-thumb pointer-events-none inline-block h-5 w-5 translate-y-0.5 rounded-full bg-white shadow transition-transform',
             checked ? 'translate-x-5' : 'translate-x-0.5',
           )}
         />

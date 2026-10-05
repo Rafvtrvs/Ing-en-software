@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Select } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/Switch'
-import { Input } from '@/components/ui/Input'
 import { useSettingsStore } from '@/store/useSettingsStore'
 import type { AppAppearanceSettings } from '@/types'
 import { SettingsCard } from './SettingsCard'
@@ -41,9 +41,17 @@ export function AppearanceSettingsPanel() {
         subtitle="Tema, idioma y formato de la interfaz (CU-125)."
         footer={<Button type="submit">Guardar apariencia</Button>}
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        <FormGrid cols={2}>
           <FormField label="Tema">
-            <Select {...register('theme')}>
+            <Select
+              {...register('theme', {
+                onChange: (e) => {
+                  updateAppearance({
+                    theme: e.target.value as AppAppearanceSettings['theme'],
+                  })
+                },
+              })}
+            >
               <option value="light">Claro</option>
               <option value="dark">Oscuro</option>
               <option value="system">Sistema</option>
@@ -55,7 +63,7 @@ export function AppearanceSettingsPanel() {
               <option value="en">English</option>
             </Select>
           </FormField>
-        </div>
+        </FormGrid>
         <FormField label="Formato de fecha">
           <Select {...register('dateFormat')}>
             <option value="dd/mm/yyyy">DD/MM/AAAA</option>
@@ -73,23 +81,56 @@ export function AppearanceSettingsPanel() {
         </div>
 
         <FormField label="Color de acento (menú y paneles)" htmlFor="accentColor">
-          <div className="flex flex-wrap items-center gap-2">
-            <Input
-              id="accentColor"
-              type="color"
-              className="h-10 w-14 cursor-pointer p-1"
-              {...register('accentColor')}
-            />
-            {ACCENT_PRESETS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                title={c}
-                className="h-8 w-8 rounded-full ring-2 ring-white ring-offset-1"
-                style={{ backgroundColor: c }}
-                onClick={() => setValue('accentColor', c)}
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              htmlFor="accentColor"
+              className="relative flex h-11 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-600 dark:bg-slate-900"
+              title="Elegir color"
+            >
+              <input
+                id="accentColor"
+                type="color"
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                value={watch('accentColor')}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setValue('accentColor', value, { shouldDirty: true })
+                  updateAppearance({ accentColor: value })
+                }}
               />
-            ))}
+              <span
+                className="pointer-events-none h-7 w-9 rounded-md border border-black/10"
+                style={{ backgroundColor: watch('accentColor') }}
+              />
+            </label>
+            <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
+              {watch('accentColor')}
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {ACCENT_PRESETS.map((c) => {
+                const selected =
+                  watch('accentColor')?.toLowerCase() === c.toLowerCase()
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    title={c}
+                    aria-label={`Acento ${c}`}
+                    aria-pressed={selected}
+                    className={
+                      selected
+                        ? 'h-9 w-9 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-white dark:ring-offset-slate-800'
+                        : 'h-9 w-9 rounded-full ring-1 ring-black/10 ring-offset-1 ring-offset-white hover:ring-2 hover:ring-slate-400 dark:ring-white/20 dark:ring-offset-slate-800'
+                    }
+                    style={{ backgroundColor: c }}
+                    onClick={() => {
+                      setValue('accentColor', c, { shouldDirty: true })
+                      updateAppearance({ accentColor: c })
+                    }}
+                  />
+                )
+              })}
+            </div>
             <Button
               type="button"
               variant="outline"
@@ -101,21 +142,32 @@ export function AppearanceSettingsPanel() {
           </div>
         </FormField>
 
-        <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
-          <p className="text-sm font-medium text-slate-800">Tablas de datos</p>
+        <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-700">
+          <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
+            Tablas de datos (CU-127)
+          </p>
+          <p className="text-xs text-slate-500">
+            Se aplican al instante en Usuarios, Órdenes, Inventario y Reportes.
+          </p>
           <Switch
             id="zebraTables"
             label="Filas alternas"
             description="Mejora la lectura de tablas densas."
             checked={watch('zebraTables')}
-            onChange={(v) => setValue('zebraTables', v)}
+            onChange={(v) => {
+              setValue('zebraTables', v)
+              updateAppearance({ zebraTables: v })
+            }}
           />
           <Switch
             id="highContrastTables"
             label="Alto contraste"
             description="Encabezados y bordes más marcados."
             checked={watch('highContrastTables')}
-            onChange={(v) => setValue('highContrastTables', v)}
+            onChange={(v) => {
+              setValue('highContrastTables', v)
+              updateAppearance({ highContrastTables: v })
+            }}
           />
           <Button
             type="button"

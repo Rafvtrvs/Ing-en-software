@@ -23,6 +23,7 @@ interface UserFormModalProps {
   onClose: () => void
 }
 
+/** Mismo layout vertical que el formulario de OT en terreno (operador). */
 export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps) {
   const roles = useUsersStore((s) => s.roles)
   const addUser = useUsersStore((s) => s.addUser)
@@ -109,44 +110,40 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
       }
     >
       <form id="user-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="Nombre completo" error={errors.name?.message} required>
-            <Input
-              placeholder="Ej: Carlos Mendoza"
-              {...register('name', { required: 'El nombre es obligatorio' })}
-            />
-          </FormField>
-          <FormField label="Email" error={errors.email?.message} required>
-            <Input
-              type="email"
-              placeholder="usuario@camus.cl"
-              {...register('email', {
-                required: 'El email es obligatorio',
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Email inválido',
-                },
-              })}
-            />
-          </FormField>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="Teléfono" error={errors.phone?.message} required>
-            <Input
-              placeholder="+56 9 1234 5678"
-              {...register('phone', { required: 'El teléfono es obligatorio' })}
-            />
-          </FormField>
-          <FormField label="Rol" required>
-            <Select {...register('roleId', { required: true })}>
-              {activeRoles.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-        </div>
+        <FormField label="Nombre completo" error={errors.name?.message} required>
+          <Input
+            placeholder="Ej: Carlos Mendoza"
+            {...register('name', { required: 'El nombre es obligatorio' })}
+          />
+        </FormField>
+        <FormField label="Email" error={errors.email?.message} required>
+          <Input
+            type="email"
+            placeholder="usuario@camus.cl"
+            {...register('email', {
+              required: 'El email es obligatorio',
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Email inválido',
+              },
+            })}
+          />
+        </FormField>
+        <FormField label="Teléfono" error={errors.phone?.message} required>
+          <Input
+            placeholder="+56 9 1234 5678"
+            {...register('phone', { required: 'El teléfono es obligatorio' })}
+          />
+        </FormField>
+        <FormField label="Rol" required>
+          <Select {...register('roleId', { required: true })}>
+            {activeRoles.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </Select>
+        </FormField>
         <FormField label="Estado" required>
           <Select {...register('status')}>
             <option value="Activo">Activo</option>

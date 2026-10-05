@@ -39,7 +39,9 @@ export function ClientsSummaryChart() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-slate-900">{total}</span>
+                <span className="max-w-full truncate text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
+                  {total.toLocaleString('es-CL')}
+                </span>
                 <span className="text-xs text-slate-500">Total</span>
               </div>
             </div>

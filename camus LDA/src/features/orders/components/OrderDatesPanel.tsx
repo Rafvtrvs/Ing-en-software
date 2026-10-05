@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { CalendarClock } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
+import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { calcDurationHours, toInputDate } from '@/features/orders/utils/orderDates'
@@ -59,40 +60,40 @@ export function OrderDatesPanel({
           </p>
         </div>
       </div>
-      <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-3">
-        <FormField label="Fecha inicio" htmlFor={`start-${order.id}`}>
-          <Input
-            id={`start-${order.id}`}
-            type="date"
-            value={startDate}
-            disabled={!canEdit}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </FormField>
-        <FormField label="Fecha término" htmlFor={`end-${order.id}`}>
-          <Input
-            id={`end-${order.id}`}
-            type="date"
-            value={endDate}
-            disabled={!canEdit}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </FormField>
-        <FormField label="Duración (horas)" htmlFor={`dur-${order.id}`}>
-          <Input
-            id={`dur-${order.id}`}
-            type="number"
-            min={0}
-            step={0.5}
-            value={durationHours}
-            disabled={!canEdit}
-            onChange={(e) => setDurationHours(e.target.value)}
-          />
-        </FormField>
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <FormGrid cols={3}>
+          <FormField label="Fecha inicio" htmlFor={`start-${order.id}`}>
+            <Input
+              id={`start-${order.id}`}
+              type="date"
+              value={startDate}
+              disabled={!canEdit}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </FormField>
+          <FormField label="Fecha término" htmlFor={`end-${order.id}`}>
+            <Input
+              id={`end-${order.id}`}
+              type="date"
+              value={endDate}
+              disabled={!canEdit}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </FormField>
+          <FormField label="Duración (horas)" htmlFor={`dur-${order.id}`}>
+            <Input
+              id={`dur-${order.id}`}
+              type="number"
+              min={0}
+              step={0.5}
+              value={durationHours}
+              disabled={!canEdit}
+              onChange={(e) => setDurationHours(e.target.value)}
+            />
+          </FormField>
+        </FormGrid>
         {canEdit && (
-          <div className="sm:col-span-3">
-            <Button type="submit">Guardar fechas</Button>
-          </div>
+          <Button type="submit">Guardar fechas</Button>
         )}
       </form>
     </div>
