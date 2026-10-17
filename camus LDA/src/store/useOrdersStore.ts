@@ -36,7 +36,7 @@ import {
 import { useNotificationsStore } from '@/store/useNotificationsStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
-import { calcDurationHours } from '@/features/orders/utils/orderDates'
+import { calcDurationHours, validateServiceTimeSequence } from '@/features/orders/utils/orderDates'
 import {
   getExecutionDate,
   validateRescheduleDate,
@@ -71,8 +71,41 @@ export interface OperatorWorkload {
   totalAssigned: number
 }
 
+/** RF-56 — marcas de inicio/término que el API no guarda */
+interface ServiceClock {
+  serviceStartedAt?: string
+  serviceEndedAt?: string
+  clientSignature?: string
+  timeCorrectionNote?: string
+  startDate?: string
+  endDate?: string
+  durationHours?: number
+}
+
+function applyServiceClocks(
+  orders: WorkOrder[],
+  clocks: Record<string, ServiceClock>,
+): WorkOrder[] {
+  return orders.map((order) => {
+    const clock = clocks[order.id]
+    if (!clock) return order
+    return {
+      ...order,
+      serviceStartedAt: clock.serviceStartedAt ?? order.serviceStartedAt,
+      serviceEndedAt: clock.serviceEndedAt ?? order.serviceEndedAt,
+      clientSignature: clock.clientSignature ?? order.clientSignature,
+      timeCorrectionNote: clock.timeCorrectionNote ?? order.timeCorrectionNote,
+      startDate: clock.startDate ?? order.startDate,
+      endDate: clock.endDate ?? order.endDate,
+      durationHours: clock.durationHours ?? order.durationHours,
+    }
+  })
+}
+
 interface OrdersState {
   orders: WorkOrder[]
+  /** RF-56 CU-197/198 — sobrevive a la sincronización con el servidor */
+  serviceClocks: Record<string, ServiceClock>
   apiAvailable: boolean
   /** Intervenciones locales por OT (fallback / caché CU-149–151) */
   interventionsByOrderId: Record<string, OrderIntervention[]>
@@ -113,8 +146,20 @@ interface OrdersState {
   ) => void
   setOrderDates: (
     orderId: string,
-    dates: { startDate?: string; endDate?: string; durationHours?: number },
-  ) => void
+    dates: {
+      startDate?: string
+      endDate?: string
+      durationHours?: number
+      timeCorrectionNote?: string
+    },
+  ) => { ok: boolean; message?: string }
+  /** RF-56 CU-197 — inicio de jornada en terreno */
+  startFieldService: (orderId: string) => { ok: boolean; message?: string }
+  /** RF-56 CU-198 — cierre con firma y duración */
+  finishFieldService: (
+    orderId: string,
+    clientSignature: string,
+  ) => { ok: boolean; message?: string }
   setOrderPriority: (
     orderId: string,
     priority: OrderPriority,
@@ -327,6 +372,12 @@ function mergeApiOrders(
       startDate: local.startDate ?? api.startDate,
       endDate: local.endDate ?? api.endDate,
       durationHours: local.durationHours ?? api.durationHours,
+      serviceStartedAt: local.serviceStartedAt ?? api.serviceStartedAt,
+      serviceEndedAt: local.serviceEndedAt ?? api.serviceEndedAt,
+      clientSignature: local.clientSignature ?? api.clientSignature,
+      timeCorrectionNote: local.timeCorrectionNote ?? api.timeCorrectionNote,
+      status:
+        local.serviceStartedAt && api.status === 'Pendiente' ? local.status : api.status,
       incidentType: local.incidentType ?? api.incidentType,
       priorityManual: local.priorityManual ?? api.priorityManual,
       photoUrls: local.photoUrls ?? api.photoUrls,
@@ -364,6 +415,7 @@ export const useOrdersStore = create<OrdersState>()(
   persist(
     (set, get) => ({
       orders: seededOrders,
+      serviceClocks: {},
       apiAvailable: false,
       interventionsByOrderId: {},
       commentsByOrderId: groupCommentsByOrder(initialOrderComments),
@@ -383,7 +435,10 @@ export const useOrdersStore = create<OrdersState>()(
       syncFromApi: async () => {
         try {
           const orders = await ordersService.list()
-          const merged = mergeApiOrders(orders, get().orders)
+          const merged = applyServiceClocks(
+            mergeApiOrders(orders, get().orders),
+            get().serviceClocks,
+          )
           set({ orders: normalizeOrdersSort(merged), apiAvailable: true })
         } catch {
           set({ apiAvailable: false })
@@ -686,8 +741,121 @@ export const useOrdersStore = create<OrdersState>()(
       },
 
       setOrderDates: (orderId, dates) => {
-        get().updateOrder(orderId, dates)
-        get().addToast('Fechas de la orden actualizadas')
+        const existing = get().orders.find((o) => o.id === orderId)
+        const start = dates.startDate ?? existing?.startDate
+        const end = dates.endDate ?? existing?.endDate
+        const sequenceError = validateServiceTimeSequence(start, end)
+        if (sequenceError) {
+          get().addToast(sequenceError, 'error')
+          return { ok: false, message: sequenceError }
+        }
+        const duration =
+          dates.durationHours ??
+          (start && end ? calcDurationHours(start, end) : existing?.durationHours)
+        get().updateOrder(orderId, {
+          ...dates,
+          durationHours: duration,
+        })
+        set((state) => ({
+          serviceClocks: {
+            ...state.serviceClocks,
+            [orderId]: {
+              ...state.serviceClocks[orderId],
+              startDate: dates.startDate,
+              endDate: dates.endDate,
+              durationHours: duration,
+              timeCorrectionNote: dates.timeCorrectionNote,
+            },
+          },
+        }))
+        get().addToast(
+          dates.timeCorrectionNote
+            ? 'Tiempos corregidos y registrados en la orden'
+            : 'Fechas de la orden actualizadas',
+        )
+        return { ok: true }
+      },
+
+      startFieldService: (orderId) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) return { ok: false, message: 'Orden no encontrada' }
+        if (order.status !== 'Pendiente') {
+          return { ok: false, message: 'Solo se puede iniciar una orden pendiente' }
+        }
+        if (order.serviceStartedAt || get().serviceClocks[orderId]?.serviceStartedAt) {
+          return { ok: false, message: 'El inicio de servicio ya está registrado' }
+        }
+        const now = new Date()
+        const serviceStartedAt = now.toISOString()
+        const startDate = serviceStartedAt.slice(0, 10)
+        get().updateOrder(orderId, {
+          status: 'En Curso',
+          progress: Math.max(order.progress ?? 0, 10),
+          serviceStartedAt,
+          startDate,
+        })
+        set((state) => ({
+          serviceClocks: {
+            ...state.serviceClocks,
+            [orderId]: {
+              ...state.serviceClocks[orderId],
+              serviceStartedAt,
+              startDate,
+            },
+          },
+        }))
+        get().addToast('Servicio iniciado. Fecha y hora de inicio bloqueadas.')
+        return { ok: true }
+      },
+
+      finishFieldService: (orderId, clientSignature) => {
+        const signature = clientSignature.trim()
+        if (signature.length < 3) {
+          return { ok: false, message: 'La firma del cliente es obligatoria' }
+        }
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) return { ok: false, message: 'Orden no encontrada' }
+        if (order.status !== 'En Curso') {
+          return { ok: false, message: 'La orden debe estar en ejecución' }
+        }
+        const now = new Date()
+        const started = order.serviceStartedAt ?? order.startDate
+        const sequenceError = validateServiceTimeSequence(started, now.toISOString())
+        if (sequenceError) {
+          get().addToast(sequenceError, 'error')
+          return { ok: false, message: sequenceError }
+        }
+        const hours = calcDurationHours(started, now.toISOString())
+        const serviceEndedAt = now.toISOString()
+        const endDate = serviceEndedAt.slice(0, 10)
+        get().updateOrder(orderId, {
+          status: 'Completada',
+          progress: 100,
+          serviceEndedAt,
+          endDate,
+          durationHours: hours,
+          clientSignature: signature,
+        })
+        set((state) => ({
+          serviceClocks: {
+            ...state.serviceClocks,
+            [orderId]: {
+              ...state.serviceClocks[orderId],
+              serviceStartedAt: order.serviceStartedAt ?? state.serviceClocks[orderId]?.serviceStartedAt,
+              serviceEndedAt,
+              endDate,
+              durationHours: hours,
+              clientSignature: signature,
+              startDate: order.startDate ?? state.serviceClocks[orderId]?.startDate,
+            },
+          },
+        }))
+        get().addToast(
+          hours != null
+            ? `Servicio finalizado. Duración: ${hours} h`
+            : 'Servicio finalizado',
+        )
+        return { ok: true }
       },
 
       setOrderPriority: (orderId, priority, manual = true) => {
@@ -1358,6 +1526,7 @@ export const useOrdersStore = create<OrdersState>()(
       name: 'camus_orders_store_v2',
       partialize: (state) => ({
         orders: state.orders,
+        serviceClocks: state.serviceClocks,
         interventionsByOrderId: state.interventionsByOrderId,
         commentsByOrderId: state.commentsByOrderId,
         rescheduleHistoryByOrderId: state.rescheduleHistoryByOrderId,
@@ -1368,6 +1537,22 @@ export const useOrdersStore = create<OrdersState>()(
       merge: (persisted, current) => {
         const p = persisted as Partial<OrdersState> | undefined
         const orders = normalizeOrdersSort(p?.orders ?? current.orders)
+        const clocksFromOrders = Object.fromEntries(
+          orders
+            .filter((order) => order.serviceStartedAt || order.serviceEndedAt)
+            .map((order) => [
+              order.id,
+              {
+                serviceStartedAt: order.serviceStartedAt,
+                serviceEndedAt: order.serviceEndedAt,
+                clientSignature: order.clientSignature,
+                timeCorrectionNote: order.timeCorrectionNote,
+                startDate: order.startDate,
+                endDate: order.endDate,
+                durationHours: order.durationHours,
+              },
+            ]),
+        )
         const comments =
           p?.commentsByOrderId && Object.keys(p.commentsByOrderId).length > 0
             ? p.commentsByOrderId
@@ -1385,7 +1570,6 @@ export const useOrdersStore = create<OrdersState>()(
         return {
           ...current,
           ...p,
-          orders,
           interventionsByOrderId:
             p?.interventionsByOrderId ?? current.interventionsByOrderId,
           commentsByOrderId: comments,
@@ -1395,6 +1579,14 @@ export const useOrdersStore = create<OrdersState>()(
               ? p.modificationRequests
               : initialModificationRequests,
           modificationHistoryByOrderId: modHistory,
+          serviceClocks: {
+            ...clocksFromOrders,
+            ...(p?.serviceClocks ?? {}),
+          },
+          orders: applyServiceClocks(orders, {
+            ...clocksFromOrders,
+            ...(p?.serviceClocks ?? {}),
+          }),
         }
       },
     },

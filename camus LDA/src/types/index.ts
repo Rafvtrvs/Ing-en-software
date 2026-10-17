@@ -87,6 +87,14 @@ export interface WorkOrder {
   endDate?: string
   /** Duración en horas — CU-154 */
   durationHours?: number
+  /** RF-56 CU-197 — marca de inicio de servicio (ISO) */
+  serviceStartedAt?: string
+  /** RF-56 CU-198 — marca de término de servicio (ISO) */
+  serviceEndedAt?: string
+  /** RF-56 CU-198 — nombre de quien firma el cierre */
+  clientSignature?: string
+  /** RF-56 CU-199 — motivo de corrección administrativa de tiempos */
+  timeCorrectionNote?: string
   /** Tipo de incidente — CU-165 */
   incidentType?: IncidentType
   /** IDs de técnicos/operadores asignados (cuadrilla) — CU-160 */
@@ -562,6 +570,7 @@ export type ReportTab =
   | 'costos'
   | 'tecnicos'
   | 'terceros'
+  | 'tiempos'
   | 'auditoria'
 
 export type ReportPeriod = 'month' | 'quarter' | 'year'
@@ -722,6 +731,8 @@ export interface PlatformSystemSettings {
   maintenanceMode: boolean
   debugMode: boolean
   lastBackup: string
+  /** RF-26 CU-90 — minutos entre actualizaciones automáticas del panel (0 = desactivado) */
+  chartRefreshMinutes: number
 }
 
 export interface AppConfiguration {

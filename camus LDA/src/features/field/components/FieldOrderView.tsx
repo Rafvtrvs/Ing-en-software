@@ -24,6 +24,7 @@ export function FieldOrderView({
   const [note, setNote] = useState('')
   const [feedback, setFeedback] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [signature, setSignature] = useState('')
   const cameraRef = useRef<HTMLInputElement>(null)
 
   const run = async (action: NewFieldAction) => {
@@ -90,23 +91,47 @@ export function FieldOrderView({
       </Button>
       {showLocation && <OrderLocationCard order={order} />}
 
-      {/* CU-117: estado */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-2">
         <Button
+          className="w-full"
           leftIcon={<Play className="h-4 w-4" />}
-          disabled={busy || order.status !== 'Pendiente'}
-          onClick={() => void run({ kind: 'status', orderId: order.id, status: 'En Curso', progress: 10 })}
+          disabled={busy || order.status !== 'Pendiente' || Boolean(order.serviceStartedAt)}
+          onClick={() => void run({ kind: 'start-service', orderId: order.id })}
         >
-          Iniciar trabajo
+          Comenzar Servicio
         </Button>
+        {order.status === 'En Curso' && (
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium text-slate-700">Firma del cliente</span>
+            <input
+              value={signature}
+              onChange={(e) => setSignature(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-base"
+              placeholder="Nombre de quien recibe"
+            />
+          </label>
+        )}
         <Button
+          className="w-full"
           variant="secondary"
           leftIcon={<CheckCircle2 className="h-4 w-4" />}
-          disabled={busy || order.status !== 'En Curso'}
-          onClick={() => void run({ kind: 'status', orderId: order.id, status: 'Completada', progress: 100 })}
+          disabled={busy || order.status !== 'En Curso' || signature.trim().length < 3}
+          onClick={() =>
+            void run({
+              kind: 'finish-service',
+              orderId: order.id,
+              clientSignature: signature.trim(),
+            })
+          }
         >
-          Finalizar
+          Finalizar Servicio
         </Button>
+        {order.serviceStartedAt && (
+          <p className="text-xs text-slate-500">
+            Inicio {new Date(order.serviceStartedAt).toLocaleString('es-CL')}
+            {order.durationHours != null ? ` · ${order.durationHours} h` : ''}
+          </p>
+        )}
       </div>
 
       {/* CU-117: detalles técnicos */}

@@ -24,6 +24,8 @@ export type NewFieldAction =
   | { kind: 'status'; orderId: string; status: OrderStatus; progress?: number }
   | { kind: 'note'; orderId: string; detail: string }
   | { kind: 'photo'; orderId: string; fileName: string; mimeType: string; data: string }
+  | { kind: 'start-service'; orderId: string }
+  | { kind: 'finish-service'; orderId: string; clientSignature: string }
 
 export interface SyncResult {
   synced: number

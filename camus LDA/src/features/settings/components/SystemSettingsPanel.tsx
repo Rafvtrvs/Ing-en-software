@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Database, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/Switch'
 import { useSettingsStore } from '@/store/useSettingsStore'
 import { APP_VERSION } from '@/data/mock/settings'
@@ -19,7 +20,10 @@ export function SystemSettingsPanel() {
   const addToast = useSettingsStore((s) => s.addToast)
 
   const { handleSubmit, reset, watch, setValue } = useForm<PlatformSystemSettings>({
-    defaultValues: system,
+    defaultValues: {
+      ...system,
+      chartRefreshMinutes: system.chartRefreshMinutes ?? 5,
+    },
   })
 
   useEffect(() => {
@@ -58,6 +62,24 @@ export function SystemSettingsPanel() {
             <span className="font-medium text-slate-900">
               {formatLastLogin(system.lastBackup)}
             </span>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="chart-refresh" className="mb-1 block text-sm font-medium text-slate-700">
+              Intervalo de actualización de gráficos
+            </label>
+            <Select
+              id="chart-refresh"
+              value={String(watch('chartRefreshMinutes') ?? 5)}
+              onChange={(e) => setValue('chartRefreshMinutes', Number(e.target.value))}
+            >
+              <option value="0">Desactivado</option>
+              <option value="1">Cada 1 minuto</option>
+              <option value="5">Cada 5 minutos</option>
+              <option value="15">Cada 15 minutos</option>
+            </Select>
+            <p className="mt-1 text-xs text-slate-500">
+              El panel principal usa este intervalo para refrescar KPIs y gráficos.
+            </p>
           </div>
           <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
             <Switch

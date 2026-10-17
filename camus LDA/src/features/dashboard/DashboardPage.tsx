@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Calendar, RefreshCw } from 'lucide-react'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { formatDate, formatDateTime } from '@/utils/formatters'
 import { useAppStore } from '@/store/useAppStore'
+import { useSettingsStore } from '@/store/useSettingsStore'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useBillingStore } from '@/store/useBillingStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
@@ -25,6 +26,14 @@ import { OverdueOrdersAlert } from './components/OverdueOrdersAlert'
 import { QuickActions } from './components/QuickActions'
 
 const PRIORITY_OPTIONS: PriorityFilter[] = ['Todas', 'Baja', 'Media', 'Alta']
+const FILTER_KEY = 'camus_dashboard_priority_filter'
+
+function readSavedFilter(): PriorityFilter {
+  const saved = localStorage.getItem(FILTER_KEY)
+  return PRIORITY_OPTIONS.includes(saved as PriorityFilter)
+    ? (saved as PriorityFilter)
+    : 'Todas'
+}
 
 export function DashboardPage() {
   const user = useAppStore((s) => s.user)
@@ -33,8 +42,11 @@ export function DashboardPage() {
   const invoices = useBillingStore((s) => s.invoices)
   const payments = useBillingStore((s) => s.payments)
   const products = useInventoryStore((s) => s.products)
+  const refreshMinutes = useSettingsStore(
+    (s) => s.config.system.chartRefreshMinutes ?? 5,
+  )
 
-  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('Todas')
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>(readSavedFilter)
   const [lastUpdated, setLastUpdated] = useState(() => new Date())
   const [refreshing, setRefreshing] = useState(false)
   const [refreshTick, setRefreshTick] = useState(0)
@@ -57,6 +69,20 @@ export function DashboardPage() {
       setRefreshing(false)
     }
   }
+
+  useEffect(() => {
+    localStorage.setItem(FILTER_KEY, priorityFilter)
+  }, [priorityFilter])
+
+  useEffect(() => {
+    if (!refreshMinutes || refreshMinutes < 1) return
+    const timer = window.setInterval(() => {
+      void handleRefresh()
+    }, refreshMinutes * 60 * 1000)
+    return () => window.clearInterval(timer)
+    // El intervalo se rearma cuando cambia la configuración guardada.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshMinutes])
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -81,7 +107,7 @@ export function DashboardPage() {
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as PriorityFilter)}
               aria-label="Filtrar por prioridad"
-              className="w-full"
+              className={`w-full ${priorityFilter !== 'Todas' ? 'ring-2 ring-primary' : ''}`}
             >
               {PRIORITY_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -97,7 +123,7 @@ export function DashboardPage() {
               className="w-full sm:w-auto"
               onClick={() => setPriorityFilter('Todas')}
             >
-              Limpiar filtros
+              Resetear filtros
             </Button>
             <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm sm:px-4">
               <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
@@ -113,7 +139,7 @@ export function DashboardPage() {
               onClick={() => void handleRefresh()}
               disabled={refreshing}
             >
-              Actualizar panel
+              Actualización manual
             </Button>
           </div>
         </div>

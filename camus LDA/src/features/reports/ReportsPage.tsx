@@ -27,6 +27,7 @@ import { BillingReportPanel } from './components/BillingReportPanel'
 import { CostsReportPanel } from './components/CostsReportPanel'
 import { TechniciansReportPanel } from './components/TechniciansReportPanel'
 import { AuditReportPanel } from './components/AuditReportPanel'
+import { ServiceTimesReportPanel } from './components/ServiceTimesReportPanel'
 import { ThirdPartyInterventionsReportPanel } from './components/ThirdPartyInterventionsReportPanel'
 import { TraceabilityReportPanel } from './components/TraceabilityReportPanel'
 import { PhysicalAssetsReportPanel } from './components/PhysicalAssetsReportPanel'
@@ -40,6 +41,7 @@ const REPORT_TABS: { id: ReportTab; label: string }[] = [
   { id: 'activos', label: 'Activos físicos' },
   { id: 'costos', label: 'Costos' },
   { id: 'tecnicos', label: 'Técnicos' },
+  { id: 'tiempos', label: 'Tiempos de operación' },
   { id: 'terceros', label: 'Terceros' },
   { id: 'auditoria', label: 'Auditoría' },
 ]
@@ -103,6 +105,7 @@ export function ReportsPage() {
         {activeTab === 'activos' && <PhysicalAssetsReportPanel />}
         {activeTab === 'costos' && <CostsReportPanel />}
         {activeTab === 'tecnicos' && <TechniciansReportPanel />}
+        {activeTab === 'tiempos' && <ServiceTimesReportPanel />}
         {activeTab === 'terceros' && <ThirdPartyInterventionsReportPanel />}
         {activeTab === 'auditoria' && <AuditReportPanel />}
       </div>

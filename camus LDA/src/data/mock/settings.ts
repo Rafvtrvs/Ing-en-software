@@ -26,6 +26,7 @@ export const defaultAppConfiguration: AppConfiguration = {
     maintenanceMode: false,
     debugMode: false,
     lastBackup: '2026-05-24T22:00:00',
+    chartRefreshMinutes: 5,
   },
 }
 

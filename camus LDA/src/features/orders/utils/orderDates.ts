@@ -37,6 +37,21 @@ export function calcDurationHours(
   return Math.round((ms / (1000 * 60 * 60)) * 10) / 10
 }
 
+/** RF-56 CU-201 — el término no puede ser anterior al inicio */
+export function validateServiceTimeSequence(
+  startDate?: string | null,
+  endDate?: string | null,
+): string | null {
+  if (!startDate?.trim() || !endDate?.trim()) return null
+  const start = parseFlexibleDate(startDate)
+  const end = parseFlexibleDate(endDate)
+  if (!start || !end) return 'Fechas de servicio inválidas'
+  if (end.getTime() < start.getTime()) {
+    return 'La fecha de finalización no puede ser anterior al comienzo'
+  }
+  return null
+}
+
 export function toInputDate(value?: string | null): string {
   const d = parseFlexibleDate(value)
   if (!d) return ''

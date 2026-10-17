@@ -5,7 +5,11 @@ import { FormField } from '@/components/ui/FormField'
 import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { useOrdersStore } from '@/store/useOrdersStore'
-import { calcDurationHours, toInputDate } from '@/features/orders/utils/orderDates'
+import {
+  calcDurationHours,
+  toInputDate,
+  validateServiceTimeSequence,
+} from '@/features/orders/utils/orderDates'
 import type { WorkOrder } from '@/types'
 
 /** CU-152 / 153 / 154: fechas inicio, término y duración */
@@ -17,19 +21,47 @@ export function OrderDatesPanel({
   canEdit?: boolean
 }) {
   const setOrderDates = useOrdersStore((s) => s.setOrderDates)
-  const [startDate, setStartDate] = useState(toInputDate(order.startDate))
+  const liveOrder = useOrdersStore(
+    (s) => s.orders.find((item) => item.id === order.id) ?? order,
+  )
+  const clock = useOrdersStore((s) => s.serviceClocks[order.id])
+  const startedAt = liveOrder.serviceStartedAt ?? clock?.serviceStartedAt
+  const endedAt = liveOrder.serviceEndedAt ?? clock?.serviceEndedAt
+  const signature = liveOrder.clientSignature ?? clock?.clientSignature
+  const startedLabel = startedAt
+    ? new Date(startedAt).toLocaleString('es-CL')
+    : toInputDate(clock?.startDate ?? liveOrder.startDate)
+  const locked = Boolean(
+    startedAt ||
+      ((liveOrder.status === 'En Curso' ||
+        liveOrder.status === 'Completada' ||
+        liveOrder.status === 'Abonado') &&
+        startedLabel),
+  )
+  const [startDate, setStartDate] = useState(
+    toInputDate(clock?.startDate ?? order.startDate),
+  )
   const [endDate, setEndDate] = useState(toInputDate(order.endDate))
   const [durationHours, setDurationHours] = useState(
     order.durationHours != null ? String(order.durationHours) : '',
   )
+  const [reason, setReason] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setStartDate(toInputDate(order.startDate))
-    setEndDate(toInputDate(order.endDate))
-    setDurationHours(
-      order.durationHours != null ? String(order.durationHours) : '',
-    )
-  }, [order.id, order.startDate, order.endDate, order.durationHours])
+    setStartDate(toInputDate(clock?.startDate ?? liveOrder.startDate))
+    setEndDate(toInputDate(clock?.endDate ?? liveOrder.endDate))
+    const hours = clock?.durationHours ?? liveOrder.durationHours
+    setDurationHours(hours != null ? String(hours) : '')
+  }, [
+    liveOrder.id,
+    liveOrder.startDate,
+    liveOrder.endDate,
+    liveOrder.durationHours,
+    clock?.startDate,
+    clock?.endDate,
+    clock?.durationHours,
+  ])
 
   useEffect(() => {
     const calc = calcDurationHours(startDate, endDate)
@@ -39,12 +71,25 @@ export function OrderDatesPanel({
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (!canEdit) return
+    const sequenceError = validateServiceTimeSequence(startDate, endDate)
+    if (sequenceError) {
+      setError(sequenceError)
+      return
+    }
+    if (locked && reason.trim().length < 5) {
+      setError('Indica el motivo de la corrección (mínimo 5 caracteres)')
+      return
+    }
+    setError(null)
     const hours = Number(durationHours)
-    setOrderDates(order.id, {
+    const result = setOrderDates(order.id, {
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       durationHours: Number.isFinite(hours) ? hours : undefined,
+      timeCorrectionNote: reason.trim() || undefined,
     })
+    if (!result.ok) setError(result.message ?? 'No se pudieron guardar los tiempos')
+    else setReason('')
   }
 
   return (
@@ -61,6 +106,20 @@ export function OrderDatesPanel({
         </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3">
+        {locked && startedLabel && (
+          <div className="rounded-lg border border-slate-300 bg-slate-100 px-3 py-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Inicio de servicio bloqueado
+            </p>
+            <p className="mt-1 text-sm font-medium text-slate-900">{startedLabel}</p>
+            {endedAt && (
+              <p className="mt-1 text-xs text-slate-600">
+                Término: {new Date(endedAt).toLocaleString('es-CL')}
+                {signature ? ` · Firma: ${signature}` : ''}
+              </p>
+            )}
+          </div>
+        )}
         <FormGrid cols={3}>
           <FormField label="Fecha inicio" htmlFor={`start-${order.id}`}>
             <Input
@@ -92,6 +151,17 @@ export function OrderDatesPanel({
             />
           </FormField>
         </FormGrid>
+        {canEdit && locked && (
+          <FormField label="Motivo de la corrección" htmlFor={`reason-${order.id}`}>
+            <Input
+              id={`reason-${order.id}`}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Ej. desfase respecto al reporte físico"
+            />
+          </FormField>
+        )}
+        {error && <p className="text-sm text-red-600">{error}</p>}
         {canEdit && (
           <Button type="submit">Guardar fechas</Button>
         )}

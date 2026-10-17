@@ -35,6 +35,7 @@ import { OrderModificationRequestModal } from '@/features/orders/components/Orde
 import {
   enqueue,
   flushQueue,
+  formatStamp,
   loadQueue,
   type NewFieldAction,
 } from '@/features/field/utils/fieldQueue'
@@ -111,6 +112,34 @@ export function FieldMobilePage() {
   if (!allowed) return <Navigate to={ROUTES.DASHBOARD} replace />
 
   const handleAction = async (action: NewFieldAction): Promise<string> => {
+    if (action.kind === 'start-service') {
+      const result = useOrdersStore.getState().startFieldService(action.orderId)
+      if (!result.ok) return result.message ?? 'No se pudo iniciar el servicio'
+      enqueue({ kind: 'status', orderId: action.orderId, status: 'En Curso', progress: 10 })
+      setPending(loadQueue().length)
+      if (navigator.onLine) await flushQueue()
+      setPending(loadQueue().length)
+      const started = useOrdersStore.getState().orders.find((o) => o.id === action.orderId)
+      return started?.serviceStartedAt
+        ? `Servicio iniciado: ${formatStamp(started.serviceStartedAt)}`
+        : 'Servicio iniciado'
+    }
+    if (action.kind === 'finish-service') {
+      const result = useOrdersStore.getState().finishFieldService(
+        action.orderId,
+        action.clientSignature,
+      )
+      if (!result.ok) return result.message ?? 'No se pudo finalizar el servicio'
+      enqueue({ kind: 'status', orderId: action.orderId, status: 'Completada', progress: 100 })
+      setPending(loadQueue().length)
+      if (navigator.onLine) await flushQueue()
+      setPending(loadQueue().length)
+      const ended = useOrdersStore.getState().orders.find((o) => o.id === action.orderId)
+      const hours = ended?.durationHours
+      return hours != null
+        ? `Servicio finalizado. Tiempo transcurrido: ${hours} h`
+        : 'Servicio finalizado'
+    }
     const saved = enqueue(action)
     if (!saved.ok) return 'Memoria del dispositivo llena. Sincroniza y vuelve a intentar.'
     setPending(loadQueue().length)
