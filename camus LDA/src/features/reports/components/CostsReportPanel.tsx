@@ -144,8 +144,8 @@ export function CostsReportPanel() {
       trend: `${from || '—'} a ${to || '—'}`,
       trendDirection: 'up',
       icon: Calculator,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Costos operacionales',

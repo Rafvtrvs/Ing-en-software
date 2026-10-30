@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Droplets, LogIn } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { MobileFormsMode } from '@/components/layout/MobileFormsMode'
 import { authService } from '@/services/authService'
 import { ROUTES } from '@/constants/routes'
+import { AuthBrand } from './AuthBrand'
 
 // Pantalla de autenticación. Consume /api/auth/login (AuthController),
 // guarda el JWT y habilita las operaciones de escritura contra la BD.
@@ -43,15 +44,7 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <MobileFormsMode />
       <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
-            <Droplets className="h-6 w-6" />
-          </span>
-          <h1 className="text-lg font-semibold text-slate-900">
-            Alcantarillados Camus Ltda.
-          </h1>
-          <p className="text-sm text-slate-500">Inicia sesión para continuar</p>
-        </div>
+        <AuthBrand subtitle="Inicia sesión para continuar" />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -63,7 +56,7 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <div>
@@ -75,12 +68,12 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <div className="mt-2 text-right">
               <Link
                 to={ROUTES.FORGOT_PASSWORD}
-                className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                className="text-xs font-medium text-primary hover:text-primary-hover"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
@@ -116,9 +109,6 @@ export function LoginPage() {
           </p>
           <p>
             <strong>Operador:</strong> operador@camus.cl / operador123
-          </p>
-          <p className="mt-1.5 text-[11px] text-slate-400">
-            Si el backend no está activo, el login usa modo demo automáticamente.
           </p>
         </div>
       </div>

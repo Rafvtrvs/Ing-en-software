@@ -71,7 +71,7 @@ export function ClientsTable({ onCreateClick }: ClientsTableProps) {
     {
       key: 'name',
       header: 'Cliente',
-      render: (row) => <p className="font-medium text-slate-900">{row.name}</p>,
+      render: (row) => <p className="truncate font-medium text-slate-900">{row.name}</p>,
     },
     { key: 'company', header: 'Empresa' },
     { key: 'rut', header: 'RUT' },
@@ -86,6 +86,7 @@ export function ClientsTable({ onCreateClick }: ClientsTableProps) {
     {
       key: 'actions',
       header: 'Acciones',
+      className: 'w-28 whitespace-nowrap',
       render: (row) => (
         <div className="flex items-center gap-1">
           <button

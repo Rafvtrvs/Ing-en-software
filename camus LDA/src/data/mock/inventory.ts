@@ -167,8 +167,8 @@ export function getInventoryKpis(products: Product[]): KpiData[] {
       trend: '+12% vs mes anterior',
       trendDirection: 'up',
       icon: Package,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Stock Total (Unidades)',

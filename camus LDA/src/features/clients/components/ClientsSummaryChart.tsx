@@ -1,8 +1,8 @@
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import { BarChart3, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { ChartLegend } from '@/components/ui/ChartLegend'
+import { DonutChart } from '@/components/ui/DonutChart'
 import { useClientsStore } from '@/store/useClientsStore'
 import { getClientsByStatus } from '@/features/clients/utils/clientStats'
 import { ROUTES } from '@/constants/routes'
@@ -20,31 +20,11 @@ export function ClientsSummaryChart() {
       ) : (
         <>
           <div className="flex flex-col items-center gap-6">
-            <div className="relative h-48 w-48 shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={78}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={index} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="max-w-full truncate text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-                  {total.toLocaleString('es-CL')}
-                </span>
-                <span className="text-xs text-slate-500">Total</span>
-              </div>
-            </div>
+            <DonutChart
+              data={chartData}
+              centerValue={total.toLocaleString('es-CL')}
+              centerLabel="Total"
+            />
             <ChartLegend
               items={chartData.map((item) => ({
                 name: item.name,

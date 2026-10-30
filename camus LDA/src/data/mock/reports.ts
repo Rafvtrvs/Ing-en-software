@@ -141,8 +141,8 @@ export function getSummaryReportKpis(stats: {
       trend: `${completionRate}% completadas`,
       trendDirection: completionRate >= 70 ? 'up' : 'down',
       icon: ClipboardList,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Ingresos Facturados',
@@ -187,8 +187,8 @@ export function getOrdersReportKpis(stats: {
       trend: 'En el período',
       trendDirection: 'up',
       icon: ClipboardList,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Pendientes',
@@ -205,8 +205,8 @@ export function getOrdersReportKpis(stats: {
       trend: 'Activas ahora',
       trendDirection: 'up',
       icon: BarChart3,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Completadas',

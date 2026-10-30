@@ -102,7 +102,7 @@ export function SystemSettingsPanel() {
 
       <SettingsCard
         title="Tablas de datos"
-        subtitle="CU-127 — filas alternas y contraste en listados del sistema."
+        subtitle="Filas alternas y contraste en los listados del sistema."
       >
         <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-700">
           <Switch

@@ -148,8 +148,8 @@ export function getBillingKpis(invoices: Invoice[]): KpiData[] {
       trend: '+12% vs mes anterior',
       trendDirection: 'up',
       icon: FileText,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Por Cobrar',

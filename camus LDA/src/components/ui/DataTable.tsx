@@ -38,7 +38,7 @@ export function DataTable<T>({
     <div className={cn('overflow-x-auto', className)}>
       <table
         className={cn(
-          'w-full text-left text-sm',
+          'w-full table-fixed text-left text-sm',
           highContrast && 'border border-slate-300 dark:border-slate-500',
           tableClassName,
         )}
@@ -55,7 +55,8 @@ export function DataTable<T>({
               <th
                 key={col.key}
                 className={cn(
-                  'px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400',
+                  'px-3 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400',
+                  !col.render && 'truncate',
                   highContrast && 'text-slate-800 dark:text-slate-100',
                   col.className,
                 )}
@@ -86,19 +87,23 @@ export function DataTable<T>({
                   isSelected && 'bg-primary/5 ring-1 ring-inset ring-primary/20',
                 )}
               >
-                {columns.map((col) => (
+                {columns.map((col) => {
+                  const raw = (row as Record<string, unknown>)[col.key]
+                  const text = raw == null ? '' : String(raw)
+                  return (
                   <td
                     key={col.key}
+                    title={!col.render && text ? text : undefined}
                     className={cn(
-                      'px-4 py-3.5 text-slate-700 dark:text-slate-200',
+                      'overflow-hidden px-3 py-3.5 text-slate-700 dark:text-slate-200',
+                      !col.render && 'truncate',
                       col.className,
                     )}
                   >
-                    {col.render
-                      ? col.render(row)
-                      : String((row as Record<string, unknown>)[col.key] ?? '')}
+                    {col.render ? col.render(row) : text}
                   </td>
-                ))}
+                  )
+                })}
               </tr>
             )
           })}

@@ -96,8 +96,8 @@ export function PhysicalAssetsReportPanel() {
       trend: 'Maquinaria disponible',
       trendDirection: 'up' as const,
       icon: Truck,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Activos filtrados',

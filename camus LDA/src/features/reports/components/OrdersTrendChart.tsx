@@ -1,13 +1,14 @@
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts'
 import { Card, CardHeader } from '@/components/ui/Card'
+import { chartGrid, chartTick, chartTooltip } from '@/components/ui/chartTheme'
 import { ordersTrendByMonth } from '@/data/mock/reports'
 
 export function OrdersTrendChart() {
@@ -16,26 +17,28 @@ export function OrdersTrendChart() {
       <CardHeader title="Evolución de Órdenes" />
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={ordersTrendByMonth()} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-            <Tooltip
-              contentStyle={{
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                fontSize: '12px',
-              }}
-            />
-            <Line
+          <AreaChart data={ordersTrendByMonth()} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+            <defs>
+              <linearGradient id="ordersTrendFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.28} />
+                <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0.02} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid {...chartGrid} />
+            <XAxis dataKey="month" tick={chartTick} axisLine={false} tickLine={false} />
+            <YAxis tick={chartTick} axisLine={false} tickLine={false} allowDecimals={false} />
+            <Tooltip {...chartTooltip} />
+            <Area
               type="monotone"
               dataKey="orders"
-              stroke="#2563eb"
+              name="Órdenes"
+              stroke="var(--color-primary)"
               strokeWidth={2.5}
-              dot={{ fill: '#2563eb', r: 4 }}
-              activeDot={{ r: 6 }}
+              fill="url(#ordersTrendFill)"
+              dot={{ fill: 'var(--color-primary)', r: 3, strokeWidth: 0 }}
+              activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2 }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </div>
     </Card>

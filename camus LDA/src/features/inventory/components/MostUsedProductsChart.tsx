@@ -8,6 +8,7 @@ import {
   YAxis,
 } from 'recharts'
 import { Card, CardHeader } from '@/components/ui/Card'
+import { chartGrid, chartTick, chartTooltip } from '@/components/ui/chartTheme'
 import { mostUsedProducts } from '@/data/mock/inventory'
 
 export function MostUsedProductsChart() {
@@ -36,13 +37,13 @@ export function MostUsedProductsChart() {
             layout="vertical"
             margin={{ top: 0, right: 16, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-            <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+            <CartesianGrid {...chartGrid} horizontal={false} />
+            <XAxis type="number" tick={chartTick} axisLine={false} tickLine={false} />
             <YAxis
               type="category"
               dataKey="name"
-              width={100}
-              tick={{ fontSize: 10, fill: '#64748b' }}
+              width={108}
+              tick={chartTick}
               axisLine={false}
               tickLine={false}
             />
@@ -51,13 +52,9 @@ export function MostUsedProductsChart() {
                 `${value} (${(props.payload as { label: string }).label})`,
                 'Uso',
               ]}
-              contentStyle={{
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                fontSize: '12px',
-              }}
+              {...chartTooltip}
             />
-            <Bar dataKey="value" fill="#2563eb" radius={[0, 4, 4, 0]} barSize={14} />
+            <Bar dataKey="value" name="Uso" fill="var(--color-primary)" radius={[0, 8, 8, 0]} barSize={12} />
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -27,7 +27,7 @@ export function AvailabilityBlock({ products, equipment }: AvailabilityBlockProp
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-            <Package className="h-4 w-4 text-blue-600" />
+            <Package className="h-4 w-4 text-primary" />
             Inventario
           </div>
           <ul className="space-y-2 text-sm">

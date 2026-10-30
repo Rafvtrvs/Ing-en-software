@@ -7,7 +7,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f8fafc",
-  "theme_color": "#2563eb",
+  "theme_color": "#1B8634",
   "icons": [
     { "src": "/images/logo-camus.png", "sizes": "any", "type": "image/png", "purpose": "any" }
   ]

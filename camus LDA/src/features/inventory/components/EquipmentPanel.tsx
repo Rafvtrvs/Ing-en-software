@@ -87,8 +87,8 @@ export function EquipmentPanel() {
       trend: 'Maquinaria y herramientas',
       trendDirection: 'up' as const,
       icon: Settings,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Operativos',

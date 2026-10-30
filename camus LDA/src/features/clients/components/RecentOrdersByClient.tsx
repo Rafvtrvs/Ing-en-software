@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge'
 import { recentOrdersByClient } from '@/data/mock/clients'
 import type { ClientOrder } from '@/types'
 import { ROUTES } from '@/constants/routes'
+import { UserAvatar } from '@/components/layout/UserAvatar'
 
 const columns: Column<ClientOrder>[] = [
   { key: 'id', header: 'ID Orden', className: 'font-medium text-slate-900' },
@@ -22,11 +23,7 @@ const columns: Column<ClientOrder>[] = [
     header: 'Técnico Asignado',
     render: (row) => (
       <div className="flex items-center gap-2">
-        <img
-          src={row.technicianAvatar}
-          alt={row.technician}
-          className="h-7 w-7 rounded-full bg-slate-100 object-cover"
-        />
+        <UserAvatar size="sm" />
         <span>{row.technician}</span>
       </div>
     ),

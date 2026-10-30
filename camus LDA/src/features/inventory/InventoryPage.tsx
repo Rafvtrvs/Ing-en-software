@@ -66,7 +66,7 @@ export function InventoryPage() {
           subtitle="Gestiona y controla los recursos, repuestos e insumos de la empresa."
         />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
           {kpis.map((kpi) => (
             <KpiCard key={kpi.title} data={kpi} />
           ))}
@@ -75,16 +75,14 @@ export function InventoryPage() {
         <Tabs tabs={INVENTORY_TABS} active={activeTab} onChange={setActiveTab} />
 
         {activeTab === 'inventario' && (
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="space-y-6 lg:col-span-2">
-              <InventoryTable />
-              <RecentMovementsTable />
-            </div>
-            <div className="space-y-6">
+          <div className="space-y-6">
+            <InventoryTable />
+            <div className="grid gap-6 lg:grid-cols-3">
               <InventorySummaryChart />
               <MostUsedProductsChart />
               <InventoryAlerts />
             </div>
+            <RecentMovementsTable />
           </div>
         )}
 

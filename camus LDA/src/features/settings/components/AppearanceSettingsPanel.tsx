@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/store/useSettingsStore'
 import type { AppAppearanceSettings } from '@/types'
 import { SettingsCard } from './SettingsCard'
 
-const ACCENT_PRESETS = ['#2563eb', '#0f766e', '#7c3aed', '#c2410c', '#be123c']
+const ACCENT_PRESETS = ['#1B8634', '#2563eb', '#0f766e', '#7c3aed', '#c2410c']
 
 /** RF-37 CU-125..129 — tema, colores, tablas, gráficos y reset */
 export function AppearanceSettingsPanel() {
@@ -38,7 +38,7 @@ export function AppearanceSettingsPanel() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <SettingsCard
         title="Apariencia"
-        subtitle="Tema, idioma y formato de la interfaz (CU-125)."
+        subtitle="Tema, idioma y formato de la interfaz."
         footer={<Button type="submit">Guardar apariencia</Button>}
       >
         <FormGrid cols={2}>
@@ -144,7 +144,7 @@ export function AppearanceSettingsPanel() {
 
         <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-700">
           <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-            Tablas de datos (CU-127)
+            Tablas de datos
           </p>
           <p className="text-xs text-slate-500">
             Se aplican al instante en Usuarios, Órdenes, Inventario y Reportes.
@@ -226,7 +226,7 @@ export function AppearanceSettingsPanel() {
 
       <SettingsCard
         title="Restablecimientos"
-        subtitle="RF-37 / RF-38 — volver a valores de fábrica."
+        subtitle="Vuelve la apariencia y el tablero a los valores iniciales."
       >
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="outline" onClick={resetAppearance}>

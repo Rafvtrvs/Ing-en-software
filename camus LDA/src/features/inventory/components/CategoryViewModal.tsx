@@ -43,8 +43,8 @@ export function CategoryViewModal({ category, open, onClose }: CategoryViewModal
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-blue-50 p-2">
-            <Tag className="h-5 w-5 text-blue-600" />
+          <div className="rounded-lg bg-primary/10 p-2">
+            <Tag className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900">{category.name}</h3>

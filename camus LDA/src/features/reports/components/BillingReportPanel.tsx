@@ -74,8 +74,8 @@ export function BillingReportPanel() {
       trend: 'Período actual',
       trendDirection: 'up',
       icon: FileText,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Total Cobrado',

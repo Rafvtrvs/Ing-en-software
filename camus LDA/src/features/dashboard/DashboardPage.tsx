@@ -85,10 +85,10 @@ export function DashboardPage() {
   }, [refreshMinutes])
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
+          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl dark:text-slate-100">
             ¡Bienvenido, {user.name}!
           </h1>
           <p className="mt-1 text-sm text-slate-500 sm:text-base">
@@ -98,54 +98,60 @@ export function DashboardPage() {
             Última actualización: {formatDateTime(lastUpdated)}
           </p>
         </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end sm:gap-3">
-          <div className="w-full sm:min-w-[160px] sm:w-auto">
-            <label className="mb-1 block text-xs font-medium text-slate-600">
-              Prioridad / urgencia
-            </label>
-            <Select
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value as PriorityFilter)}
-              aria-label="Filtrar por prioridad"
-              className={`w-full ${priorityFilter !== 'Todas' ? 'ring-2 ring-primary' : ''}`}
-            >
-              {PRIORITY_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full sm:w-auto"
-              onClick={() => setPriorityFilter('Todas')}
-            >
-              Resetear filtros
-            </Button>
-            <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm sm:px-4">
-              <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
-              <span className="truncate">{today}</span>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="col-span-2 w-full sm:col-span-1 sm:w-auto"
-              leftIcon={
-                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              }
-              onClick={() => void handleRefresh()}
-              disabled={refreshing}
-            >
-              Actualización manual
-            </Button>
-          </div>
+        <p className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+          <Calendar className="h-4 w-4 shrink-0 text-primary" />
+          <span>{today}</span>
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
+          <label
+            htmlFor="dashboard-priority"
+            className="shrink-0 text-xs font-medium text-slate-600"
+          >
+            Prioridad
+          </label>
+          <Select
+            id="dashboard-priority"
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value as PriorityFilter)}
+            aria-label="Filtrar por prioridad"
+            className={`w-full sm:max-w-[200px] ${priorityFilter !== 'Todas' ? 'ring-2 ring-primary' : ''}`}
+          >
+            {PRIORITY_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 sm:flex-none"
+            onClick={() => setPriorityFilter('Todas')}
+            disabled={priorityFilter === 'Todas'}
+          >
+            Restablecer
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 sm:flex-none"
+            leftIcon={
+              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            }
+            onClick={() => void handleRefresh()}
+            disabled={refreshing}
+          >
+            Actualizar
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:gap-4">
         {kpis.map((kpi) => (
           <KpiCard key={kpi.title} data={kpi} />
         ))}
@@ -158,13 +164,13 @@ export function DashboardPage() {
         <AvailabilityBlock products={products} equipment={mockEquipment} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">
         <OrdersByStatusChart orders={filteredOrders} />
         <OrdersByMonthChart orders={filteredOrders} />
         <OrdersByCategoryChart orders={filteredOrders} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-2">
         <RecentOrdersTable orders={filteredOrders} />
         <CriticalInventoryTable products={products} />
       </div>

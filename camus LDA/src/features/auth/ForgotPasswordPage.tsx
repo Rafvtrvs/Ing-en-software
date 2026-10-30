@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Droplets, Mail } from 'lucide-react'
+import { ArrowLeft, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { ROUTES } from '@/constants/routes'
+import { AuthBrand } from './AuthBrand'
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -20,15 +21,10 @@ export function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
-            <Droplets className="h-6 w-6" />
-          </span>
-          <h1 className="text-lg font-semibold text-slate-900">Recuperar contraseña</h1>
-          <p className="text-sm text-slate-500">
-            Te enviaremos un enlace para restablecer tu acceso
-          </p>
-        </div>
+        <AuthBrand
+          title="Recuperar contraseña"
+          subtitle="Te enviaremos un enlace para restablecer tu acceso"
+        />
 
         {sent ? (
           <div className="space-y-4 text-center">
@@ -38,9 +34,9 @@ export function ForgotPasswordPage() {
             </div>
             <Link
               to={`${ROUTES.RESET_PASSWORD}?email=${encodeURIComponent(email)}`}
-              className="block text-sm font-medium text-blue-600 hover:text-blue-700"
+              className="block text-sm font-medium text-primary hover:text-primary-hover"
             >
-              Simular enlace de recuperación (demo)
+              Continuar para restablecer la contraseña
             </Link>
             <Link
               to="/login"
@@ -62,7 +58,7 @@ export function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="usuario@camus.cl"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
             <Button

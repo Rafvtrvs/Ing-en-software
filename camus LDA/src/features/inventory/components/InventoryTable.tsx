@@ -66,6 +66,7 @@ export function InventoryTable() {
     {
       key: 'actions',
       header: 'Acciones',
+      className: 'w-28 whitespace-nowrap',
       render: (row) => (
         <div className="flex items-center gap-1">
           <button

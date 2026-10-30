@@ -98,8 +98,8 @@ export function KitsPanel() {
       </div>
       <Card>
         <CardHeader title="Resumen de Kits" />
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
-          <Package className="h-6 w-6 text-blue-600" />
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+          <Package className="h-6 w-6 text-primary" />
         </div>
         <ul className="space-y-2 text-sm">
           <li className="flex justify-between">

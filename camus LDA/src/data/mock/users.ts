@@ -141,8 +141,8 @@ export function getUsersKpis(users: SystemUser[], roles: AppRole[]): KpiData[] {
       trend: `${active} activos`,
       trendDirection: 'up',
       icon: Users,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Usuarios Activos',

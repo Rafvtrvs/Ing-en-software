@@ -6,6 +6,7 @@ import { useUsersStore } from '@/store/useUsersStore'
 import { getRoleName } from '@/data/mock/users'
 import { RolePermissionsList } from './RolePermissionsList'
 import { useSessionUser } from '@/features/auth/useSessionUser'
+import { UserAvatar } from '@/components/layout/UserAvatar'
 import type { SystemUser } from '@/types'
 
 /**
@@ -66,7 +67,7 @@ export function DeactivateUserModal({
     >
       <div className="space-y-4">
         <div className="flex items-center gap-4">
-          <img src={user.avatar} alt="" className="h-12 w-12 rounded-full bg-slate-100" />
+          <UserAvatar size="lg" className="h-12 w-12" />
           <div>
             <p className="font-semibold text-slate-900">{user.name}</p>
             <p className="text-sm text-slate-500">{user.email}</p>

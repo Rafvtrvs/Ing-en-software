@@ -3,6 +3,7 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { useOperationsStore } from '@/store/useOperationsStore'
 import { ROUTES } from '@/constants/routes'
+import { UserAvatar } from '@/components/layout/UserAvatar'
 import { cn } from '@/utils/cn'
 
 export function TechniciansList() {
@@ -21,11 +22,7 @@ export function TechniciansList() {
       <ul className="divide-y divide-slate-50">
         {technicians.map((tech) => (
           <li key={tech.id} className="flex gap-3 py-3.5 first:pt-0">
-            <img
-              src={tech.avatar}
-              alt={tech.name}
-              className="h-10 w-10 shrink-0 rounded-full bg-slate-100"
-            />
+            <UserAvatar />
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-2">
                 <p className="font-medium text-slate-900">{tech.name}</p>

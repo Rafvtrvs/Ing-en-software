@@ -18,7 +18,7 @@ export function useSessionUser(): OrderPermissionUser {
       setUser({
         name: authUser.name,
         role: authUser.role,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authUser.name)}`,
+        avatar: '',
       })
     }
   }, [appUser.name, appUser.role, setUser])

@@ -54,7 +54,7 @@ export function ProductFormModal({
     defaultValues: {
       code: '',
       name: '',
-      category: 'TuberÃ­as',
+      category: 'Tuberías',
       currentStock: 0,
       minStock: 0,
       unit: 'un',
@@ -76,7 +76,7 @@ export function ProductFormModal({
       reset({
         code: '',
         name: '',
-        category: 'TuberÃ­as',
+        category: 'Tuberías',
         currentStock: 0,
         minStock: 0,
         unit: 'un',
@@ -130,7 +130,7 @@ export function ProductFormModal({
       open={open}
       onClose={onClose}
       title={mode === 'create' ? 'Nuevo Producto' : 'Editar Producto'}
-      description="Registra o actualiza la informaciÃ³n del producto en inventario."
+      description="Registra o actualiza la información del producto en inventario."
       size="lg"
       footer={
         <>
@@ -163,10 +163,10 @@ export function ProductFormModal({
               className={errors.code ? 'border-red-300' : undefined}
             />
           </FormField>
-          <FormField label="CategorÃ­a" htmlFor="category" required>
+          <FormField label="Categoría" htmlFor="category" required>
             <Select id="category" {...register('category')}>
               {categoryNames.length === 0 ? (
-                <option value="">Sin categorÃ­as activas</option>
+                <option value="">Sin categorías activas</option>
               ) : (
                 categoryNames.map((c) => (
                   <option key={c} value={c}>
@@ -181,7 +181,7 @@ export function ProductFormModal({
         <FormField label="Nombre del producto" htmlFor="name" error={errors.name?.message} required>
           <Input
             id="name"
-            placeholder="Ej: TuberÃ­a PVC 110mm"
+            placeholder="Ej: Tubería PVC 110mm"
             {...register('name', { required: 'El nombre es obligatorio' })}
             className={errors.name ? 'border-red-300' : undefined}
           />
@@ -201,12 +201,12 @@ export function ProductFormModal({
               {...register('currentStock', {
                 required: true,
                 valueAsNumber: true,
-                min: { value: 0, message: 'MÃ­nimo 0' },
+                min: { value: 0, message: 'Mínimo 0' },
               })}
             />
           </FormField>
           <FormField
-            label="Stock mÃ­nimo"
+            label="Stock mínimo"
             htmlFor="minStock"
             error={errors.minStock?.message}
             required
@@ -218,7 +218,7 @@ export function ProductFormModal({
               {...register('minStock', {
                 required: true,
                 valueAsNumber: true,
-                min: { value: 0, message: 'MÃ­nimo 0' },
+                min: { value: 0, message: 'Mínimo 0' },
               })}
             />
           </FormField>

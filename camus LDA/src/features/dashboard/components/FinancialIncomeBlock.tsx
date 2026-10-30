@@ -50,7 +50,7 @@ export function FinancialIncomeBlock({ invoices, payments }: FinancialIncomeBloc
               {row.label}
             </p>
             <p
-              className="mt-1 text-base font-semibold tabular-nums leading-snug text-slate-900 break-words sm:text-lg"
+              className="mt-1 whitespace-nowrap text-base font-semibold tabular-nums leading-tight text-slate-900 sm:text-lg"
               title={row.value}
             >
               {row.value}

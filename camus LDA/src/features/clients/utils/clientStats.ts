@@ -54,8 +54,8 @@ export function getClientsKpis(clients: Client[]): KpiData[] {
       trend: `${total} registrados`,
       trendDirection: 'up',
       icon: Users,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Clientes Activos',

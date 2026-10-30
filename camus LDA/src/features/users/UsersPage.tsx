@@ -72,7 +72,7 @@ export function UsersPage() {
           }
         />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
           {kpis.map((kpi) => (
             <KpiCard key={kpi.title} data={kpi} />
           ))}
@@ -81,10 +81,8 @@ export function UsersPage() {
         <Tabs tabs={USERS_TABS} active={activeTab} onChange={setActiveTab} />
 
         {activeTab === 'usuarios' && (
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <UsersTable onCreateClick={openUserCreateModal} />
-            </div>
+          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+            <UsersTable onCreateClick={openUserCreateModal} />
             <UsersByRoleChart />
           </div>
         )}

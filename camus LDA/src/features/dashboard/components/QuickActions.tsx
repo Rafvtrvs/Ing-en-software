@@ -31,7 +31,7 @@ export function QuickActions() {
             className={cn(
               'flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-4',
               'text-center text-xs font-medium text-slate-700 transition-colors',
-              'hover:border-primary/30 hover:bg-blue-50/50 hover:text-primary',
+              'hover:border-primary/30 hover:bg-primary/5 hover:text-primary',
             )}
           >
             <action.icon className="h-5 w-5 text-slate-500" />

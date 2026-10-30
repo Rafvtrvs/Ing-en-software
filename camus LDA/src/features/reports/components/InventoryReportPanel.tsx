@@ -23,8 +23,8 @@ export function InventoryReportPanel() {
       trend: 'En catálogo',
       trendDirection: 'up',
       icon: Package,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Stock Ok',

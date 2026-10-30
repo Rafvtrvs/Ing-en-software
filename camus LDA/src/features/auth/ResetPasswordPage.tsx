@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Droplets, KeyRound } from 'lucide-react'
+import { ArrowLeft, KeyRound } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { AuthBrand } from './AuthBrand'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -31,15 +32,10 @@ export function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white">
-            <Droplets className="h-6 w-6" />
-          </span>
-          <h1 className="text-lg font-semibold text-slate-900">Nueva contraseña</h1>
-          <p className="text-sm text-slate-500">
-            Restablece el acceso para <strong>{email}</strong>
-          </p>
-        </div>
+        <AuthBrand
+          title="Nueva contraseña"
+          subtitle={`Restablece el acceso para ${email}`}
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -51,7 +47,7 @@ export function ResetPasswordPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <div>
@@ -63,7 +59,7 @@ export function ResetPasswordPage() {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 

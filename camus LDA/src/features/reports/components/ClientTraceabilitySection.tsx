@@ -78,8 +78,8 @@ export function ClientTraceabilitySection({ logs, loading }: ClientTraceabilityS
       trend: selectedClient ? `RUT ${selectedClient.rut}` : 'Selecciona cliente',
       trendDirection: 'up' as const,
       icon: UserRound,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Cliente analizado',

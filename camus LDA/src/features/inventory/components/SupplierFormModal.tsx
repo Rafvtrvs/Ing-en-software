@@ -50,7 +50,7 @@ export function SupplierFormModal({
       phone: '',
       email: '',
       address: '',
-      paymentTerms: '30 dÃ­as',
+      paymentTerms: '30 días',
       status: 'Activo',
     },
   })
@@ -76,7 +76,7 @@ export function SupplierFormModal({
         phone: '',
         email: '',
         address: '',
-        paymentTerms: '30 dÃ­as',
+        paymentTerms: '30 días',
         status: 'Activo',
       })
     }
@@ -150,7 +150,7 @@ export function SupplierFormModal({
         </FormField>
         <FormGrid cols={2}>
           <FormField label="Condiciones de pago" htmlFor="sup-terms">
-            <Input id="sup-terms" placeholder="30 dÃ­as" {...register('paymentTerms')} />
+            <Input id="sup-terms" placeholder="30 días" {...register('paymentTerms')} />
           </FormField>
           <FormField label="Estado" htmlFor="sup-status">
             <Select id="sup-status" {...register('status')}>

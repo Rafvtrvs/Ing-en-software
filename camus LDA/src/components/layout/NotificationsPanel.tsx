@@ -36,13 +36,13 @@ function NotificationItem({
       onClick={() => onSelect(item)}
       className={cn(
         'flex w-full gap-3 rounded-lg px-3 py-3 text-left transition hover:bg-slate-50',
-        !item.read && 'bg-blue-50/60',
+        !item.read && 'bg-primary/10',
       )}
     >
       <div
         className={cn(
           'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
-          item.type === 'order' && 'bg-blue-100 text-blue-600',
+          item.type === 'order' && 'bg-primary/15 text-primary',
           item.type === 'inventory' && 'bg-amber-100 text-amber-600',
           item.type === 'system' && 'bg-slate-100 text-slate-600',
         )}
@@ -53,7 +53,7 @@ function NotificationItem({
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-semibold text-slate-900">{item.title}</p>
           {!item.read && (
-            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />
+            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
           )}
         </div>
         <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">{item.message}</p>
@@ -66,7 +66,7 @@ function NotificationItem({
 export function NotificationsPanel({
   variant = 'default',
 }: {
-  /** onPrimary: campanita sobre header azul (vista móvil) */
+  /** onPrimary: campanita sobre el header de color de marca (vista móvil) */
   variant?: 'default' | 'onPrimary'
 } = {}) {
   const navigate = useNavigate()
