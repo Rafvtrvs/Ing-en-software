@@ -8,8 +8,8 @@ export const dashboardKpis: KpiData[] = [
     trend: '+15% vs mes anterior',
     trendDirection: 'up',
     icon: ClipboardList,
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-600',
+    iconBg: 'bg-primary/10',
+    iconColor: 'text-primary',
   },
   {
     title: 'Órdenes Completadas',

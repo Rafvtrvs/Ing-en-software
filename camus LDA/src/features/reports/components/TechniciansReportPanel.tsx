@@ -22,8 +22,8 @@ export function TechniciansReportPanel() {
       trend: 'En operaciones',
       trendDirection: 'up',
       icon: Users,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Órdenes Completadas',
@@ -73,6 +73,7 @@ export function TechniciansReportPanel() {
           data={chartData}
           color="#7c3aed"
           layout="horizontal"
+          valueLabel="Órdenes"
         />
         <TechniciansPerformanceTable />
       </div>

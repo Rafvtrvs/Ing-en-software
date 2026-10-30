@@ -1,8 +1,8 @@
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
+import { ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { ChartLegend } from '@/components/ui/ChartLegend'
-import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { DonutChart } from '@/components/ui/DonutChart'
 import type { WorkOrder } from '@/types'
 import { ROUTES } from '@/constants/routes'
 import { buildOrdersByStatus } from '../utils/dashboardHelpers'
@@ -23,34 +23,15 @@ export function OrdersByStatusChart({ orders }: OrdersByStatusChartProps) {
           Sin órdenes para el filtro actual
         </p>
       ) : (
-        <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
-          <div className="relative h-52 w-52 shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {data.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-2">
-              <span className="max-w-full truncate text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-                {total.toLocaleString('es-CL')}
-              </span>
-              <span className="text-xs text-slate-500">Total</span>
-            </div>
-          </div>
+        <div className="flex flex-col items-center gap-6">
+          <DonutChart
+            size="sm"
+            data={data}
+            centerValue={total.toLocaleString('es-CL')}
+            centerLabel="Total"
+          />
           <ChartLegend
-            className="w-full min-w-0 md:flex-1 md:max-w-[240px]"
+            className="w-full"
             items={data.map((item) => ({
               name: item.name,
               value: item.value,

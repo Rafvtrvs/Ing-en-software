@@ -171,14 +171,14 @@ export function FieldMobilePage() {
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold leading-tight">Camus · Terreno</p>
-            <p className="truncate text-xs text-blue-100">
+            <p className="truncate text-xs text-white/80">
               {user.name} · {assigned.length} asignada(s)
             </p>
           </div>
 
           <div className="flex shrink-0 items-center gap-0.5">
             <span
-              className="mr-0.5 inline-flex h-9 items-center gap-1 rounded-lg bg-white/10 px-2 text-[11px] font-medium text-blue-50"
+              className="mr-0.5 inline-flex h-9 items-center gap-1 rounded-lg bg-white/10 px-2 text-[11px] font-medium text-white/90"
               title={online ? 'En línea' : 'Sin conexión'}
             >
               {online ? <Wifi className="h-3.5 w-3.5 shrink-0" /> : <CloudOff className="h-3.5 w-3.5 shrink-0" />}
@@ -214,7 +214,7 @@ export function FieldMobilePage() {
               }}
               className={cn(
                 'flex flex-col items-center gap-0.5 rounded-md px-1 py-1.5 text-[10px] font-medium',
-                tab === t.id ? 'bg-white text-primary' : 'text-blue-100',
+                tab === t.id ? 'bg-white text-primary' : 'text-white/80',
               )}
             >
               <t.icon className="h-4 w-4" />

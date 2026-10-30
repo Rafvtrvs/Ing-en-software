@@ -39,7 +39,7 @@ export function BillingPage() {
           }
         />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
           {kpis.map((kpi) => (
             <KpiCard key={kpi.title} data={kpi} />
           ))}

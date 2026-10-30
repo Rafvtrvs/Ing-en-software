@@ -8,8 +8,8 @@ export const clientsKpis: KpiData[] = [
     trend: '+12% vs mes anterior',
     trendDirection: 'up',
     icon: Users,
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-600',
+    iconBg: 'bg-primary/10',
+    iconColor: 'text-primary',
   },
   {
     title: 'Clientes Activos',

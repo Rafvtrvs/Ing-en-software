@@ -10,6 +10,7 @@ import {
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import { chartGrid, chartTick, chartTooltip } from '@/components/ui/chartTheme'
 import type { WorkOrder } from '@/types'
 import { ROUTES } from '@/constants/routes'
 import { buildOrdersByCategory } from '../utils/dashboardHelpers'
@@ -36,24 +37,18 @@ export function OrdersByCategoryChart({ orders }: OrdersByCategoryChartProps) {
               layout="vertical"
               margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+              <CartesianGrid {...chartGrid} horizontal={false} />
+              <XAxis type="number" tick={chartTick} axisLine={false} tickLine={false} allowDecimals={false} />
               <YAxis
                 type="category"
                 dataKey="name"
-                width={110}
-                tick={{ fontSize: 11, fill: '#64748b' }}
+                width={128}
+                tick={chartTick}
                 axisLine={false}
                 tickLine={false}
               />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '12px',
-                }}
-              />
-              <Bar dataKey="value" fill="#2563eb" radius={[0, 4, 4, 0]} barSize={16} />
+              <Tooltip {...chartTooltip} />
+              <Bar dataKey="value" name="Órdenes" fill="var(--color-primary)" radius={[0, 8, 8, 0]} barSize={14} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -360,6 +360,11 @@ export const useSettingsStore = create<SettingsState>()(
         }
         try {
           const appearance = sanitizeAppearance(state.config.appearance)
+          // El azul #2563eb era el acento de fábrica anterior. Si sigue guardado,
+          // no fue una elección propia: pasa al verde de marca.
+          if (appearance.accentColor.toLowerCase() === '#2563eb') {
+            appearance.accentColor = FACTORY_APPEARANCE.accentColor
+          }
           state.config.appearance = appearance
           applyAppearanceVars(appearance)
           // Vista escritorio usable al iniciar (menú visible)

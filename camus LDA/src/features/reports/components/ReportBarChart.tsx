@@ -8,6 +8,7 @@ import {
   YAxis,
 } from 'recharts'
 import { Card, CardHeader } from '@/components/ui/Card'
+import { chartGrid, chartTick, chartTooltip } from '@/components/ui/chartTheme'
 import type { ChartDataPoint } from '@/types'
 
 interface ReportBarChartProps {
@@ -15,13 +16,15 @@ interface ReportBarChartProps {
   data: ChartDataPoint[]
   color?: string
   layout?: 'vertical' | 'horizontal'
+  valueLabel?: string
 }
 
 export function ReportBarChart({
   title,
   data,
-  color = '#2563eb',
+  color = 'var(--color-primary)',
   layout = 'vertical',
+  valueLabel = 'Cantidad',
 }: ReportBarChartProps) {
   const isVertical = layout === 'vertical'
 
@@ -36,35 +39,50 @@ export function ReportBarChart({
             <BarChart
               data={data}
               layout={isVertical ? 'vertical' : 'horizontal'}
-              margin={{ top: 0, right: 20, left: isVertical ? 0 : -10, bottom: 0 }}
+              margin={{ top: 8, right: 16, left: 0, bottom: isVertical ? 0 : 4 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={!isVertical} />
+              <CartesianGrid {...chartGrid} horizontal={!isVertical} />
               {isVertical ? (
-                <>
-                  <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={110}
-                    tick={{ fontSize: 11, fill: '#64748b' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                </>
+                <XAxis type="number" tick={chartTick} axisLine={false} tickLine={false} />
               ) : (
-                <>
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                </>
+                <XAxis
+                  dataKey="name"
+                  type="category"
+                  interval={0}
+                  tick={chartTick}
+                  axisLine={false}
+                  tickLine={false}
+                  height={36}
+                />
+              )}
+              {isVertical ? (
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={120}
+                  tick={chartTick}
+                  axisLine={false}
+                  tickLine={false}
+                />
+              ) : (
+                <YAxis tick={chartTick} axisLine={false} tickLine={false} allowDecimals={false} />
               )}
               <Tooltip
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0',
-                  fontSize: '12px',
+                {...chartTooltip}
+                cursor={{ fill: 'rgb(15 23 42 / 0.04)' }}
+                formatter={(value) => [value, valueLabel]}
+                labelFormatter={(_, payload) => {
+                  const row = payload?.[0]?.payload as { name?: string } | undefined
+                  return row?.name ?? ''
                 }}
               />
-              <Bar dataKey="value" fill={color} radius={isVertical ? [0, 4, 4, 0] : [4, 4, 0, 0]} barSize={16} />
+              <Bar
+                dataKey="value"
+                name={valueLabel}
+                fill={color}
+                radius={isVertical ? [0, 8, 8, 0] : [8, 8, 0, 0]}
+                barSize={14}
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>

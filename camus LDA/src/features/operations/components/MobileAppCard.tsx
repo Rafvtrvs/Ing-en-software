@@ -11,7 +11,7 @@ const features = [
 
 export function MobileAppCard() {
   return (
-    <Card className="overflow-hidden bg-gradient-to-br from-blue-600 to-blue-500 text-white">
+    <Card className="overflow-hidden bg-gradient-to-br from-primary-hover to-primary text-white">
       <div className="p-6">
         <div className="mb-4 flex items-center gap-3">
           <div className="rounded-xl bg-white/20 p-2">
@@ -19,12 +19,12 @@ export function MobileAppCard() {
           </div>
           <div>
             <h3 className="text-lg font-bold">App Móvil - Técnicos</h3>
-            <p className="text-sm text-blue-100">Gestión en terreno</p>
+            <p className="text-sm text-white/80">Gestión en terreno</p>
           </div>
         </div>
         <ul className="mb-6 space-y-2">
           {features.map((f) => (
-            <li key={f} className="flex items-center gap-2 text-sm text-blue-50">
+            <li key={f} className="flex items-center gap-2 text-sm text-white/90">
               <Check className="h-4 w-4 shrink-0 text-emerald-300" />
               {f}
             </li>

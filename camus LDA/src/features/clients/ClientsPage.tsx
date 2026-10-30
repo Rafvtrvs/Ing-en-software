@@ -45,22 +45,22 @@ export function ClientsPage() {
           }
         />
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
           {kpis.map((kpi) => (
             <KpiCard key={kpi.title} data={kpi} />
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <ClientsTable onCreateClick={openCreateModal} />
-          </div>
-          <ClientsSummaryChart />
+        <div className="min-w-0">
+          <ClientsTable onCreateClick={openCreateModal} />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <RecentOrdersByClient />
-          <UpcomingDeadlines />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <ClientsSummaryChart />
+          <div className="grid gap-6 lg:col-span-2">
+            <RecentOrdersByClient />
+            <UpcomingDeadlines />
+          </div>
         </div>
       </div>
 

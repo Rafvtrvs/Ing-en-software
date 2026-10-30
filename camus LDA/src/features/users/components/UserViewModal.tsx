@@ -6,6 +6,7 @@ import { useUsersStore } from '@/store/useUsersStore'
 import { getRoleName } from '@/data/mock/users'
 import { formatLastLogin } from '@/features/users/utils/userFormatters'
 import { RolePermissionsList } from './RolePermissionsList'
+import { UserAvatar } from '@/components/layout/UserAvatar'
 import type { SystemUser } from '@/types'
 
 interface UserViewModalProps {
@@ -61,11 +62,7 @@ export function UserViewModal({ user, open, onClose }: UserViewModalProps) {
       }
     >
       <div className="mb-6 flex items-center gap-4">
-        <img
-          src={user.avatar}
-          alt=""
-          className="h-16 w-16 rounded-full bg-slate-100 object-cover"
-        />
+        <UserAvatar size="lg" />
         <div>
           <h3 className="text-xl font-bold text-slate-900">{user.name}</h3>
           <p className="text-sm text-slate-500">{user.email}</p>

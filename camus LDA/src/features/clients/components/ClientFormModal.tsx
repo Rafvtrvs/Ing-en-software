@@ -122,7 +122,7 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
       description={
         mode === 'create'
           ? 'Completa los datos para registrar un nuevo cliente.'
-          : 'Modifica la informaciÃ³n del cliente seleccionado.'
+          : 'Modifica la información del cliente seleccionado.'
       }
       size="lg"
       footer={

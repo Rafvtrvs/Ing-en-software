@@ -8,6 +8,7 @@ import { useUsersStore } from '@/store/useUsersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
 import { getRoleName } from '@/data/mock/users'
 import { RolePermissionsList } from './RolePermissionsList'
+import { UserAvatar } from '@/components/layout/UserAvatar'
 import type { SystemUser } from '@/types'
 
 interface AssignRoleModalProps {
@@ -90,11 +91,7 @@ export function AssignRoleModal({ user, open, onClose }: AssignRoleModalProps) {
       }
     >
       <div className="mb-5 flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50/80 p-4">
-        <img
-          src={user.avatar}
-          alt=""
-          className="h-12 w-12 rounded-full bg-white object-cover ring-2 ring-white"
-        />
+        <UserAvatar size="lg" className="h-12 w-12 bg-white ring-2 ring-white" />
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-slate-900">{user.name}</p>
           <p className="truncate text-sm text-slate-500">{user.email}</p>

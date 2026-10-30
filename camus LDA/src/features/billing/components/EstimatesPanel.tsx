@@ -41,16 +41,18 @@ export function EstimatesPanel() {
   const [selected, setSelected] = useState<CostEstimate | null>(null)
   const [newRate, setNewRate] = useState({ type: 'insumo' as CostRateType, name: '', unit: 'unidad', price: '' })
   const [busy, setBusy] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
       const [r, e] = await Promise.all([estimatesService.listRates(), estimatesService.list()])
       setRates(r)
       setEstimates(e)
+      setLoadError(null)
     } catch (err) {
-      addToast(errorMessage(err, 'No se pudieron cargar las tarifas y estimaciones'), 'error')
+      setLoadError(errorMessage(err, 'No se pudieron cargar las tarifas y estimaciones'))
     }
-  }, [addToast])
+  }, [])
 
   useEffect(() => {
     void load()
@@ -132,6 +134,10 @@ export function EstimatesPanel() {
             <p className="text-xs text-slate-500">Materiales, maquinaria, combustible y personal (+ IVA {taxRate}%)</p>
           </div>
         </div>
+
+        {loadError && (
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{loadError}</p>
+        )}
 
         {rows.map((row, i) => (
           <div key={i} className="flex items-end gap-2">

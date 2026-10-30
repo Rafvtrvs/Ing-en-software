@@ -105,8 +105,8 @@ export function TraceabilityReportPanel() {
       trend: executed ? 'Resultado del reporte' : 'Aún no ejecutado',
       trendDirection: 'up' as const,
       icon: Shield,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'OT seleccionada',

@@ -120,8 +120,8 @@ export function MachineryAvailabilityPanel() {
             trend: 'Equipos registrados',
             trendDirection: 'up',
             icon: Truck,
-            iconBg: 'bg-blue-50',
-            iconColor: 'text-blue-600',
+            iconBg: 'bg-primary/10',
+            iconColor: 'text-primary',
           }}
         />
         <KpiCard

@@ -6,6 +6,7 @@ import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { useSettingsStore } from '@/store/useSettingsStore'
 import type { UserProfileSettings } from '@/types'
+import { UserAvatar } from '@/components/layout/UserAvatar'
 import { SettingsCard } from './SettingsCard'
 
 export function ProfileSettingsPanel() {
@@ -22,10 +23,7 @@ export function ProfileSettingsPanel() {
   }, [profile, reset])
 
   const onSubmit = (data: UserProfileSettings) => {
-    updateProfile({
-      ...data,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.name)}`,
-    })
+    updateProfile(data)
     addToast('Perfil actualizado correctamente')
   }
 
@@ -37,13 +35,9 @@ export function ProfileSettingsPanel() {
         footer={<Button type="submit">Guardar perfil</Button>}
       >
         <div className="mb-4 flex items-center gap-4">
-          <img
-            src={profile.avatar}
-            alt=""
-            className="h-16 w-16 rounded-full bg-slate-100 object-cover"
-          />
+          <UserAvatar size="lg" />
           <p className="text-sm text-slate-500">
-            El avatar se genera automáticamente según tu nombre.
+            Tu cuenta se identifica con una silueta, junto a tu nombre y rol.
           </p>
         </div>
         <FormGrid cols={2}>

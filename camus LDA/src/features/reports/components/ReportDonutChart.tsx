@@ -1,6 +1,6 @@
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { ChartLegend } from '@/components/ui/ChartLegend'
+import { DonutChart } from '@/components/ui/DonutChart'
 import type { ChartDataPoint } from '@/types'
 
 interface ReportDonutChartProps {
@@ -17,34 +17,15 @@ export function ReportDonutChart({ title, data }: ReportDonutChartProps) {
       {total === 0 ? (
         <p className="py-10 text-center text-sm text-slate-500">Sin datos para mostrar</p>
       ) : (
-        <div className="flex flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
-          <div className="relative h-48 w-48 shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={78}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {data.map((entry, index) => (
-                    <Cell key={index} fill={entry.color ?? '#94a3b8'} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="max-w-full truncate text-xl font-bold tabular-nums text-slate-900 dark:text-slate-100">
-                {total.toLocaleString('es-CL')}
-              </span>
-              <span className="text-xs text-slate-500">Total</span>
-            </div>
-          </div>
+        <div className="flex flex-col items-center gap-6 xl:flex-row xl:items-center xl:justify-between">
+          <DonutChart
+            size="sm"
+            data={data}
+            centerValue={total.toLocaleString('es-CL')}
+            centerLabel="Total"
+          />
           <ChartLegend
-            className="md:min-w-[200px] md:flex-1 md:max-w-[260px]"
+            className="w-full xl:min-w-[200px] xl:flex-1 xl:max-w-[280px]"
             items={data.map((item) => ({
               name: item.name,
               value: item.value,

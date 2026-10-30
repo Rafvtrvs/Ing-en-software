@@ -140,6 +140,7 @@ export function OrdersTable({
     {
       key: 'actions',
       header: 'Acciones',
+      className: 'w-28 whitespace-nowrap',
       render: (row) => {
         const editable = canEditOrder(currentUser, row)
         return (

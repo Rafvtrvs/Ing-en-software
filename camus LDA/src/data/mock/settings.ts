@@ -12,7 +12,7 @@ export const defaultAppConfiguration: AppConfiguration = {
     compactSidebar: false,
     language: 'es',
     dateFormat: 'dd/mm/yyyy',
-    accentColor: '#2563eb',
+    accentColor: '#1B8634',
     zebraTables: true,
     highContrastTables: true,
     chartPalette: 'default',

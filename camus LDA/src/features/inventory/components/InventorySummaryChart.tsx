@@ -1,6 +1,6 @@
-import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { ChartLegend } from '@/components/ui/ChartLegend'
+import { DonutChart } from '@/components/ui/DonutChart'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { useMemo } from 'react'
 
@@ -49,31 +49,11 @@ export function InventorySummaryChart() {
       ) : (
         <>
           <div className="flex flex-col items-center gap-6">
-            <div className="relative h-48 w-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={78}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {chartData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-xl font-bold text-slate-900">
-                  {totalUnits.toLocaleString('es-CL')}
-                </span>
-                <span className="text-xs text-slate-500">Unidades</span>
-              </div>
-            </div>
+            <DonutChart
+              data={chartData}
+              centerValue={totalUnits.toLocaleString('es-CL')}
+              centerLabel="Unidades"
+            />
             <ChartLegend
               items={chartData.map((item) => ({
                 name: item.name,

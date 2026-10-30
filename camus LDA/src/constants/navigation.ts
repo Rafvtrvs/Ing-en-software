@@ -46,3 +46,18 @@ export const SUPPORT_ITEM = {
   path: ROUTES.SOPORTE,
   icon: Headphones,
 }
+
+export function findSectionLabel(pathname: string): string {
+  const items = [
+    ...NAV_SECTIONS.flatMap((section) => section.items),
+    SUPPORT_ITEM,
+  ]
+  const match = items
+    .filter((item) =>
+      item.path === '/'
+        ? pathname === '/'
+        : pathname === item.path || pathname.startsWith(`${item.path}/`),
+    )
+    .sort((a, b) => b.path.length - a.path.length)[0]
+  return match?.label ?? 'Inicio'
+}

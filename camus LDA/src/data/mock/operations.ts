@@ -142,8 +142,8 @@ export function getOperationsKpis(): KpiData[] {
       trend: '+12% vs ayer',
       trendDirection: 'up',
       icon: Users,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       title: 'Operaciones Activas',
