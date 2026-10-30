@@ -16,6 +16,7 @@ export type UserModalMode =
   | 'consultEmail'
   | 'linkEmail'
   | 'unlinkEmail'
+  | 'editEmail'
   | null
 export type RoleModalMode = 'create' | 'edit' | 'view' | 'delete' | null
 
@@ -65,8 +66,10 @@ interface UsersState {
   openUserEmailConsultModal: (user: SystemUser) => void
   openLinkEmailModal: (user: SystemUser) => void
   openUnlinkEmailModal: (user: SystemUser) => void
+  openEditEmailModal: (user: SystemUser) => void
   linkUserEmail: (userId: string, email: string) => { ok: true } | { ok: false; message: string }
   unlinkUserEmail: (userId: string) => { ok: true } | { ok: false; message: string }
+  editUserEmail: (userId: string, email: string) => { ok: true } | { ok: false; message: string }
   openRoleCreateModal: () => void
   openRoleEditModal: (role: AppRole) => void
   openRoleViewModal: (role: AppRole) => void
@@ -272,6 +275,8 @@ export const useUsersStore = create<UsersState>()(
         set({ userModalMode: 'linkEmail', selectedUser: user, roleModalMode: null }),
       openUnlinkEmailModal: (user) =>
         set({ userModalMode: 'unlinkEmail', selectedUser: user, roleModalMode: null }),
+      openEditEmailModal: (user) =>
+        set({ userModalMode: 'editEmail', selectedUser: user, roleModalMode: null }),
 
       linkUserEmail: (userId, email) => {
         const trimmed = email.trim()
@@ -293,6 +298,24 @@ export const useUsersStore = create<UsersState>()(
           return { ok: false, message: 'El usuario no tiene correo vinculado' }
         }
         get().updateUser(userId, { email: '', emailLinked: false })
+        return { ok: true }
+      },
+
+      editUserEmail: (userId, email) => {
+        const user = get().users.find((u) => u.id === userId)
+        if (!user) return { ok: false, message: 'Usuario no encontrado' }
+        if (user.emailLinked === false && !user.email?.trim()) {
+          return { ok: false, message: 'El usuario no tiene correo vinculado' }
+        }
+        const trimmed = email.trim()
+        if (!trimmed) return { ok: false, message: 'Ingrese un correo electrónico' }
+        const duplicate = get().users.some(
+          (u) => u.id !== userId && u.email.toLowerCase() === trimmed.toLowerCase(),
+        )
+        if (duplicate) {
+          return { ok: false, message: 'Ese correo ya está asociado a otro usuario' }
+        }
+        get().updateUser(userId, { email: trimmed, emailLinked: true })
         return { ok: true }
       },
 

@@ -17,6 +17,7 @@ import { AlertTriangle, CheckCircle, Settings } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
+import { useNotificationsStore } from '@/store/useNotificationsStore'
 
 const STATUS_OPTIONS: Array<EquipmentStatus | 'all'> = [
   'all',
@@ -32,6 +33,9 @@ export function EquipmentPanel() {
   const openViewModal = useOrdersStore((s) => s.openViewModal)
   const updateOrder = useOrdersStore((s) => s.updateOrder)
   const addToast = useInventoryStore((s) => s.addToast)
+  const pushEquipmentUnavailable = useNotificationsStore(
+    (s) => s.pushEquipmentUnavailable,
+  )
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<EquipmentStatus | 'all'>('all')
   const [items, setItems] = useState<Equipment[]>(mockEquipment)
@@ -167,6 +171,10 @@ export function EquipmentPanel() {
       }
     }
 
+    const becomesUnavailable =
+      statusChanged &&
+      (draftStatus === 'Fuera de servicio' || draftStatus === 'Mantenimiento')
+
     setItems((prev) =>
       prev.map((eq) =>
         eq.id === selected.id
@@ -175,6 +183,9 @@ export function EquipmentPanel() {
               status: draftStatus,
               lastMaintenance: draftLastMaintenance,
               nextMaintenance: draftNextMaintenance,
+              ...(becomesUnavailable
+                ? { assignedOrderId: undefined, assignedTo: undefined }
+                : {}),
             }
           : eq,
       ),
@@ -198,6 +209,19 @@ export function EquipmentPanel() {
           ...prev,
         ].slice(0, 10),
       )
+
+      // RF-30 CU-100/101: alertar cuando la maquinaria deja de estar operativa
+      if (becomesUnavailable) {
+        pushEquipmentUnavailable({
+          code: selected.code,
+          name: selected.name,
+          status: draftStatus,
+        })
+        // CU-102: liberar vínculo con OT si estaba asignada
+        if (selected.assignedOrderId) {
+          updateOrder(selected.assignedOrderId, { equipmentId: undefined })
+        }
+      }
     }
 
     addToast(`Equipo "${selected.code}" actualizado`, 'success')

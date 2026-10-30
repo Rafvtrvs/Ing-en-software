@@ -12,9 +12,21 @@ export interface ToastMessage {
   message: string
 }
 
+/** RF-14 — bitácora de cambios de estado financiero */
+export interface InvoiceStatusHistoryEntry {
+  id: string
+  invoiceId: string
+  invoiceNumber: string
+  previousStatus: InvoiceStatus | '—'
+  newStatus: InvoiceStatus
+  at: string
+  note?: string
+}
+
 interface BillingState {
   invoices: Invoice[]
   payments: PaymentRecord[]
+  statusHistory: InvoiceStatusHistoryEntry[]
   modalMode: InvoiceModalMode
   selectedInvoice: Invoice | null
   statusFilter: InvoiceStatus | 'all'
@@ -28,6 +40,7 @@ interface BillingState {
     id: string,
     data: { amount: number; method: PaymentMethod; reference?: string; notes?: string },
   ) => void
+  getInvoiceStatusHistory: (invoiceId: string) => InvoiceStatusHistoryEntry[]
   openCreateModal: () => void
   openEditModal: (invoice: Invoice) => void
   openViewModal: (invoice: Invoice) => void
@@ -57,9 +70,10 @@ function nextInvoiceNumber() {
 
 export const useBillingStore = create<BillingState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       invoices: initialInvoices,
       payments: recentPayments,
+      statusHistory: [],
       modalMode: null,
       selectedInvoice: null,
       statusFilter: 'all',
@@ -79,15 +93,33 @@ export const useBillingStore = create<BillingState>()(
         })),
 
       updateInvoice: (id, data) =>
-        set((state) => ({
-          invoices: state.invoices.map((inv) =>
-            inv.id === id ? { ...inv, ...data } : inv,
-          ),
-          selectedInvoice:
-            state.selectedInvoice?.id === id
-              ? { ...state.selectedInvoice, ...data }
-              : state.selectedInvoice,
-        })),
+        set((state) => {
+          const current = state.invoices.find((inv) => inv.id === id)
+          const historyEntry =
+            current && data.status && data.status !== current.status
+              ? ([
+                  {
+                    id: safeId(),
+                    invoiceId: id,
+                    invoiceNumber: current.number,
+                    previousStatus: current.status,
+                    newStatus: data.status,
+                    at: new Date().toISOString(),
+                    note: 'Cambio manual de estado financiero',
+                  },
+                ] as InvoiceStatusHistoryEntry[])
+              : []
+          return {
+            invoices: state.invoices.map((inv) =>
+              inv.id === id ? { ...inv, ...data } : inv,
+            ),
+            statusHistory: [...historyEntry, ...state.statusHistory].slice(0, 200),
+            selectedInvoice:
+              state.selectedInvoice?.id === id
+                ? { ...state.selectedInvoice, ...data }
+                : state.selectedInvoice,
+          }
+        }),
 
       deleteInvoice: (id) =>
         set((state) => ({
@@ -95,19 +127,36 @@ export const useBillingStore = create<BillingState>()(
         })),
 
       markAsPaid: (id, method) =>
-        set((state) => ({
-          invoices: state.invoices.map((inv) =>
-            inv.id === id
-              ? {
-                  ...inv,
-                  status: 'Pagada' as const,
-                  paymentMethod: method,
-                  paidAmount: inv.amount,
-                  paidAt: new Date().toISOString().slice(0, 10),
-                }
-              : inv,
-          ),
-        })),
+        set((state) => {
+          const current = state.invoices.find((inv) => inv.id === id)
+          const historyEntry = current
+            ? ([
+                {
+                  id: safeId(),
+                  invoiceId: id,
+                  invoiceNumber: current.number,
+                  previousStatus: current.status,
+                  newStatus: 'Pagada' as const,
+                  at: new Date().toISOString(),
+                  note: `Marcada como pagada (${method})`,
+                },
+              ] as InvoiceStatusHistoryEntry[])
+            : []
+          return {
+            invoices: state.invoices.map((inv) =>
+              inv.id === id
+                ? {
+                    ...inv,
+                    status: 'Pagada' as const,
+                    paymentMethod: method,
+                    paidAmount: inv.amount,
+                    paidAt: new Date().toISOString().slice(0, 10),
+                  }
+                : inv,
+            ),
+            statusHistory: [...historyEntry, ...state.statusHistory].slice(0, 200),
+          }
+        }),
 
       registerPayment: (id, data) =>
         set((state) => {
@@ -117,6 +166,7 @@ export const useBillingStore = create<BillingState>()(
           const paidSoFar = invoice.paidAmount ?? 0
           const newPaid = paidSoFar + data.amount
           const isFullyPaid = newPaid >= invoice.amount
+          const nextStatus = isFullyPaid ? ('Pagada' as const) : invoice.status
 
           // Si la factura está asociada a una OT y se registra un abono parcial,
           // el estado de la OT pasa a "Abonado" (mientras no esté cancelada).
@@ -136,8 +186,24 @@ export const useBillingStore = create<BillingState>()(
             date: new Date().toISOString().slice(0, 10),
           }
 
+          const historyEntry =
+            nextStatus !== invoice.status
+              ? ([
+                  {
+                    id: safeId(),
+                    invoiceId: id,
+                    invoiceNumber: invoice.number,
+                    previousStatus: invoice.status,
+                    newStatus: nextStatus,
+                    at: new Date().toISOString(),
+                    note: `Pago registrado: ${data.amount}`,
+                  },
+                ] as InvoiceStatusHistoryEntry[])
+              : []
+
           return {
             payments: [payment, ...state.payments],
+            statusHistory: [...historyEntry, ...state.statusHistory].slice(0, 200),
             invoices: state.invoices.map((inv) =>
               inv.id === id
                 ? {
@@ -145,7 +211,7 @@ export const useBillingStore = create<BillingState>()(
                     paidAmount: newPaid,
                     paymentMethod: data.method,
                     paidAt: new Date().toISOString().slice(0, 10),
-                    status: isFullyPaid ? ('Pagada' as const) : inv.status,
+                    status: nextStatus,
                     notes: data.notes || inv.notes,
                   }
                 : inv,
@@ -157,11 +223,14 @@ export const useBillingStore = create<BillingState>()(
                     paidAmount: newPaid,
                     paymentMethod: data.method,
                     paidAt: new Date().toISOString().slice(0, 10),
-                    status: isFullyPaid ? ('Pagada' as const) : state.selectedInvoice.status,
+                    status: nextStatus,
                   }
                 : state.selectedInvoice,
           }
         }),
+
+      getInvoiceStatusHistory: (invoiceId) =>
+        get().statusHistory.filter((entry) => entry.invoiceId === invoiceId),
 
       openCreateModal: () => set({ modalMode: 'create', selectedInvoice: null }),
       openEditModal: (invoice) => set({ modalMode: 'edit', selectedInvoice: invoice }),
@@ -191,6 +260,7 @@ export const useBillingStore = create<BillingState>()(
       partialize: (state) => ({
         invoices: state.invoices,
         payments: state.payments,
+        statusHistory: state.statusHistory,
       }),
     },
   ),

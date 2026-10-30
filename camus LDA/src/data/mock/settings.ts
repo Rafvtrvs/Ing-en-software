@@ -66,7 +66,7 @@ export const faqItems: FaqItem[] = [
     category: 'Reportes',
     question: '¿Puedo exportar reportes a Excel?',
     answer:
-      'Los reportes se exportan en CSV compatible con Excel desde cada pestaña o con "Exportar todo" en la cabecera.',
+      'Los reportes se exportan en CSV, Excel (.xlsx) o PDF desde cada pestaña o con "Exportar todo" en la cabecera.',
   },
   {
     id: 'faq-6',

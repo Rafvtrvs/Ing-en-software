@@ -11,13 +11,7 @@ import { useBillingStore } from '@/store/useBillingStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { useClientsStore } from '@/store/useClientsStore'
 import { technicianPerformance } from '@/data/mock/reports'
-import {
-  exportClientsReport,
-  exportInventoryReport,
-  exportInvoicesReport,
-  exportOrdersReport,
-  exportTechniciansReport,
-} from '@/features/reports/utils/exportReports'
+import { exportAllReportsPackage } from '@/features/reports/utils/exportReports'
 import type { ReportTab } from '@/types'
 import { ReportPeriodSelect } from './components/ReportPeriodSelect'
 import { SummaryReportPanel } from './components/SummaryReportPanel'
@@ -28,6 +22,8 @@ import { CostsReportPanel } from './components/CostsReportPanel'
 import { TechniciansReportPanel } from './components/TechniciansReportPanel'
 import { AuditReportPanel } from './components/AuditReportPanel'
 import { ServiceTimesReportPanel } from './components/ServiceTimesReportPanel'
+import { UtilityReportPanel } from './components/UtilityReportPanel'
+import { AccessLogReportPanel } from './components/AccessLogReportPanel'
 import { ThirdPartyInterventionsReportPanel } from './components/ThirdPartyInterventionsReportPanel'
 import { TraceabilityReportPanel } from './components/TraceabilityReportPanel'
 import { PhysicalAssetsReportPanel } from './components/PhysicalAssetsReportPanel'
@@ -37,12 +33,14 @@ const REPORT_TABS: { id: ReportTab; label: string }[] = [
   { id: 'ordenes', label: 'Órdenes' },
   { id: 'inventario', label: 'Inventario' },
   { id: 'facturacion', label: 'Facturación' },
+  { id: 'utilidad', label: 'Utilidad' },
   { id: 'trazabilidad', label: 'Trazabilidad' },
   { id: 'activos', label: 'Activos físicos' },
   { id: 'costos', label: 'Costos' },
   { id: 'tecnicos', label: 'Técnicos' },
   { id: 'tiempos', label: 'Tiempos de operación' },
   { id: 'terceros', label: 'Terceros' },
+  { id: 'accesos', label: 'Accesos' },
   { id: 'auditoria', label: 'Auditoría' },
 ]
 
@@ -67,12 +65,19 @@ export function ReportsPage() {
   }, [searchParams, setActiveTab])
 
   const handleExportAll = () => {
-    exportOrdersReport(orders)
-    exportInvoicesReport(invoices)
-    exportInventoryReport(products)
-    exportTechniciansReport(technicianPerformance)
-    exportClientsReport(clients)
-    addToast('Paquete de reportes CSV descargado correctamente')
+    try {
+      exportAllReportsPackage({
+        orders,
+        invoices,
+        products,
+        technicians: technicianPerformance,
+        clients,
+      })
+      addToast('Descargado: reporte-completo.xlsx (Órdenes, Facturas, Inventario, Técnicos, Clientes)')
+    } catch (err) {
+      console.error(err)
+      addToast('No se pudo generar el reporte completo', 'error')
+    }
   }
 
   return (
@@ -101,12 +106,14 @@ export function ReportsPage() {
         {activeTab === 'ordenes' && <OrdersReportPanel />}
         {activeTab === 'inventario' && <InventoryReportPanel />}
         {activeTab === 'facturacion' && <BillingReportPanel />}
+        {activeTab === 'utilidad' && <UtilityReportPanel />}
         {activeTab === 'trazabilidad' && <TraceabilityReportPanel />}
         {activeTab === 'activos' && <PhysicalAssetsReportPanel />}
         {activeTab === 'costos' && <CostsReportPanel />}
         {activeTab === 'tecnicos' && <TechniciansReportPanel />}
         {activeTab === 'tiempos' && <ServiceTimesReportPanel />}
         {activeTab === 'terceros' && <ThirdPartyInterventionsReportPanel />}
+        {activeTab === 'accesos' && <AccessLogReportPanel />}
         {activeTab === 'auditoria' && <AuditReportPanel />}
       </div>
 

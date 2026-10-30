@@ -83,7 +83,7 @@ export function OrderPdfPanel({ order }: { order: WorkOrder }) {
     } else if (action === 'download') {
       downloadOrderPdf(order, interventions)
       markPdfGenerated(order.id)
-      addToast('Resumen descargado (HTML imprimible)')
+      addToast('Resumen PDF descargado')
     } else if (action === 'print') {
       printOrderPdf(order, interventions)
       markPdfGenerated(order.id)

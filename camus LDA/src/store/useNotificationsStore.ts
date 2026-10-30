@@ -38,6 +38,12 @@ interface NotificationsState {
     name: string
     category: string
   }) => void
+  /** RF-30 — maquinaria no disponible */
+  pushEquipmentUnavailable: (payload: {
+    code: string
+    name: string
+    status: string
+  }) => void
 }
 
 function syncHeaderBadge(count: number) {
@@ -140,6 +146,15 @@ export const useNotificationsStore = create<NotificationsState>()(
         get().addNotification({
           title: `Producto ${code} registrado`,
           message: `Se agregó "${name}" a inventario en la categoría ${category}.`,
+          type: 'inventory',
+          link: ROUTES.INVENTARIO,
+        })
+      },
+
+      pushEquipmentUnavailable: ({ code, name, status }) => {
+        get().addNotification({
+          title: `Maquinaria no disponible: ${code}`,
+          message: `"${name}" quedó en estado "${status}". No debe asignarse a nuevas órdenes.`,
           type: 'inventory',
           link: ROUTES.INVENTARIO,
         })

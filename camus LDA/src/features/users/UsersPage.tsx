@@ -25,6 +25,7 @@ import { RoleAssignmentHistoryPanel } from './components/RoleAssignmentHistoryPa
 import { UserEmailConsultModal } from './components/UserEmailConsultModal'
 import { LinkUserEmailModal } from './components/LinkUserEmailModal'
 import { UnlinkUserEmailModal } from './components/UnlinkUserEmailModal'
+import { EditUserEmailModal } from './components/EditUserEmailModal'
 
 const USERS_TABS: { id: UsersTab; label: string }[] = [
   { id: 'usuarios', label: 'Usuarios' },
@@ -137,6 +138,11 @@ export function UsersPage() {
       <UnlinkUserEmailModal
         user={selectedUser}
         open={userModalMode === 'unlinkEmail'}
+        onClose={closeUserModal}
+      />
+      <EditUserEmailModal
+        user={selectedUser}
+        open={userModalMode === 'editEmail'}
         onClose={closeUserModal}
       />
 

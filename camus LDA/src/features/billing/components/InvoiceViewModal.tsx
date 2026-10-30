@@ -37,8 +37,10 @@ export function InvoiceViewModal({ invoice, open, onClose }: InvoiceViewModalPro
   const openEditModal = useBillingStore((s) => s.openEditModal)
   const markAsPaid = useBillingStore((s) => s.markAsPaid)
   const addToast = useBillingStore((s) => s.addToast)
+  const getInvoiceStatusHistory = useBillingStore((s) => s.getInvoiceStatusHistory)
 
   if (!invoice) return null
+  const history = getInvoiceStatusHistory(invoice.id)
 
   const handleEdit = () => {
     onClose()
@@ -107,6 +109,34 @@ export function InvoiceViewModal({ invoice, open, onClose }: InvoiceViewModalPro
           {invoice.notes}
         </p>
       )}
+
+      <div className="mt-5">
+        <p className="mb-2 text-sm font-semibold text-slate-800">
+          Bitácora de estado financiero
+        </p>
+        {history.length === 0 ? (
+          <p className="text-sm text-slate-500">Sin cambios de estado registrados.</p>
+        ) : (
+          <ul className="space-y-2">
+            {history.map((entry) => (
+              <li
+                key={entry.id}
+                className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+              >
+                <span className="font-medium">
+                  {entry.previousStatus} → {entry.newStatus}
+                </span>
+                <span className="ml-2 text-xs text-slate-500">
+                  {new Date(entry.at).toLocaleString('es-CL')}
+                </span>
+                {entry.note ? (
+                  <p className="mt-0.5 text-xs text-slate-500">{entry.note}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </Modal>
   )
 }

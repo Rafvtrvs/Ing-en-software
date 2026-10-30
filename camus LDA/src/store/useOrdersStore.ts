@@ -542,6 +542,15 @@ export const useOrdersStore = create<OrdersState>()(
               previousStatus: existing.status,
               newStatus: data.status,
             })
+            // RF-8 — registrar cambio de estado en historial de la OT
+            get().addModificationHistory(existing.id, {
+              field: 'status',
+              fieldLabel: 'Estado',
+              previousValue: existing.status,
+              newValue: data.status,
+              changedById: 'session',
+              changedByName: 'Sistema',
+            })
           }
         }
 

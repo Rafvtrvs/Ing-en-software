@@ -571,6 +571,8 @@ export type ReportTab =
   | 'tecnicos'
   | 'terceros'
   | 'tiempos'
+  | 'utilidad'
+  | 'accesos'
   | 'auditoria'
 
 export type ReportPeriod = 'month' | 'quarter' | 'year'
@@ -589,7 +591,7 @@ export interface ReportExportItem {
   title: string
   description: string
   category: ReportTab
-  format: 'PDF' | 'CSV'
+  format: 'PDF' | 'CSV' | 'XLSX'
 }
 
 export type ParametersTab =

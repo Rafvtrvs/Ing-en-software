@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { CheckCircle2, Droplets, Loader2 } from 'lucide-react'
 import { authService } from '@/services/authService'
 import { useAppStore } from '@/store/useAppStore'
+import { useAccessLogStore } from '@/store/useAccessLogStore'
 import { isFieldOperator } from '@/features/auth/roleAccess'
 import { ROUTES } from '@/constants/routes'
 
@@ -27,6 +28,12 @@ export function LoginSuccessPage() {
         name: authUser.name,
         role: authUser.role,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authUser.name)}`,
+      })
+      useAccessLogStore.getState().recordLogin({
+        id: authUser.id,
+        name: authUser.name,
+        email: authUser.email,
+        role: authUser.role,
       })
     }
 

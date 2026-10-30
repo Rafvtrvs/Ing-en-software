@@ -4,6 +4,8 @@ import { useAppStore } from '@/store/useAppStore'
 import { authService } from '@/services/authService'
 import { useSessionUser } from '@/features/auth/useSessionUser'
 import { NotificationsPanel } from '@/components/layout/NotificationsPanel'
+import { GlobalSearch } from '@/components/layout/GlobalSearch'
+import { useAccessLogStore } from '@/store/useAccessLogStore'
 
 export function Header() {
   const toggleSidebar = useAppStore((s) => s.toggleSidebar)
@@ -11,7 +13,18 @@ export function Header() {
   const navigate = useNavigate()
   const session = useSessionUser()
 
+  const recordLogout = useAccessLogStore((s) => s.recordLogout)
+
   const handleLogout = () => {
+    const current = authService.getUser()
+    if (current) {
+      recordLogout({
+        id: current.id,
+        name: current.name,
+        email: current.email,
+        role: current.role,
+      })
+    }
     authService.logout()
     setUser({
       name: 'Invitado',
@@ -42,6 +55,7 @@ export function Header() {
       </button>
 
       <div className="flex flex-1 items-center justify-end gap-3 sm:gap-4">
+        <GlobalSearch />
         <NotificationsPanel />
 
         <div className="flex items-center gap-3 rounded-lg py-1.5 pl-1.5 pr-2">

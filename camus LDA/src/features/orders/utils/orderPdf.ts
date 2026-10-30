@@ -1,7 +1,8 @@
+import { jsPDF } from 'jspdf'
 import type { OrderIntervention, WorkOrder } from '@/types'
 import { formatDisplayDate } from '@/features/orders/utils/orderDates'
 
-/** Genera HTML imprimible del resumen de OT (CU-173–176, sin libs PDF) */
+/** Genera HTML imprimible del resumen de OT (CU-173 vista previa / impresión) */
 export function buildOrderSummaryHtml(
   order: WorkOrder,
   interventions: OrderIntervention[] = [],
@@ -89,6 +90,107 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
+function line(
+  doc: jsPDF,
+  label: string,
+  value: string,
+  y: number,
+): number {
+  doc.setFont('helvetica', 'bold')
+  doc.text(label, 14, y)
+  doc.setFont('helvetica', 'normal')
+  const lines = doc.splitTextToSize(value || '—', 120)
+  doc.text(lines, 55, y)
+  return y + Math.max(7, lines.length * 5 + 2)
+}
+
+/** RF-52 / CU-173–176 — PDF binario real del resumen de OT */
+export function downloadOrderPdf(
+  order: WorkOrder,
+  interventions: OrderIntervention[] = [],
+  filename?: string,
+): void {
+  const doc = new jsPDF()
+  const ops =
+    order.operators?.map((o) => o.name).join(', ') ||
+    order.technician ||
+    'Sin asignar'
+
+  doc.setFontSize(16)
+  doc.text(`Orden de trabajo ${order.id}`, 14, 18)
+  doc.setFontSize(10)
+  doc.setTextColor(100)
+  doc.text(
+    `Generado ${new Date().toLocaleString('es-CL')} · Alcantarillados Camus Ltda.`,
+    14,
+    25,
+  )
+  doc.setTextColor(0)
+
+  let y = 36
+  y = line(doc, 'Cliente', order.client, y)
+  y = line(doc, 'Estado', order.status, y)
+  y = line(doc, 'Prioridad', order.priority ?? 'Media', y)
+  y = line(doc, 'Incidente', order.incidentType ?? order.category, y)
+  y = line(doc, 'Direccion', order.address, y)
+  y = line(doc, 'Servicio', order.service ?? '—', y)
+  y = line(doc, 'Operadores', ops, y)
+  y = line(doc, 'Inicio', formatDisplayDate(order.startDate), y)
+  y = line(doc, 'Termino', formatDisplayDate(order.endDate), y)
+  y = line(
+    doc,
+    'Duracion',
+    order.durationHours != null ? `${order.durationHours} h` : '—',
+    y,
+  )
+  y = line(doc, 'Progreso', `${order.progress ?? 0}%`, y)
+
+  y += 4
+  doc.setFont('helvetica', 'bold')
+  doc.text('Intervenciones', 14, y)
+  y += 6
+  doc.setFont('helvetica', 'normal')
+  if (interventions.length === 0) {
+    doc.text('Sin intervenciones registradas.', 14, y)
+    y += 6
+  } else {
+    for (const item of interventions.slice(0, 12)) {
+      const text = doc.splitTextToSize(`#${item.id} — ${item.detail}`, 180)
+      doc.text(text, 14, y)
+      y += text.length * 5 + 2
+      if (y > 270) {
+        doc.addPage()
+        y = 20
+      }
+    }
+  }
+
+  y += 4
+  if (y > 250) {
+    doc.addPage()
+    y = 20
+  }
+  doc.setFont('helvetica', 'bold')
+  doc.text('Terceros', 14, y)
+  y += 6
+  doc.setFont('helvetica', 'normal')
+  const thirds = order.thirdParties ?? []
+  if (thirds.length === 0) {
+    doc.text('Sin intervenciones de terceros.', 14, y)
+  } else {
+    for (const item of thirds.slice(0, 8)) {
+      const text = doc.splitTextToSize(
+        `${item.company}: ${item.detail}`,
+        180,
+      )
+      doc.text(text, 14, y)
+      y += text.length * 5 + 2
+    }
+  }
+
+  doc.save(filename ?? `resumen-${order.id}.pdf`)
+}
+
 /** Abre ventana de vista previa imprimible (CU-173) */
 export function previewOrderPdf(
   order: WorkOrder,
@@ -100,22 +202,6 @@ export function previewOrderPdf(
   win.document.open()
   win.document.write(html)
   win.document.close()
-}
-
-/** Descarga Blob HTML como archivo (CU-174) — usable como “PDF” vía imprimir */
-export function downloadOrderPdf(
-  order: WorkOrder,
-  interventions: OrderIntervention[] = [],
-  filename?: string,
-): void {
-  const html = buildOrderSummaryHtml(order, interventions)
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename ?? `resumen-${order.id}.html`
-  link.click()
-  URL.revokeObjectURL(url)
 }
 
 /** Abre diálogo de impresión del navegador (CU-174 / regenerar CU-176) */
@@ -130,7 +216,5 @@ export function printOrderPdf(
   win.document.write(html)
   win.document.close()
   win.focus()
-  setTimeout(() => {
-    win.print()
-  }, 250)
+  win.print()
 }

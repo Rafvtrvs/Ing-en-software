@@ -1,4 +1,4 @@
-import { Download, FileText } from 'lucide-react'
+import { Download, FileSpreadsheet, FileText } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { reportExportCatalog } from '@/data/mock/reports'
@@ -8,8 +8,12 @@ import { useBillingStore } from '@/store/useBillingStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { useClientsStore } from '@/store/useClientsStore'
 import { technicianPerformance } from '@/data/mock/reports'
+import { mockEquipment } from '@/data/mock/equipment'
 import {
+  exportAssetsPdf,
   exportClientsReport,
+  exportCostsPdf,
+  exportExecutiveSummaryPdf,
   exportInventoryReport,
   exportInvoicesReport,
   exportOrdersReport,
@@ -34,47 +38,74 @@ export function ReportExportCatalog({ filterTab }: ReportExportCatalogProps) {
     : reportExportCatalog
 
   const handleExport = (id: string, title: string, format: string) => {
-    if (format === 'PDF') {
-      const content = `Reporte: ${title}\nGenerado: ${new Date().toLocaleString('es-CL')}\n\nDocumento de demostración — Camus LDA\n`
-      const blob = new Blob([content], { type: 'application/pdf' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `${title.replace(/\s+/g, '_').toLowerCase()}_demo.pdf`
-      link.click()
-      URL.revokeObjectURL(url)
-      addToast(`PDF de demostración "${title}" descargado`)
-      return
-    }
+    const asExcel = format === 'XLSX'
 
     switch (id) {
       case 'exp-1':
-        exportOrdersReport(orders)
+      case 'exp-1x':
+        exportOrdersReport(orders, asExcel ? 'XLSX' : 'CSV')
         break
       case 'exp-2':
-        exportInvoicesReport(invoices)
+      case 'exp-2x':
+        exportInvoicesReport(invoices, asExcel ? 'XLSX' : 'CSV')
         break
       case 'exp-3':
-        exportInventoryReport(products)
+      case 'exp-3x':
+        exportInventoryReport(products, asExcel ? 'XLSX' : 'CSV')
         break
       case 'exp-4':
-        exportTechniciansReport(technicianPerformance)
+      case 'exp-4x':
+        exportTechniciansReport(technicianPerformance, asExcel ? 'XLSX' : 'CSV')
         break
       case 'exp-6':
-        exportClientsReport(clients)
+      case 'exp-6x':
+        exportClientsReport(clients, asExcel ? 'XLSX' : 'CSV')
         break
+      case 'exp-5': {
+        const completed = orders.filter((o) => o.status === 'Completada' || o.status === 'Abonado').length
+        exportExecutiveSummaryPdf({
+          totalOrders: orders.length,
+          completedOrders: completed,
+          totalRevenue: invoices.reduce((sum, inv) => sum + inv.amount, 0),
+          criticalProducts: products.filter((p) => p.status === 'Crítico').length,
+          activeClients: clients.filter((c) => c.status === 'Activo').length,
+        })
+        break
+      }
+      case 'exp-7': {
+        const labor = Math.round(orders.length * 45000)
+        const fuel = Math.round(orders.length * 18000)
+        const overhead = Math.round((labor + fuel) * 0.15)
+        exportCostsPdf([
+          `Ordenes consideradas: ${orders.length}`,
+          `Mano de obra estimada: $${labor.toLocaleString('es-CL')}`,
+          `Combustible estimado: $${fuel.toLocaleString('es-CL')}`,
+          `Overhead (15%): $${overhead.toLocaleString('es-CL')}`,
+          `Total estimado: $${(labor + fuel + overhead).toLocaleString('es-CL')}`,
+        ])
+        break
+      }
+      case 'exp-8': {
+        const lines = mockEquipment.map((eq) => {
+          const linked = orders.filter((o) => o.equipmentId === eq.id || o.truckCode === eq.code)
+          return `${eq.code} — ${eq.name}: ${linked.length} OT · estado ${eq.status}`
+        })
+        exportAssetsPdf(lines)
+        break
+      }
       default:
         addToast(`Exportación de "${title}" — próximamente`, 'info')
         return
     }
-    addToast(`"${title}" exportado correctamente`)
+
+    addToast(`"${title}" descargado (${format})`)
   }
 
   return (
     <Card>
       <CardHeader
         title="Exportar Reportes"
-        subtitle="Descarga datos en CSV o genera documentos PDF."
+        subtitle="Descargas reales en CSV, Excel (.xlsx) o PDF."
       />
       <div className="grid gap-3 sm:grid-cols-2">
         {items.map((item) => (
@@ -86,6 +117,8 @@ export function ReportExportCatalog({ filterTab }: ReportExportCatalogProps) {
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm">
                 {item.format === 'PDF' ? (
                   <FileText className="h-5 w-5 text-red-500" />
+                ) : item.format === 'XLSX' ? (
+                  <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
                 ) : (
                   <Download className="h-5 w-5 text-primary" />
                 )}
@@ -98,7 +131,9 @@ export function ReportExportCatalog({ filterTab }: ReportExportCatalogProps) {
                     'mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium',
                     item.format === 'PDF'
                       ? 'bg-red-50 text-red-600'
-                      : 'bg-blue-50 text-blue-600',
+                      : item.format === 'XLSX'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'bg-blue-50 text-blue-600',
                   )}
                 >
                   {item.format}

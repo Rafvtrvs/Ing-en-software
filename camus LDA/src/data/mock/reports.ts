@@ -73,11 +73,25 @@ export const reportExportCatalog: ReportExportItem[] = [
     format: 'CSV',
   },
   {
+    id: 'exp-1x',
+    title: 'Órdenes de Trabajo (Excel)',
+    description: 'Mismo listado en formato Excel (.xlsx).',
+    category: 'ordenes',
+    format: 'XLSX',
+  },
+  {
     id: 'exp-2',
     title: 'Facturas Emitidas',
     description: 'Detalle de facturación, montos y fechas de vencimiento.',
     category: 'facturacion',
     format: 'CSV',
+  },
+  {
+    id: 'exp-2x',
+    title: 'Facturas Emitidas (Excel)',
+    description: 'Facturación en Excel (.xlsx).',
+    category: 'facturacion',
+    format: 'XLSX',
   },
   {
     id: 'exp-3',
@@ -87,11 +101,25 @@ export const reportExportCatalog: ReportExportItem[] = [
     format: 'CSV',
   },
   {
+    id: 'exp-3x',
+    title: 'Inventario Actual (Excel)',
+    description: 'Inventario en Excel (.xlsx).',
+    category: 'inventario',
+    format: 'XLSX',
+  },
+  {
     id: 'exp-4',
     title: 'Rendimiento de Técnicos',
     description: 'Órdenes completadas, tiempos y calificación promedio.',
     category: 'tecnicos',
     format: 'CSV',
+  },
+  {
+    id: 'exp-4x',
+    title: 'Rendimiento de Técnicos (Excel)',
+    description: 'Rendimiento técnico en Excel (.xlsx).',
+    category: 'tecnicos',
+    format: 'XLSX',
   },
   {
     id: 'exp-5',
@@ -106,6 +134,13 @@ export const reportExportCatalog: ReportExportItem[] = [
     description: 'Base de clientes con última orden y estado.',
     category: 'resumen',
     format: 'CSV',
+  },
+  {
+    id: 'exp-6x',
+    title: 'Clientes Activos (Excel)',
+    description: 'Clientes en Excel (.xlsx).',
+    category: 'resumen',
+    format: 'XLSX',
   },
   {
     id: 'exp-7',

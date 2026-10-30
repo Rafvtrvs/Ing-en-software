@@ -19,6 +19,7 @@ export function UserEmailConsultModal({
   const roles = useUsersStore((s) => s.roles)
   const openLinkEmailModal = useUsersStore((s) => s.openLinkEmailModal)
   const openUnlinkEmailModal = useUsersStore((s) => s.openUnlinkEmailModal)
+  const openEditEmailModal = useUsersStore((s) => s.openEditEmailModal)
 
   if (!user) return null
 
@@ -35,6 +36,11 @@ export function UserEmailConsultModal({
     openUnlinkEmailModal(user)
   }
 
+  const handleEdit = () => {
+    onClose()
+    openEditEmailModal(user)
+  }
+
   return (
     <Modal
       open={open}
@@ -48,9 +54,14 @@ export function UserEmailConsultModal({
             Cerrar
           </Button>
           {linked ? (
-            <Button variant="outline" className="border-red-200 text-red-600" onClick={handleUnlink}>
-              Desvincular correo
-            </Button>
+            <>
+              <Button variant="outline" onClick={handleEdit}>
+                Editar correo
+              </Button>
+              <Button variant="outline" className="border-red-200 text-red-600" onClick={handleUnlink}>
+                Desvincular correo
+              </Button>
+            </>
           ) : (
             <Button onClick={handleLink}>Vincular correo electrónico</Button>
           )}

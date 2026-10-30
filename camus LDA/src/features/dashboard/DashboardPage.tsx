@@ -23,6 +23,7 @@ import { CriticalInventoryTable } from './components/CriticalInventoryTable'
 import { FinancialIncomeBlock } from './components/FinancialIncomeBlock'
 import { AvailabilityBlock } from './components/AvailabilityBlock'
 import { OverdueOrdersAlert } from './components/OverdueOrdersAlert'
+import { UnavailableEquipmentAlert } from './components/UnavailableEquipmentAlert'
 import { QuickActions } from './components/QuickActions'
 
 const PRIORITY_OPTIONS: PriorityFilter[] = ['Todas', 'Baja', 'Media', 'Alta']
@@ -152,6 +153,7 @@ export function DashboardPage() {
       </div>
 
       <OverdueOrdersAlert orders={filteredOrders} />
+      <UnavailableEquipmentAlert equipment={mockEquipment} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <FinancialIncomeBlock invoices={invoices} payments={payments} />
