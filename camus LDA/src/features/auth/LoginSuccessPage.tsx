@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { authService } from '@/services/authService'
-import { useAppStore } from '@/store/useAppStore'
+import { applySessionUser } from '@/features/auth/sessionAvatar'
 import { useAccessLogStore } from '@/store/useAccessLogStore'
 import { isFieldOperator } from '@/features/auth/roleAccess'
 import { ROUTES } from '@/constants/routes'
@@ -13,7 +13,6 @@ const REDIRECT_DELAY_MS = 2000
 export function LoginSuccessPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const setUser = useAppStore((s) => s.setUser)
   const from = (location.state as { from?: string })?.from ?? ROUTES.DASHBOARD
   const user = authService.getUser()
 
@@ -25,10 +24,9 @@ export function LoginSuccessPage() {
 
     const authUser = authService.getUser()
     if (authUser) {
-      setUser({
+      applySessionUser({
         name: authUser.name,
         role: authUser.role,
-        avatar: '',
       })
       useAccessLogStore.getState().recordLogin({
         id: authUser.id,
@@ -49,7 +47,7 @@ export function LoginSuccessPage() {
     }, REDIRECT_DELAY_MS)
 
     return () => window.clearTimeout(timer)
-  }, [from, navigate, setUser])
+  }, [from, navigate])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">

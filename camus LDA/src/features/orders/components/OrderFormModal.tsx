@@ -26,6 +26,7 @@ import type {
   OrderStatus,
   WorkOrder,
 } from '@/types'
+import { geocodeAddress, hasOrderCoords } from '@/services/geocodeService'
 import { cn } from '@/utils/cn'
 
 interface OrderFormValues {
@@ -193,7 +194,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
     setValue('technician', first?.name ?? '', { shouldDirty: true })
   }
 
-  const onSubmit = (data: OrderFormValues) => {
+  const onSubmit = async (data: OrderFormValues) => {
     const operators = data.operatorIds
       .map((id) => {
         const u = technicians.find((t) => t.id === id)
@@ -201,10 +202,22 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       })
       .filter(Boolean) as WorkOrder['operators']
 
+    const address = data.address.trim()
+    const addressChanged = !order || order.address !== address
+    let latitude = order?.latitude
+    let longitude = order?.longitude
+    if (addressChanged || !hasOrderCoords({ latitude, longitude })) {
+      const coords = await geocodeAddress(address)
+      if (coords) {
+        latitude = coords.latitude
+        longitude = coords.longitude
+      }
+    }
+
     const payload: WorkOrder = {
       id: data.id.trim(),
       client: data.client.trim(),
-      address: data.address.trim(),
+      address,
       service: data.service.trim(),
       category: data.incidentType || data.category,
       incidentType: data.incidentType,
@@ -219,6 +232,8 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       operatorIds: data.operatorIds,
       operators,
       ...(data.truckCode ? { truckCode: data.truckCode } : null),
+      ...(typeof latitude === 'number' ? { latitude } : null),
+      ...(typeof longitude === 'number' ? { longitude } : null),
       progress: Number.isFinite(data.progress) ? Number(data.progress) : 0,
       startDate: data.startDate || undefined,
       endDate: data.endDate || undefined,

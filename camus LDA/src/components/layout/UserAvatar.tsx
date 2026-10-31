@@ -1,9 +1,13 @@
 import { User } from 'lucide-react'
 import { cn } from '@/utils/cn'
+import { useAppStore } from '@/store/useAppStore'
 
 interface UserAvatarProps {
   className?: string
   size?: 'sm' | 'md' | 'lg'
+  /** Si se omite, usa el avatar del perfil en sesión */
+  src?: string | null
+  alt?: string
 }
 
 const SIZES = {
@@ -12,9 +16,32 @@ const SIZES = {
   lg: { box: 'h-16 w-16', icon: 'h-8 w-8' },
 } as const
 
-/** Silueta genérica. No usa foto ni avatar generado. */
-export function UserAvatar({ className, size = 'md' }: UserAvatarProps) {
+/** Avatar de usuario: foto de perfil si existe, si no silueta. */
+export function UserAvatar({
+  className,
+  size = 'md',
+  src,
+  alt = 'Foto de perfil',
+}: UserAvatarProps) {
+  const storeAvatar = useAppStore((s) => s.user.avatar)
+  const imageSrc = (src !== undefined ? src : storeAvatar)?.trim() || ''
   const spec = SIZES[size]
+
+  if (imageSrc) {
+    return (
+      <img
+        src={imageSrc}
+        alt={alt}
+        className={cn(
+          'shrink-0 rounded-full object-cover ring-1 ring-slate-200',
+          'dark:ring-slate-600',
+          spec.box,
+          className,
+        )}
+      />
+    )
+  }
+
   return (
     <span
       className={cn(

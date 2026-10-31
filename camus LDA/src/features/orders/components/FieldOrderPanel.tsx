@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/Select'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+import { geocodeAddress } from '@/services/geocodeService'
 
 /**
  * RF-43 CU-147/148 — registrar y completar OT desde terreno (operador).
@@ -17,6 +18,7 @@ export function FieldOrderPanel() {
   const user = useSessionUser()
   const { reducedData } = useNetworkStatus()
   const createFieldOrder = useOrdersStore((s) => s.createFieldOrder)
+  const updateOrder = useOrdersStore((s) => s.updateOrder)
   const completeFieldOrderForm = useOrdersStore((s) => s.completeFieldOrderForm)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
   const orders = useOrdersStore((s) => s.orders)
@@ -41,7 +43,7 @@ export function FieldOrderPanel() {
       (o.status === 'Pendiente' || o.status === 'En Curso'),
   )
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!client.trim() || !address.trim() || !service.trim()) {
       useOrdersStore
         .getState()
@@ -50,6 +52,7 @@ export function FieldOrderPanel() {
     }
     setBusy(true)
     try {
+      const coords = await geocodeAddress(address)
       const order = createFieldOrder({
         client,
         address,
@@ -58,6 +61,12 @@ export function FieldOrderPanel() {
         technician: user.name ?? 'Operador',
         notes,
       })
+      if (coords) {
+        updateOrder(order.id, {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        })
+      }
       setClient('')
       setAddress('')
       setService('')

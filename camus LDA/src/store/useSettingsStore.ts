@@ -367,6 +367,7 @@ export const useSettingsStore = create<SettingsState>()(
           }
           state.config.appearance = appearance
           applyAppearanceVars(appearance)
+          syncHeaderUser(state.config.profile)
           // Vista escritorio usable al iniciar (menú visible)
           queueMicrotask(() => {
             useAppStore.setState({ sidebarOpen: true })

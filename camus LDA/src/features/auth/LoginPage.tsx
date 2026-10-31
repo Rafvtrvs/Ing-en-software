@@ -16,8 +16,8 @@ export function LoginPage() {
   const successMessage =
     (location.state as { message?: string })?.message ?? ''
 
-  const [email, setEmail] = useState('admin@camus.cl')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -101,16 +101,6 @@ export function LoginPage() {
             {loading ? 'Ingresando...' : 'Ingresar'}
           </Button>
         </form>
-
-        <div className="mt-4 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 text-center text-xs text-slate-500">
-          <p className="font-medium text-slate-600">Credenciales de demo</p>
-          <p className="mt-1">
-            <strong>Admin:</strong> admin@camus.cl / admin123
-          </p>
-          <p>
-            <strong>Operador:</strong> operador@camus.cl / operador123
-          </p>
-        </div>
       </div>
     </div>
   )

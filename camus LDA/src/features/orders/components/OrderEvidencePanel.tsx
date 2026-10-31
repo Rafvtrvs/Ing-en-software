@@ -5,10 +5,22 @@ import { ordersService } from '@/services/ordersService'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import type { OrderEvidence, WorkOrder } from '@/types'
 
-const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
+const ACCEPTED_MIME = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
 const MAX_BYTES = 5 * 1024 * 1024
 /** CU-30: solo se puede adjuntar con la OT en ejecución o finalizada */
 const UPLOAD_STATUSES: WorkOrder['status'][] = ['En Curso', 'Completada', 'Abonado']
+
+function isAllowedEvidenceFile(file: File): boolean {
+  const type = file.type.toLowerCase()
+  const name = file.name.toLowerCase()
+  return (
+    ACCEPTED_MIME.includes(type) ||
+    name.endsWith('.png') ||
+    name.endsWith('.jpg') ||
+    name.endsWith('.jpeg') ||
+    name.endsWith('.webp')
+  )
+}
 
 function errorMessage(err: unknown, fallback: string) {
   const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
@@ -80,8 +92,8 @@ export function OrderEvidencePanel({
 
   const handleFile = async (file?: File) => {
     if (!file) return
-    if (!ACCEPTED.includes(file.type)) {
-      addToast('Formato no compatible. Use JPG, PNG o WEBP', 'error')
+    if (!isAllowedEvidenceFile(file)) {
+      addToast('Formato no compatible. Use JPG o PNG', 'error')
       return
     }
     if (file.size > MAX_BYTES) {
@@ -131,14 +143,14 @@ export function OrderEvidencePanel({
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
           <p className="text-sm font-semibold text-slate-900">Evidencia visual</p>
-          <p className="text-xs text-slate-500">JPG, PNG o WEBP · máx. 5 MB</p>
+          <p className="text-xs text-slate-500">JPG o PNG desde tu PC · máx. 5 MB</p>
         </div>
         {canUpload && (
           <>
             <input
               ref={inputRef}
               type="file"
-              accept={ACCEPTED.join(',')}
+              accept="image/png,image/jpeg,.png,.jpg,.jpeg,image/webp"
               className="hidden"
               onChange={(e) => void handleFile(e.target.files?.[0])}
             />
@@ -152,12 +164,18 @@ export function OrderEvidencePanel({
               }
               onClick={() => inputRef.current?.click()}
             >
-              {uploading ? 'Subiendo…' : 'Adjuntar evidencia'}
+              {uploading ? 'Subiendo…' : 'Subir PNG/JPG'}
             </Button>
           </>
         )}
       </div>
 
+      {canUpload && !statusOk && (
+        <p className="mb-2 text-xs text-amber-700">
+          Para subir evidencia, la orden debe estar en <strong>En Curso</strong>,{' '}
+          <strong>Completada</strong> o <strong>Abonado</strong> (ahora: {order.status}).
+        </p>
+      )}
       {error && <p className="text-sm text-red-600">{error}</p>}
       {loading && <p className="text-sm text-slate-500">Cargando…</p>}
       {!loading && !error && items.length === 0 && (

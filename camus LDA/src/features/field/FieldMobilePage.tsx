@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { ToastContainerView } from '@/components/ui/ToastContainer'
 import { NotificationsPanel } from '@/components/layout/NotificationsPanel'
+import { UserAvatar } from '@/components/layout/UserAvatar'
 import { authService } from '@/services/authService'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
@@ -193,6 +194,12 @@ export function FieldMobilePage() {
             </span>
 
             <NotificationsPanel variant="onPrimary" />
+
+            <UserAvatar
+              size="sm"
+              className="ring-2 ring-white/30"
+              alt={user.name ?? 'Perfil'}
+            />
 
             <button
               type="button"

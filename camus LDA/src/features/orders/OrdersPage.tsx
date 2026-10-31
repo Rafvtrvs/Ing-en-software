@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, UserCheck } from 'lucide-react'
+import { FileSpreadsheet, Plus, UserCheck } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { KpiCard } from '@/components/ui/KpiCard'
@@ -25,6 +25,7 @@ import { CompletedOrdersApprovalPanel } from '@/features/orders/components/Compl
 import { RescheduleOrderModal } from '@/features/orders/components/RescheduleOrderModal'
 import { OrderModificationRequestModal } from '@/features/orders/components/OrderModificationRequestModal'
 import { ModificationRequestsPanel } from '@/features/orders/components/ModificationRequestsPanel'
+import { ImportOrdersModal } from '@/features/orders/components/ImportOrdersModal'
 import { OperationsMap } from '@/features/operations/components/OperationsMap'
 import { useSessionUser } from '@/features/auth/useSessionUser'
 import { isFieldOperator } from '@/features/auth/roleAccess'
@@ -50,6 +51,7 @@ export function OrdersPage() {
   const isOperator = isFieldOperator(currentUser)
 
   const [assignedModalOpen, setAssignedModalOpen] = useState(false)
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   useEffect(() => {
     void syncFromApi()
@@ -165,6 +167,13 @@ export function OrdersPage() {
                 <option value="all">Todas las prioridades</option>
                 <option value="urgent">Solo urgentes / altas</option>
               </Select>
+              <Button
+                variant="outline"
+                leftIcon={<FileSpreadsheet className="h-4 w-4" />}
+                onClick={() => setImportModalOpen(true)}
+              >
+                Importar Excel
+              </Button>
               <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreateModal}>
                 Nueva Orden
               </Button>
@@ -208,6 +217,10 @@ export function OrdersPage() {
           order={selectedOrder}
           open={modalMode === 'modRequest'}
           onClose={closeModal}
+        />
+        <ImportOrdersModal
+          open={importModalOpen}
+          onClose={() => setImportModalOpen(false)}
         />
         <ToastContainerView toasts={toasts} onRemove={removeToast} />
     </>

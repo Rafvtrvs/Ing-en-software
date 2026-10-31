@@ -6,6 +6,7 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { Select } from '@/components/ui/Select'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { daysOverdue, getOverdueOrders } from '@/features/dashboard/utils/dashboardHelpers'
+import { geocodeAddress, hasOrderCoords } from '@/services/geocodeService'
 import type { OrderStatus, WorkOrder } from '@/types'
 import { cn } from '@/utils/cn'
 
@@ -60,6 +61,13 @@ export function OperationsMap({
   const markersRef = useRef<mapboxgl.Marker[]>([])
   const [mapError, setMapError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<MapStatusFilter>('all')
+  /** Coords obtenidas por geocoding a partir de la dirección (si no había lat/lng) */
+  const [resolvedCoords, setResolvedCoords] = useState<
+    Record<string, { latitude: number; longitude: number }>
+  >({})
+  const [geocoding, setGeocoding] = useState(false)
+  /** Evita reintentar la misma OT+dirección en esta sesión */
+  const geocodeAttemptedRef = useRef<Set<string>>(new Set())
 
   const token = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 
@@ -68,21 +76,58 @@ export function OperationsMap({
     [orders],
   )
 
-  const mappable = useMemo(() => {
-    const withCoords = orders.filter(
-      (o) =>
-        typeof o.latitude === 'number' &&
-        typeof o.longitude === 'number' &&
-        Number.isFinite(o.latitude) &&
-        Number.isFinite(o.longitude),
-    )
+  // Geocodificar direcciones de OT sin lat/lng
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
 
-    if (statusFilter === 'all') return withCoords
-    if (statusFilter === 'retrasada') {
-      return withCoords.filter((o) => overdueIds.has(o.id))
+    const need = orders.filter((o) => {
+      if (hasOrderCoords(o)) return false
+      if (typeof o.address !== 'string' || o.address.trim().length < 5) return false
+      const key = `${o.id}|${o.address.trim().toLowerCase()}`
+      return !geocodeAttemptedRef.current.has(key)
+    })
+    if (need.length === 0) return
+
+    setGeocoding(true)
+    void (async () => {
+      const next: Record<string, { latitude: number; longitude: number }> = {}
+      for (const o of need) {
+        if (cancelled) return
+        const key = `${o.id}|${o.address.trim().toLowerCase()}`
+        geocodeAttemptedRef.current.add(key)
+        const coords = await geocodeAddress(o.address)
+        if (coords) next[o.id] = coords
+      }
+      if (!cancelled) {
+        if (Object.keys(next).length > 0) {
+          setResolvedCoords((prev) => ({ ...prev, ...next }))
+        }
+        setGeocoding(false)
+      }
+    })()
+
+    return () => {
+      cancelled = true
     }
-    return withCoords.filter((o) => o.status === statusFilter)
-  }, [orders, statusFilter, overdueIds])
+  }, [orders, token])
+
+  const mappable = useMemo(() => {
+    const withLocation = orders
+      .map((o) => {
+        if (hasOrderCoords(o)) return o
+        const resolved = resolvedCoords[o.id]
+        if (!resolved) return null
+        return { ...o, latitude: resolved.latitude, longitude: resolved.longitude }
+      })
+      .filter((o): o is WorkOrder => o != null)
+
+    if (statusFilter === 'all') return withLocation
+    if (statusFilter === 'retrasada') {
+      return withLocation.filter((o) => overdueIds.has(o.id))
+    }
+    return withLocation.filter((o) => o.status === statusFilter)
+  }, [orders, statusFilter, overdueIds, resolvedCoords])
 
   const mapHeightClass = compact ? 'h-52' : 'h-64 sm:h-72'
 
@@ -157,15 +202,17 @@ export function OperationsMap({
     }
   }, [mappable, overdueIds, token])
 
+  const subtitle = !token
+    ? 'Configurá Mapbox para ver el mapa'
+    : geocoding
+      ? `Ubicando direcciones… · ${mappable.length} OT en mapa`
+      : `${mappable.length} OT visibles en el mapa`
+
   return (
     <Card className={cn('h-full lg:col-span-1', className)}>
       <CardHeader
         title={title}
-        subtitle={
-          token
-            ? `${mappable.length} OT visibles en el mapa`
-            : 'Configurá Mapbox para ver el mapa'
-        }
+        subtitle={subtitle}
         action={
           token ? (
             <Select
@@ -212,9 +259,15 @@ export function OperationsMap({
         ) : (
           <>
             <div ref={containerRef} className={cn('w-full', mapHeightClass)} />
-            {mappable.length === 0 && (
+            {mappable.length === 0 && !geocoding && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white/50 px-4 text-center text-xs text-slate-600">
-                No hay órdenes con coordenadas para este filtro.
+                No hay órdenes ubicables para este filtro. Probá una dirección más completa
+                (calle, comuna, ciudad).
+              </div>
+            )}
+            {geocoding && mappable.length === 0 && (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-white/50 px-4 text-center text-xs text-slate-600">
+                Buscando ubicaciones a partir de las direcciones…
               </div>
             )}
           </>
