@@ -24,6 +24,8 @@ export const router = createBrowserRouter([
   { path: ROUTES.LOGIN_SUCCESS, element: <LoginSuccessPage /> },
   { path: ROUTES.FORGOT_PASSWORD, element: <ForgotPasswordPage /> },
   { path: ROUTES.RESET_PASSWORD, element: <ResetPasswordPage /> },
+  // Alias Action URL Firebase (plantillas / docs)
+  { path: '/reset-password', element: <ResetPasswordPage /> },
   {
     path: ROUTES.TERRENO,
     element: (

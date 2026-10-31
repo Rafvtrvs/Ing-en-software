@@ -1,18 +1,15 @@
 // ============================================================
 //  AuthService  -> AuthController
-//
-//  El diagrama define "Firebase Auth + Firebase Admin SDK". Firebase
-//  Auth tiene capa gratuita, pero requiere crear un proyecto y
-//  credenciales. Para que el sistema funcione localmente sin pagar ni
-//  configurar nada, el proveedor por defecto es 'local' (emite JWT
-//  propios). Cambiando AUTH_PROVIDER=firebase se delega en Firebase
-//  sin tocar controllers ni middleware.
+//  AUTH_PROVIDER=local  → email/password + JWT
+//  AUTH_PROVIDER=firebase → idToken Firebase + JWT de app / verify híbrido
 // ============================================================
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { prisma } from '../db/prisma.js'
 import { env } from '../config/env.js'
 import { auditService } from './audit.service.js'
+import { getFirebaseAuth } from '../external/firebaseAdmin.js'
+import { notifyAdmins } from './pushNotify.service.js'
 
 export interface AuthTokenPayload {
   sub: number
@@ -41,6 +38,12 @@ function toAuthUser(user: {
   }
 }
 
+function signAppToken(payload: AuthTokenPayload) {
+  return jwt.sign(payload, env.auth.jwtSecret, {
+    expiresIn: env.auth.jwtExpiresIn,
+  } as jwt.SignOptions)
+}
+
 function validateAvatar(avatar: string): string {
   const value = avatar.trim()
   if (!value) return ''
@@ -61,15 +64,54 @@ function validateAvatar(avatar: string): string {
   return value
 }
 
+async function resolveUserFromFirebase(uid: string, email: string) {
+  let user = await prisma.usuario.findFirst({
+    where: {
+      OR: [
+        { firebaseUid: uid },
+        { correoElectronico: email.toLowerCase() },
+      ],
+    },
+    include: { rol: true },
+  })
+  if (!user) {
+    throw Object.assign(
+      new Error('Usuario no registrado en Camus. Pedí alta al administrador.'),
+      { status: 403 },
+    )
+  }
+  if (user.estado && user.estado !== 'Activo') {
+    throw Object.assign(new Error('Usuario inactivo o bloqueado'), { status: 403 })
+  }
+  if (user.firebaseUid !== uid) {
+    user = await prisma.usuario.update({
+      where: { id: user.id },
+      data: { firebaseUid: uid, ultimoAcceso: new Date() },
+      include: { rol: true },
+    })
+  } else {
+    await prisma.usuario.update({
+      where: { id: user.id },
+      data: { ultimoAcceso: new Date() },
+    })
+  }
+  return user
+}
+
 export const authService = {
   async login(email: string, password: string) {
+    if (env.auth.provider === 'firebase') {
+      throw Object.assign(
+        new Error('Usá Firebase Auth: enviá idToken en el body'),
+        { status: 400 },
+      )
+    }
     const user = await prisma.usuario.findUnique({
       where: { correoElectronico: email },
       include: { rol: true },
     })
     if (!user) throw Object.assign(new Error('Credenciales inválidas'), { status: 401 })
 
-    // Modo local: validar hash. (En modo firebase se validaría el idToken.)
     const ok = user.passwordHash
       ? await bcrypt.compare(password, user.passwordHash)
       : false
@@ -90,13 +132,63 @@ export const authService = {
       email: user.correoElectronico,
       rol: user.rol?.nombre ?? null,
     }
-    const token = jwt.sign(payload, env.auth.jwtSecret, {
-      expiresIn: env.auth.jwtExpiresIn,
-    } as jwt.SignOptions)
+
+    void notifyAdmins({
+      title: 'Inicio de sesión',
+      body: `${user.correoElectronico} ingresó a Camus LDA`,
+      excludeUserId: user.id,
+    })
 
     return {
-      token,
+      token: signAppToken(payload),
       user: toAuthUser(user),
+    }
+  },
+
+  /** Login con Firebase ID token (AUTH_PROVIDER=firebase o híbrido). */
+  async loginWithIdToken(idToken: string) {
+    const auth = getFirebaseAuth()
+    if (!auth) {
+      throw Object.assign(new Error('Firebase Admin no configurado'), { status: 503 })
+    }
+    let decoded: { uid: string; email?: string; email_verified?: boolean }
+    try {
+      decoded = await auth.verifyIdToken(idToken)
+    } catch {
+      throw Object.assign(new Error('Token Firebase inválido'), { status: 401 })
+    }
+    const email = (decoded.email ?? '').toLowerCase()
+    if (!email) {
+      throw Object.assign(new Error('El token no incluye email'), { status: 400 })
+    }
+
+    const user = await resolveUserFromFirebase(decoded.uid, email)
+
+    await auditService.log({
+      modulo: 'auth',
+      accion: 'login_firebase',
+      idUsuario: user.id,
+      valorNuevo: { emailVerified: Boolean(decoded.email_verified) },
+    })
+
+    const payload: AuthTokenPayload = {
+      sub: user.id,
+      email: user.correoElectronico,
+      rol: user.rol?.nombre ?? null,
+    }
+
+    void notifyAdmins({
+      title: 'Inicio de sesión',
+      body: `${user.correoElectronico} ingresó a Camus LDA`,
+      excludeUserId: user.id,
+    })
+
+    return {
+      token: signAppToken(payload),
+      user: {
+        ...toAuthUser(user),
+        emailVerified: Boolean(decoded.email_verified),
+      },
     }
   },
 
@@ -144,7 +236,50 @@ export const authService = {
     return toAuthUser(user)
   },
 
-  verify(token: string): AuthTokenPayload {
-    return jwt.verify(token, env.auth.jwtSecret) as unknown as AuthTokenPayload
+  async registerDevice(userId: number, fcmToken: string, platform = 'web') {
+    const token = fcmToken.trim()
+    if (token.length < 20) {
+      throw Object.assign(new Error('Token FCM inválido'), { status: 400 })
+    }
+    await prisma.dispositivoPush.upsert({
+      where: { fcmToken: token },
+      create: { idUsuario: userId, fcmToken: token, platform: platform.slice(0, 40) },
+      update: { idUsuario: userId, platform: platform.slice(0, 40) },
+    })
+    return { ok: true }
+  },
+
+  async unregisterDevice(userId: number, fcmToken: string) {
+    await prisma.dispositivoPush.deleteMany({
+      where: { idUsuario: userId, fcmToken: fcmToken.trim() },
+    })
+    return { ok: true }
+  },
+
+  async verify(token: string): Promise<AuthTokenPayload> {
+    try {
+      return jwt.verify(token, env.auth.jwtSecret) as unknown as AuthTokenPayload
+    } catch {
+      /* intentar Firebase si está habilitado */
+    }
+    if (env.auth.provider !== 'firebase') {
+      throw new Error('Token inválido')
+    }
+    const auth = getFirebaseAuth()
+    if (!auth) throw new Error('Firebase no disponible')
+    const decoded = await auth.verifyIdToken(token)
+    const email = (decoded.email ?? '').toLowerCase()
+    const user = await prisma.usuario.findFirst({
+      where: {
+        OR: [{ firebaseUid: decoded.uid }, ...(email ? [{ correoElectronico: email }] : [])],
+      },
+      include: { rol: true },
+    })
+    if (!user) throw new Error('Usuario no vinculado')
+    return {
+      sub: user.id,
+      email: user.correoElectronico,
+      rol: user.rol?.nombre ?? null,
+    }
   },
 }

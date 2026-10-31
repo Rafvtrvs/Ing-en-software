@@ -6,6 +6,7 @@ import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
 import { useSettingsStore } from '@/store/useSettingsStore'
+import { authService } from '@/services/authService'
 import type { SecuritySettings } from '@/types'
 import { SettingsCard } from './SettingsCard'
 
@@ -45,8 +46,20 @@ export function SecuritySettingsPanel() {
       addToast('La contraseña debe tener al menos 8 caracteres', 'error')
       return
     }
-    addToast('Contraseña actualizada correctamente')
-    setPasswords({ current: '', next: '', confirm: '' })
+    void (async () => {
+      try {
+        if (authService.usesFirebase()) {
+          await authService.changePassword(passwords.current, passwords.next)
+        }
+        addToast('Contraseña actualizada correctamente')
+        setPasswords({ current: '', next: '', confirm: '' })
+      } catch {
+        addToast(
+          'No se pudo cambiar la contraseña. Revisá la actual o volvé a iniciar sesión.',
+          'error',
+        )
+      }
+    })()
   }
 
   return (

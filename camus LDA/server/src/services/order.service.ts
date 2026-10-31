@@ -214,9 +214,9 @@ export const orderService = {
         valorNuevo: { orderId: id, estado: row.estado },
         idUsuario: userId,
       })
-      // RF29 CU-98: notificar el cambio de estado
-      await pushService.notify({
-        token: 'admin',
+      // RF29 CU-98: notificar el cambio de estado (FCM a administradores)
+      const { notifyAdmins } = await import('./pushNotify.service.js')
+      await notifyAdmins({
         title: 'Cambio de estado en orden',
         body: `${id}: ${before.estado} → ${row.estado}`,
       })

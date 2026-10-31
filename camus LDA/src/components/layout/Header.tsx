@@ -20,22 +20,26 @@ export function Header() {
   const recordLogout = useAccessLogStore((s) => s.recordLogout)
 
   const handleLogout = () => {
-    const current = authService.getUser()
-    if (current) {
-      recordLogout({
-        id: current.id,
-        name: current.name,
-        email: current.email,
-        role: current.role,
+    void (async () => {
+      const current = authService.getUser()
+      if (current) {
+        recordLogout({
+          id: current.id,
+          name: current.name,
+          email: current.email,
+          role: current.role,
+        })
+      }
+      const { unregisterPushOnLogout } = await import('@/lib/pushNotifications')
+      await unregisterPushOnLogout()
+      await authService.logout()
+      setUser({
+        name: 'Invitado',
+        role: '',
+        avatar: '',
       })
-    }
-    authService.logout()
-    setUser({
-      name: 'Invitado',
-      role: '',
-      avatar: '',
-    })
-    navigate('/login', { replace: true })
+      navigate('/login', { replace: true })
+    })()
   }
 
   return (

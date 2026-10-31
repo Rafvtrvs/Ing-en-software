@@ -35,3 +35,10 @@ export const env = {
     storageLocalDir: get('STORAGE_LOCAL_DIR', './.storage'),
   },
 }
+
+// Eager init when firebase/fcm requested
+if (env.auth.provider === 'firebase' || env.external.pushProvider === 'fcm') {
+  void import('../external/firebaseAdmin.js')
+    .then((m) => m.initFirebaseAdmin())
+    .catch((err) => console.error('[firebase-admin] init', err))
+}

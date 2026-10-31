@@ -34,6 +34,8 @@ router.get('/map/orders/:id', (_req, res) => {
 router.post('/auth/login', authController.login)
 router.get('/auth/me', requireAuth, authController.me)
 router.put('/auth/me', requireAuth, authController.updateMe)
+router.post('/auth/devices', requireAuth, authController.registerDevice)
+router.delete('/auth/devices', requireAuth, authController.unregisterDevice)
 
 // Clientes
 router.get('/clients', optionalAuth, clientController.list)

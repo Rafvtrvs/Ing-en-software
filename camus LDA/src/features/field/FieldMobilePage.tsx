@@ -235,8 +235,12 @@ export function FieldMobilePage() {
               aria-label="Cerrar sesión"
               className="flex h-9 w-9 items-center justify-center rounded-lg text-white hover:bg-white/15"
               onClick={() => {
-                authService.logout()
-                window.location.assign('/login')
+                void (async () => {
+                  const { unregisterPushOnLogout } = await import('@/lib/pushNotifications')
+                  await unregisterPushOnLogout()
+                  await authService.logout()
+                  window.location.assign('/login')
+                })()
               }}
             >
               <LogOut className="h-5 w-5" />

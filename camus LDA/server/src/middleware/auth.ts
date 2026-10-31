@@ -1,7 +1,5 @@
 // ============================================================
-//  Middleware de autenticación (componente "middleware
-//  << FireBase Auth + HTTPS >>" del diagrama).
-//  Verifica el JWT del header Authorization y expone el usuario.
+//  Middleware de autenticación (JWT app y/o Firebase ID token)
 // ============================================================
 import type { NextFunction, Request, Response } from 'express'
 import { authService, type AuthTokenPayload } from '../services/auth.service.js'
@@ -15,13 +13,13 @@ declare global {
   }
 }
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
+export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization
   if (!header?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Token requerido' })
   }
   try {
-    req.user = authService.verify(header.slice(7))
+    req.user = await authService.verify(header.slice(7))
     next()
   } catch {
     return res.status(401).json({ error: 'Token inválido o expirado' })
@@ -35,7 +33,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
  */
 export function requireRole(...roles: string[]) {
   const norm = (s: string) =>
-    s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+    s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
   const allowed = roles.map(norm)
   return (req: Request, res: Response, next: NextFunction) => {
     const rol = req.user?.rol ? norm(req.user.rol) : ''
@@ -47,11 +45,11 @@ export function requireRole(...roles: string[]) {
 }
 
 /** Variante que no bloquea: adjunta el usuario si hay token válido. */
-export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
+export async function optionalAuth(req: Request, _res: Response, next: NextFunction) {
   const header = req.headers.authorization
   if (header?.startsWith('Bearer ')) {
     try {
-      req.user = authService.verify(header.slice(7))
+      req.user = await authService.verify(header.slice(7))
     } catch {
       /* token inválido: continúa sin usuario */
     }

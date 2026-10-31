@@ -60,8 +60,22 @@ model Usuario {
   rol              Rol?      @relation(fields: [idRol], references: [id])
   ordenes          OrdenTrabajo[]
   auditorias       BitacoraAuditoria[]
+  dispositivosPush DispositivoPush[]
 
   @@map("usuario")
+}
+
+// Tokens FCM por dispositivo (push al admin)
+model DispositivoPush {
+  id        Int      @id @default(autoincrement()) @map("id_dispositivo")
+  idUsuario Int      @map("id_usuario")
+  fcmToken  String   @unique @map("fcm_token") @db.VarChar(512)
+  platform  String   @default("web") @db.VarChar(40)
+  actualizadoEn DateTime @updatedAt @map("actualizado_en")
+  usuario   Usuario  @relation(fields: [idUsuario], references: [id], onDelete: Cascade)
+
+  @@index([idUsuario])
+  @@map("dispositivo_push")
 }
 
 model Cliente {

@@ -1,10 +1,21 @@
 // ============================================================
-//  Servicio de Autenticación (frontend) -> consume /api/auth
-//  Si el backend no responde, usa credenciales demo (mock).
+//  Servicio de Autenticación (frontend) -> /api/auth
+//  Con Firebase: signIn + idToken. Sin Firebase: email/password local.
 // ============================================================
 import axios from 'axios'
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  confirmPasswordReset,
+  sendEmailVerification,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  signOut,
+} from 'firebase/auth'
 import api from './api'
 import { findDemoUser } from '@/data/mock/authUsers'
+import { getFirebaseAuth, isFirebaseConfigured } from '@/lib/firebase'
 
 export interface AuthUser {
   id: string
@@ -13,6 +24,7 @@ export interface AuthUser {
   role: string
   phone?: string
   avatar?: string
+  emailVerified?: boolean
 }
 
 const USER_KEY = 'auth_user'
@@ -39,27 +51,113 @@ function demoLogin(email: string, password: string): AuthUser {
   return withAvatar
 }
 
+async function loginViaFirebase(email: string, password: string): Promise<AuthUser> {
+  const auth = getFirebaseAuth()
+  if (!auth) throw new Error('Firebase no configurado')
+  const cred = await signInWithEmailAndPassword(auth, email.trim(), password)
+  const idToken = await cred.user.getIdToken()
+  const { data } = await api.post<{ token: string; user: AuthUser }>('/auth/login', {
+    idToken,
+  })
+  saveSession(data.token, {
+    ...data.user,
+    emailVerified: cred.user.emailVerified,
+  })
+  if (!cred.user.emailVerified) {
+    try {
+      await sendEmailVerification(cred.user)
+    } catch {
+      /* ignore */
+    }
+  }
+  return data.user
+}
+
+async function loginViaApi(email: string, password: string): Promise<AuthUser> {
+  const { data } = await api.post<{ token: string; user: AuthUser }>('/auth/login', {
+    email,
+    password,
+  })
+  saveSession(data.token, data.user)
+  return data.user
+}
+
 export const authService = {
+  usesFirebase() {
+    return isFirebaseConfigured()
+  },
+
   async login(email: string, password: string): Promise<AuthUser> {
     try {
-      const { data } = await api.post<{ token: string; user: AuthUser }>(
-        '/auth/login',
-        { email, password },
-      )
-      saveSession(data.token, data.user)
-      return data.user
+      if (isFirebaseConfigured()) {
+        return await loginViaFirebase(email, password)
+      }
+      return await loginViaApi(email, password)
     } catch (err) {
-      // Credenciales incorrectas contra API activa → no usar fallback demo
       if (axios.isAxiosError(err) && err.response?.status === 401) {
         throw Object.assign(new Error('Credenciales inválidas'), { code: 'INVALID_CREDENTIALS' })
       }
-
-      // Backend caído o sin red → modo demo local
-      return demoLogin(email, password)
+      const code = (err as { code?: string }).code
+      if (
+        code === 'auth/invalid-credential' ||
+        code === 'auth/wrong-password' ||
+        code === 'auth/user-not-found' ||
+        code === 'auth/invalid-email'
+      ) {
+        throw Object.assign(new Error('Credenciales inválidas'), { code: 'INVALID_CREDENTIALS' })
+      }
+      // Backend caído o sin red → demo local solo sin Firebase
+      if (!isFirebaseConfigured() && axios.isAxiosError(err) && !err.response) {
+        return demoLogin(email, password)
+      }
+      throw err
     }
   },
 
-  /** Actualiza perfil del usuario autenticado (incl. avatar) en el servidor. */
+  async sendPasswordReset(email: string): Promise<void> {
+    const auth = getFirebaseAuth()
+    if (!auth) {
+      // UI mock path: no-op success
+      await new Promise((r) => setTimeout(r, 400))
+      return
+    }
+    await sendPasswordResetEmail(auth, email.trim(), {
+      url: `${window.location.origin}/restablecer-contrasena`,
+      handleCodeInApp: false,
+    })
+  },
+
+  async confirmPasswordReset(oobCode: string, newPassword: string): Promise<void> {
+    const auth = getFirebaseAuth()
+    if (!auth) throw new Error('Firebase no configurado')
+    await confirmPasswordReset(auth, oobCode, newPassword)
+  },
+
+  async changePassword(currentPassword: string, nextPassword: string): Promise<void> {
+    const auth = getFirebaseAuth()
+    const user = auth?.currentUser
+    if (!auth || !user?.email) {
+      throw new Error('Sesión Firebase no disponible')
+    }
+    const cred = EmailAuthProvider.credential(user.email, currentPassword)
+    await reauthenticateWithCredential(user, cred)
+    await updatePassword(user, nextPassword)
+  },
+
+  async registerPushToken(token: string, platform = 'web'): Promise<void> {
+    if (authService.isDemoSession()) return
+    await api.post('/auth/devices', { token, platform })
+  },
+
+  async unregisterPushToken(token: string): Promise<void> {
+    if (authService.isDemoSession()) return
+    try {
+      await api.delete('/auth/devices', { data: { token } })
+    } catch {
+      /* ignore */
+    }
+  },
+
   async updateMe(payload: {
     name?: string
     phone?: string
@@ -99,7 +197,13 @@ export const authService = {
     }
   },
 
-  logout() {
+  async logout() {
+    try {
+      const auth = getFirebaseAuth()
+      if (auth) await signOut(auth)
+    } catch {
+      /* ignore */
+    }
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
   },

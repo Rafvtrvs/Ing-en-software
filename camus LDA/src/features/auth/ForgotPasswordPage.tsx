@@ -3,19 +3,33 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { ROUTES } from '@/constants/routes'
+import { authService } from '@/services/authService'
 import { AuthBrand } from './AuthBrand'
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 800))
-    setSent(true)
-    setLoading(false)
+    try {
+      await authService.sendPasswordReset(email)
+      setSent(true)
+    } catch (err) {
+      const code = (err as { code?: string }).code
+      if (code === 'auth/user-not-found' || code === 'auth/invalid-email') {
+        // No revelar si existe la cuenta
+        setSent(true)
+      } else {
+        setError('No se pudo enviar el correo. Revisá el email e intentá de nuevo.')
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -32,12 +46,14 @@ export function ForgotPasswordPage() {
               Si existe una cuenta asociada a <strong>{email}</strong>, recibirás un correo
               con instrucciones en los próximos minutos.
             </div>
-            <Link
-              to={`${ROUTES.RESET_PASSWORD}?email=${encodeURIComponent(email)}`}
-              className="block text-sm font-medium text-primary hover:text-primary-hover"
-            >
-              Continuar para restablecer la contraseña
-            </Link>
+            {!authService.usesFirebase() && (
+              <Link
+                to={`${ROUTES.RESET_PASSWORD}?email=${encodeURIComponent(email)}`}
+                className="block text-sm font-medium text-primary hover:text-primary-hover"
+              >
+                Continuar para restablecer la contraseña (modo local)
+              </Link>
+            )}
             <Link
               to="/login"
               className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
@@ -50,31 +66,33 @@ export function ForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">
-                Correo electrónico
+                Correo
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="usuario@camus.cl"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
+            {error && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+            )}
             <Button
               type="submit"
               className="w-full justify-center"
               disabled={loading}
               leftIcon={<Mail className="h-4 w-4" />}
             >
-              {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+              {loading ? 'Enviando…' : 'Enviar enlace'}
             </Button>
             <Link
               to="/login"
-              className="flex items-center justify-center gap-1 text-sm text-slate-500 hover:text-slate-700"
+              className="inline-flex w-full items-center justify-center gap-1 text-sm text-slate-500 hover:text-slate-700"
             >
               <ArrowLeft className="h-4 w-4" />
-              Volver al inicio de sesión
+              Volver
             </Link>
           </form>
         )}
