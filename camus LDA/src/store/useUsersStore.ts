@@ -3,7 +3,13 @@ import { persist } from 'zustand/middleware'
 import { initialRoles, initialSystemUsers } from '@/data/mock/users'
 import { initialUserLifecycleEvents } from '@/data/mock/userLifecycle'
 import { initialRoleAssignmentEvents } from '@/data/mock/roleAssignments'
-import type { AppRole, RoleAssignmentEvent, SystemUser, SystemUserStatus, UserLifecycleEvent, UsersTab } from '@/types'
+import {
+  usersService,
+  type CreateUserPayload,
+  type UpdateUserPayload,
+} from '@/services/usersService'
+import { isOfflineApiError } from '@/utils/demoMode'
+import type { AppRole, PermissionKey, RoleAssignmentEvent, SystemUser, SystemUserStatus, UserLifecycleEvent, UsersTab } from '@/types'
 
 export type UserModalMode =
   | 'create'
@@ -40,7 +46,16 @@ interface UsersState {
   roleFilter: string | 'all'
   showFilters: boolean
   toasts: ToastMessage[]
+  apiAvailable: boolean
+  syncFromApi: () => Promise<void>
   addUser: (user: Omit<SystemUser, 'id' | 'lastLogin'>) => void
+  createUserInDb: (
+    payload: CreateUserPayload,
+  ) => Promise<{ ok: true; user: SystemUser } | { ok: false; message: string }>
+  updateUserInDb: (
+    id: string,
+    payload: UpdateUserPayload,
+  ) => Promise<{ ok: true; user: SystemUser } | { ok: false; message: string }>
   updateUser: (id: string, data: Partial<Omit<SystemUser, 'id'>>) => void
   deleteUser: (id: string, performedBy: { id: string; name: string }) => void
   deactivateUser: (id: string, performedBy: { id: string; name: string }) => void
@@ -108,6 +123,30 @@ export const useUsersStore = create<UsersState>()(
       roleFilter: 'all',
       showFilters: false,
       toasts: [],
+      apiAvailable: false,
+
+      syncFromApi: async () => {
+        try {
+          const [apiUsers, apiRoles] = await Promise.all([
+            usersService.list(),
+            usersService.listRoles(),
+          ])
+          const roles =
+            apiRoles.length > 0
+              ? apiRoles.map((r) => ({
+                  ...r,
+                  permissions: r.permissions as PermissionKey[],
+                }))
+              : get().roles
+          set({
+            users: apiUsers,
+            roles,
+            apiAvailable: true,
+          })
+        } catch {
+          set({ apiAvailable: false })
+        }
+      },
 
       addUser: (user) =>
         set((state) => ({
@@ -124,6 +163,59 @@ export const useUsersStore = create<UsersState>()(
             ...state.users,
           ],
         })),
+
+      createUserInDb: async (payload) => {
+        try {
+          const user = await usersService.create(payload)
+          set((state) => ({
+            users: [user, ...state.users.filter((u) => u.email !== user.email)],
+            apiAvailable: true,
+          }))
+          return { ok: true as const, user }
+        } catch (err) {
+          if (isOfflineApiError(err)) {
+            get().addUser({
+              name: payload.name,
+              email: payload.email,
+              phone: payload.phone ?? '',
+              roleId: payload.roleId,
+              status: payload.status ?? 'Activo',
+            })
+            return {
+              ok: false as const,
+              message:
+                'Sin conexión a la API: se guardó solo en el navegador (no podrá iniciar sesión hasta crearlo en Postgres).',
+            }
+          }
+          const message =
+            (err as { response?: { data?: { error?: string } } })?.response?.data
+              ?.error ?? 'No se pudo crear el usuario en la base de datos'
+          return { ok: false as const, message }
+        }
+      },
+
+      updateUserInDb: async (id, payload) => {
+        try {
+          const user = await usersService.update(id, payload)
+          set((state) => ({
+            users: state.users.map((u) => (u.id === id ? { ...u, ...user } : u)),
+            apiAvailable: true,
+          }))
+          return { ok: true as const, user }
+        } catch (err) {
+          if (isOfflineApiError(err)) {
+            get().updateUser(id, payload)
+            return {
+              ok: false as const,
+              message: 'Sin conexión a la API: cambios solo locales',
+            }
+          }
+          const message =
+            (err as { response?: { data?: { error?: string } } })?.response?.data
+              ?.error ?? 'No se pudo actualizar el usuario'
+          return { ok: false as const, message }
+        }
+      },
 
       addLifecycleEvent: (event) =>
         set((state) => ({

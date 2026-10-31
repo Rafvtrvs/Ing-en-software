@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+.env
+.env.*
+!.env.production.example
+.git
+.vscode
+.idea
+*.log
+coverage
+server
+docs
+_legado_fastapi_sqlite
+agent-transcripts
+.vite

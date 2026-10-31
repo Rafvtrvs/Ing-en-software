@@ -14,6 +14,7 @@ interface UserFormValues {
   phone: string
   roleId: string
   status: SystemUserStatus
+  password: string
 }
 
 interface UserFormModalProps {
@@ -26,7 +27,8 @@ interface UserFormModalProps {
 /** Mismo layout vertical que el formulario de OT en terreno (operador). */
 export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps) {
   const roles = useUsersStore((s) => s.roles)
-  const addUser = useUsersStore((s) => s.addUser)
+  const createUserInDb = useUsersStore((s) => s.createUserInDb)
+  const updateUserInDb = useUsersStore((s) => s.updateUserInDb)
   const updateUser = useUsersStore((s) => s.updateUser)
   const addToast = useUsersStore((s) => s.addToast)
 
@@ -48,6 +50,7 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
       phone: '',
       roleId: defaultRoleId,
       status: 'Activo',
+      password: '',
     },
   })
 
@@ -60,6 +63,7 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
         phone: user.phone,
         roleId: user.roleId,
         status: user.status,
+        password: '',
       })
       return
     }
@@ -69,22 +73,68 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
       phone: '',
       roleId: defaultRoleId,
       status: 'Activo',
+      password: '',
     })
   }, [open, mode, user, reset, defaultRoleId])
 
-  const onSubmit = (data: UserFormValues) => {
+  const onSubmit = async (data: UserFormValues) => {
     if (!data.roleId) {
       addToast('Selecciona un rol activo para el usuario', 'error')
       return
     }
+    const role = roles.find((r) => r.id === data.roleId)
+
     if (mode === 'create') {
-      addUser(data)
-      addToast(`Usuario "${data.name}" creado correctamente`)
-    } else if (user) {
-      updateUser(user.id, data)
-      addToast(`Usuario "${data.name}" actualizado correctamente`)
+      const result = await createUserInDb({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        roleId: data.roleId,
+        roleName: role?.name,
+        status: data.status,
+        password: data.password,
+      })
+      if (result.ok) {
+        addToast(
+          `Usuario "${data.name}" creado en PostgreSQL. Puede iniciar sesión con ${data.email}`,
+        )
+        onClose()
+        return
+      }
+      addToast(result.message, 'error')
+      return
     }
-    onClose()
+
+    if (user) {
+      const isDbUser = /^\d+$/.test(user.id)
+      if (isDbUser) {
+        const result = await updateUserInDb(user.id, {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          roleId: data.roleId,
+          roleName: role?.name,
+          status: data.status,
+          ...(data.password ? { password: data.password } : {}),
+        })
+        if (result.ok) {
+          addToast(`Usuario "${data.name}" actualizado en PostgreSQL`)
+          onClose()
+          return
+        }
+        addToast(result.message, 'error')
+        return
+      }
+      updateUser(user.id, {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        roleId: data.roleId,
+        status: data.status,
+      })
+      addToast(`Usuario "${data.name}" actualizado localmente`)
+      onClose()
+    }
   }
 
   return (
@@ -94,8 +144,8 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
       title={mode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario'}
       description={
         mode === 'create'
-          ? 'Registra un nuevo usuario con rol y permisos asignados.'
-          : 'Modifica los datos del usuario seleccionado.'
+          ? 'Se guarda en PostgreSQL con contraseña para iniciar sesión.'
+          : 'Modifica los datos del usuario. La contraseña es opcional.'
       }
       size="lg"
       footer={
@@ -104,7 +154,11 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
             Cancelar
           </Button>
           <Button type="submit" form="user-form" disabled={isSubmitting}>
-            {mode === 'create' ? 'Crear Usuario' : 'Guardar Cambios'}
+            {isSubmitting
+              ? 'Guardando…'
+              : mode === 'create'
+                ? 'Crear Usuario'
+                : 'Guardar Cambios'}
           </Button>
         </>
       }
@@ -125,6 +179,29 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: 'Email inválido',
+              },
+            })}
+          />
+        </FormField>
+        <FormField
+          label={mode === 'create' ? 'Contraseña' : 'Nueva contraseña (opcional)'}
+          error={errors.password?.message}
+          required={mode === 'create'}
+        >
+          <Input
+            type="password"
+            autoComplete={mode === 'create' ? 'new-password' : 'off'}
+            placeholder={mode === 'create' ? 'Mínimo 6 caracteres' : 'Dejar vacío para no cambiar'}
+            {...register('password', {
+              required: mode === 'create' ? 'La contraseña es obligatoria' : false,
+              minLength: {
+                value: 6,
+                message: 'Mínimo 6 caracteres',
+              },
+              validate: (value) => {
+                if (mode === 'edit' && !value) return true
+                if (value && value.length < 6) return 'Mínimo 6 caracteres'
+                return true
               },
             })}
           />
@@ -151,6 +228,12 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
             <option value="Bloqueado">Bloqueado</option>
           </Select>
         </FormField>
+        {mode === 'create' && (
+          <p className="text-xs text-slate-500">
+            Roles disponibles en Postgres tras el seed: Administrador y Técnico de Campo.
+            Con el email y la contraseña podrá iniciar sesión de inmediato.
+          </p>
+        )}
       </form>
     </Modal>
   )

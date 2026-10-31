@@ -398,7 +398,11 @@ function mergeApiOrders(
     }
   })
   const apiIds = new Set(apiOrders.map((o) => o.id))
-  const localOnly = localOrders.filter((o) => !apiIds.has(o.id))
+  // Conserva OT creadas solo en local (offline), pero descarta residuos de
+  // datasets de carga (OT-LOAD-*) que ya no están en Postgres.
+  const localOnly = localOrders.filter(
+    (o) => !apiIds.has(o.id) && !o.id.startsWith('OT-LOAD-'),
+  )
   return [...merged, ...localOnly]
 }
 

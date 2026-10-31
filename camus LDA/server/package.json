@@ -12,6 +12,7 @@
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx prisma/seed.ts",
+    "seed:load": "tsx prisma/seed-load.ts",
     "ensure-operador": "tsx prisma/ensure-operador.ts",
     "test": "vitest"
   },

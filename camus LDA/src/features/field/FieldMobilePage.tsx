@@ -20,6 +20,7 @@ import { useSessionUser } from '@/features/auth/useSessionUser'
 import { isFieldOperator } from '@/features/auth/roleAccess'
 import { listAssignedOrders } from '@/features/orders/utils/canEditOrder'
 import { FieldOrderView } from '@/features/field/components/FieldOrderView'
+import { OperationsMap } from '@/features/operations/components/OperationsMap'
 
 /** Ancho lógico iPhone 16 (CSS px) — layout de terreno sin marco visual */
 const IPHONE_16_WIDTH = 393
@@ -66,10 +67,14 @@ export function FieldMobilePage() {
   const [syncing, setSyncing] = useState(false)
   const [tab, setTab] = useState<MobileTab>('terreno')
   const [assignedModalOpen, setAssignedModalOpen] = useState(false)
+  const [visibleAssigned, setVisibleAssigned] = useState(5)
 
   const allowed = isFieldOperator(user)
   const assigned = useMemo(() => listAssignedOrders(orders, user), [orders, user])
   const selected = assigned.find((o) => o.id === selectedId) ?? null
+  const visibleAssignedOrders = assigned.slice(0, visibleAssigned)
+  const hasMoreAssigned = visibleAssigned < assigned.length
+  const canCollapseAssigned = visibleAssigned > 5
 
   const sync = useCallback(async () => {
     setSyncing(true)
@@ -170,7 +175,7 @@ export function FieldMobilePage() {
       <header className="sticky top-0 z-20 bg-primary px-3 py-3 text-white">
         <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold leading-tight">Camus · Terreno</p>
+            <p className="truncate text-sm font-semibold leading-tight">CamusLDA · Terreno</p>
             <p className="truncate text-xs text-white/80">
               {user.name} · {assigned.length} asignada(s)
             </p>
@@ -257,6 +262,14 @@ export function FieldMobilePage() {
           </p>
         )}
 
+        {!selected && (
+          <OperationsMap
+            title="Mapa de trabajo"
+            ordersOverride={assigned}
+            compact
+          />
+        )}
+
         {tab === 'terreno' &&
           (selected ? (
             <FieldOrderView
@@ -272,7 +285,7 @@ export function FieldMobilePage() {
               {assigned.length === 0 && (
                 <p className="text-sm text-slate-500">No tienes órdenes asignadas.</p>
               )}
-              {assigned.map((o) => (
+              {visibleAssignedOrders.map((o) => (
                 <button
                   key={o.id}
                   type="button"
@@ -289,6 +302,27 @@ export function FieldMobilePage() {
                   <p className="text-sm text-slate-600">{o.address}</p>
                 </button>
               ))}
+              {(hasMoreAssigned || canCollapseAssigned) && (
+                <div className="flex justify-center border-t border-slate-100 pt-3">
+                  {hasMoreAssigned ? (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleAssigned((n) => n + 5)}
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      Ver más
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleAssigned(5)}
+                      className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+                    >
+                      Ver menos
+                    </button>
+                  )}
+                </div>
+              )}
             </section>
           ))}
 

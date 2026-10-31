@@ -1,15 +1,15 @@
+import { useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
 import type { WorkOrder } from '@/types'
-import { ROUTES } from '@/constants/routes'
 import {
   OVERDUE_DAYS_THRESHOLD,
   daysOverdue,
   getOverdueOrders,
 } from '../utils/dashboardHelpers'
+
+const PAGE_SIZE = 5
 
 interface OverdueOrdersAlertProps {
   orders: WorkOrder[]
@@ -17,6 +17,10 @@ interface OverdueOrdersAlertProps {
 
 export function OverdueOrdersAlert({ orders }: OverdueOrdersAlertProps) {
   const overdue = getOverdueOrders(orders)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const visible = overdue.slice(0, visibleCount)
+  const hasMore = visibleCount < overdue.length
+  const canCollapse = visibleCount > PAGE_SIZE
 
   return (
     <Card>
@@ -39,7 +43,7 @@ export function OverdueOrdersAlert({ orders }: OverdueOrdersAlertProps) {
         </p>
       ) : (
         <ul className="divide-y divide-slate-100">
-          {overdue.map((order) => (
+          {visible.map((order) => (
             <li
               key={order.id}
               className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
@@ -61,11 +65,27 @@ export function OverdueOrdersAlert({ orders }: OverdueOrdersAlertProps) {
           ))}
         </ul>
       )}
-      <Link to={ROUTES.ORDENES} className="mt-4 inline-block">
-        <Button type="button" variant="outline" size="sm">
-          Ir a órdenes
-        </Button>
-      </Link>
+      {(hasMore || canCollapse) && (
+        <div className="mt-3 flex justify-center border-t border-slate-100 pt-3">
+          {hasMore ? (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Ver más
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setVisibleCount(PAGE_SIZE)}
+              className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+            >
+              Ver menos
+            </button>
+          )}
+        </div>
+      )}
     </Card>
   )
 }

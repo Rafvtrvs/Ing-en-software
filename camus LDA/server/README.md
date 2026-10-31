@@ -49,6 +49,19 @@ npm run seed                  # carga datos de demostración
 npm run dev                   # servidor en http://localhost:4000/api
 ```
 
+## Producción (variables)
+
+Plantilla: [`.env.production.example`](./.env.production.example).
+
+| Variable | Rol |
+|---|---|
+| `DATABASE_URL` | Postgres en la nube (obligatoria) |
+| `JWT_SECRET` | Secreto fuerte (obligatorio; rechaza valores de ejemplo) |
+| `CORS_ORIGIN` | URL HTTPS del frontend publicado |
+| `NODE_ENV` | `production` |
+
+Tras crear la DB vacía: `npm run prisma:generate` + `npm run prisma:push` (o migrate) y, si hace falta, `npm run seed`.
+
 PostgreSQL rápido con Docker (opcional):
 
 ```bash

@@ -11,6 +11,8 @@ import { getOperatorAssignments } from '@/features/operations/utils/operatorAvai
 import { formatDisplayDate } from '@/features/orders/utils/orderDates'
 import type { OrderOperator, WorkOrder } from '@/types'
 
+const PAGE_SIZE = 5
+
 /**
  * RF60 — CDS 210: Consultar asignaciones de operadores
  */
@@ -19,6 +21,7 @@ export function OperatorAssignmentsPanel() {
   const users = useUsersStore((s) => s.users)
   const roles = useUsersStore((s) => s.roles)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   const operators: OrderOperator[] = useMemo(() => {
     const techRoleIds = new Set(
@@ -47,6 +50,10 @@ export function OperatorAssignmentsPanel() {
     }
   }, [operators, selectedOperatorId])
 
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [selectedOperatorId])
+
   const selectedOperator = operators.find((o) => o.id === selectedOperatorId)
 
   const assignments = useMemo(() => {
@@ -57,6 +64,10 @@ export function OperatorAssignmentsPanel() {
       orders,
     )
   }, [selectedOperator, orders])
+
+  const visibleAssignments = assignments.slice(0, visibleCount)
+  const hasMore = visibleCount < assignments.length
+  const canCollapse = visibleCount > PAGE_SIZE
 
   const handleOpenDetail = (order: WorkOrder) => {
     openViewModal(order)
@@ -169,10 +180,31 @@ export function OperatorAssignmentsPanel() {
         <div className="-mx-2 overflow-x-auto px-2">
           <DataTable
             columns={columns}
-            data={assignments}
+            data={visibleAssignments}
             keyExtractor={(row) => row.id}
             onRowClick={handleOpenDetail}
           />
+          {(hasMore || canCollapse) && (
+            <div className="mt-3 flex justify-center border-t border-slate-100 pt-3">
+              {hasMore ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Ver más
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(PAGE_SIZE)}
+                  className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+                >
+                  Ver menos
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
 

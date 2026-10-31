@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { GripVertical, ListOrdered } from 'lucide-react'
 import {
   DndContext,
@@ -28,6 +28,8 @@ import {
 } from '@/features/orders/utils/priorityRules'
 import type { WorkOrder } from '@/types'
 import { cn } from '@/utils/cn'
+
+const PAGE_SIZE = 5
 
 function buildQueue(orders: WorkOrder[], urgencyFilter: 'all' | 'urgent') {
   let list = orders.filter(
@@ -165,11 +167,20 @@ export function PriorityQueuePanel({
   const addToast = useOrdersStore((s) => s.addToast)
 
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   const queue = useMemo(
     () => buildQueue(orders, urgencyFilter),
     [orders, urgencyFilter],
   )
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [urgencyFilter])
+
+  const visibleQueue = queue.slice(0, visibleCount)
+  const hasMore = visibleCount < queue.length
+  const canCollapse = visibleCount > PAGE_SIZE
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -214,31 +225,54 @@ export function PriorityQueuePanel({
           {urgencyFilter === 'urgent' ? ' con urgencia' : ''}.
         </p>
       ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={handleDragCancel}
-        >
-          <SortableContext
-            items={queue.map((o) => o.id)}
-            strategy={verticalListSortingStrategy}
+        <>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
           >
-            <ol className="space-y-2">
-              {queue.map((o, idx) => (
-                <SortableQueueItem key={o.id} order={o} index={idx} />
-              ))}
-            </ol>
-          </SortableContext>
-          <DragOverlay>
-            {activeOrder ? (
-              <div className="scale-[1.02] shadow-lg">
-                <QueueItemContent order={activeOrder} index={activeIndex} />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+            <SortableContext
+              items={visibleQueue.map((o) => o.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <ol className="space-y-2">
+                {visibleQueue.map((o, idx) => (
+                  <SortableQueueItem key={o.id} order={o} index={idx} />
+                ))}
+              </ol>
+            </SortableContext>
+            <DragOverlay>
+              {activeOrder ? (
+                <div className="scale-[1.02] shadow-lg">
+                  <QueueItemContent order={activeOrder} index={activeIndex} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+          {(hasMore || canCollapse) && (
+            <div className="mt-3 flex justify-center border-t border-slate-100 pt-3">
+              {hasMore ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Ver más
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(PAGE_SIZE)}
+                  className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+                >
+                  Ver menos
+                </button>
+              )}
+            </div>
+          )}
+        </>
       )}
     </Card>
   )

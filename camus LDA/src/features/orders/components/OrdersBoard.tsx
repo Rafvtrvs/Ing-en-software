@@ -25,6 +25,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 
+const PAGE_SIZE = 5
+
 const columns: { title: OrderStatus; hint: string; ring: string }[] = [
   { title: 'Pendiente', hint: 'Por iniciar', ring: 'ring-blue-500/20' },
   { title: 'En Curso', hint: 'En ejecución', ring: 'ring-amber-500/20' },
@@ -185,6 +187,9 @@ export function OrdersBoard({
   const orders = ordersOverride ?? storeOrders
   const moveOrderOnBoard = useOrdersStore((s) => s.moveOrderOnBoard)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [visibleByStatus, setVisibleByStatus] = useState<
+    Partial<Record<OrderStatus, number>>
+  >({})
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -201,6 +206,23 @@ export function OrdersBoard({
   }, [orders])
 
   const activeOrder = activeId ? orders.find((o) => o.id === activeId) : null
+
+  const visibleCountFor = (status: OrderStatus) =>
+    visibleByStatus[status] ?? PAGE_SIZE
+
+  const showMore = (status: OrderStatus) => {
+    setVisibleByStatus((prev) => ({
+      ...prev,
+      [status]: visibleCountFor(status) + PAGE_SIZE,
+    }))
+  }
+
+  const showLess = (status: OrderStatus) => {
+    setVisibleByStatus((prev) => ({
+      ...prev,
+      [status]: PAGE_SIZE,
+    }))
+  }
 
   const handleDragStart = (e: DragStartEvent) => {
     setActiveId(String(e.active.id))
@@ -234,6 +256,11 @@ export function OrdersBoard({
       >
         {columns.map((col) => {
           const items = grouped[col.title]
+          const visibleCount = visibleCountFor(col.title)
+          const visibleItems = items.slice(0, visibleCount)
+          const hasMore = visibleCount < items.length
+          const canCollapse = visibleCount > PAGE_SIZE
+
           return (
             <div
               key={col.title}
@@ -258,7 +285,7 @@ export function OrdersBoard({
               </div>
 
               <SortableContext
-                items={items.map((o) => o.id)}
+                items={visibleItems.map((o) => o.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <DroppableColumn id={col.title}>
@@ -267,12 +294,34 @@ export function OrdersBoard({
                       Arrastra una orden aquí
                     </p>
                   ) : (
-                    items.map((order) => (
+                    visibleItems.map((order) => (
                       <SortableOrderCard key={order.id} order={order} />
                     ))
                   )}
                 </DroppableColumn>
               </SortableContext>
+
+              {(hasMore || canCollapse) && (
+                <div className="mt-3 flex justify-center border-t border-slate-100 pt-3">
+                  {hasMore ? (
+                    <button
+                      type="button"
+                      onClick={() => showMore(col.title)}
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      Ver más
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => showLess(col.title)}
+                      className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+                    >
+                      Ver menos
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )
         })}

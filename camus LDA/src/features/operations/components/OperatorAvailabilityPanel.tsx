@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Download, Search, UserCheck, UserX } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
@@ -13,6 +13,8 @@ import {
 } from '@/features/operations/utils/operatorAvailability'
 import type { OrderOperator } from '@/types'
 
+const PAGE_SIZE = 5
+
 /**
  * RF60 — CDS 209: Consultar disponibilidad de operadores
  */
@@ -26,6 +28,10 @@ export function OperatorAvailabilityPanel() {
   const [dateTo, setDateTo] = useState('')
   const [orderFilter, setOrderFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [visibleOperators, setVisibleOperators] = useState(PAGE_SIZE)
+  const [visibleAssignmentsByOp, setVisibleAssignmentsByOp] = useState<
+    Record<string, number>
+  >({})
 
   const operators: OrderOperator[] = useMemo(() => {
     const techRoleIds = new Set(
@@ -59,6 +65,18 @@ export function OperatorAvailabilityPanel() {
 
   const availableCount = rows.filter((r) => r.status === 'Disponible').length
   const busyCount = rows.filter((r) => r.status === 'Ocupado').length
+
+  useEffect(() => {
+    setVisibleOperators(PAGE_SIZE)
+    setVisibleAssignmentsByOp({})
+  }, [dateFrom, dateTo, orderFilter, search])
+
+  const visibleRows = rows.slice(0, visibleOperators)
+  const hasMoreOperators = visibleOperators < rows.length
+  const canCollapseOperators = visibleOperators > PAGE_SIZE
+
+  const assignmentVisibleCount = (operatorId: string) =>
+    visibleAssignmentsByOp[operatorId] ?? PAGE_SIZE
 
   return (
     <Card className="overflow-hidden">
@@ -153,55 +171,117 @@ export function OperatorAvailabilityPanel() {
         </p>
       ) : (
         <div className="space-y-3">
-          {rows.map((row) => (
-            <div
-              key={row.operator.id}
-              className="rounded-xl border border-slate-100 bg-slate-50/60 p-4"
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <p className="font-semibold text-slate-900">{row.operator.name}</p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Periodo: {row.occupiedPeriodLabel}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge
-                    label={row.status}
-                    className={
-                      row.status === 'Disponible'
-                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
-                        : 'bg-amber-50 text-amber-700 ring-amber-600/20'
-                    }
-                  />
-                  <span className="text-xs text-slate-500">
-                    {row.activeOrders} OT activa(s)
-                  </span>
-                </div>
-              </div>
+          {visibleRows.map((row) => {
+            const assignVisible = assignmentVisibleCount(row.operator.id)
+            const visibleAssignments = row.assignments.slice(0, assignVisible)
+            const hasMoreAssignments = assignVisible < row.assignments.length
+            const canCollapseAssignments = assignVisible > PAGE_SIZE
 
-              {row.assignments.length > 0 && (
-                <ul className="mt-3 space-y-2 border-t border-slate-200/80 pt-3">
-                  {row.assignments.map((slot) => (
-                    <li
-                      key={slot.orderId}
-                      className="flex flex-col gap-1 rounded-lg bg-white px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="min-w-0">
-                        <span className="font-medium text-slate-800">{slot.orderId}</span>
-                        <span className="mx-2 text-slate-300">·</span>
-                        <span className="text-slate-600">{slot.client}</span>
+            return (
+              <div
+                key={row.operator.id}
+                className="rounded-xl border border-slate-100 bg-slate-50/60 p-4"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-900">{row.operator.name}</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Periodo: {row.occupiedPeriodLabel}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      label={row.status}
+                      className={
+                        row.status === 'Disponible'
+                          ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20'
+                          : 'bg-amber-50 text-amber-700 ring-amber-600/20'
+                      }
+                    />
+                    <span className="text-xs text-slate-500">
+                      {row.activeOrders} OT activa(s)
+                    </span>
+                  </div>
+                </div>
+
+                {row.assignments.length > 0 && (
+                  <>
+                    <ul className="mt-3 space-y-2 border-t border-slate-200/80 pt-3">
+                      {visibleAssignments.map((slot) => (
+                        <li
+                          key={slot.orderId}
+                          className="flex flex-col gap-1 rounded-lg bg-white px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div className="min-w-0">
+                            <span className="font-medium text-slate-800">{slot.orderId}</span>
+                            <span className="mx-2 text-slate-300">·</span>
+                            <span className="text-slate-600">{slot.client}</span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 text-xs">
+                            <Badge label={slot.status} context="order" />
+                            <span className="text-slate-500">{slot.periodLabel}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    {(hasMoreAssignments || canCollapseAssignments) && (
+                      <div className="mt-3 flex justify-center border-t border-slate-200/80 pt-3">
+                        {hasMoreAssignments ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setVisibleAssignmentsByOp((prev) => ({
+                                ...prev,
+                                [row.operator.id]: assignVisible + PAGE_SIZE,
+                              }))
+                            }
+                            className="text-sm font-medium text-primary hover:underline"
+                          >
+                            Ver más
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setVisibleAssignmentsByOp((prev) => ({
+                                ...prev,
+                                [row.operator.id]: PAGE_SIZE,
+                              }))
+                            }
+                            className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+                          >
+                            Ver menos
+                          </button>
+                        )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs">
-                        <Badge label={slot.status} context="order" />
-                        <span className="text-slate-500">{slot.periodLabel}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                    )}
+                  </>
+                )}
+              </div>
+            )
+          })}
+
+          {(hasMoreOperators || canCollapseOperators) && (
+            <div className="flex justify-center border-t border-slate-100 pt-3">
+              {hasMoreOperators ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleOperators((n) => n + PAGE_SIZE)}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Ver más
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setVisibleOperators(PAGE_SIZE)}
+                  className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+                >
+                  Ver menos
+                </button>
               )}
             </div>
-          ))}
+          )}
         </div>
       )}
     </Card>

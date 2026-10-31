@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -49,6 +50,11 @@ export function UsersPage() {
   const closeRoleModal = useUsersStore((s) => s.closeRoleModal)
   const toasts = useUsersStore((s) => s.toasts)
   const removeToast = useUsersStore((s) => s.removeToast)
+  const syncFromApi = useUsersStore((s) => s.syncFromApi)
+
+  useEffect(() => {
+    void syncFromApi()
+  }, [syncFromApi])
 
   const kpis = getUsersKpis(users, roles)
 

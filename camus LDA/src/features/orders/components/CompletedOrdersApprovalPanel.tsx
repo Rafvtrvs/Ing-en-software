@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { CheckCircle } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -7,17 +7,24 @@ import { useOrdersStore } from '@/store/useOrdersStore'
 import { formatDisplayDate } from '@/features/orders/utils/orderDates'
 import type { WorkOrder } from '@/types'
 
+const PAGE_SIZE = 5
+
 /**
  * RF63 — CDS 216: Panel de órdenes completadas pendientes de aprobación
  */
 export function CompletedOrdersApprovalPanel() {
   const orders = useOrdersStore((s) => s.orders)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   const completedOrders = useMemo(
     () => orders.filter((o) => o.status === 'Completada'),
     [orders],
   )
+
+  const visibleOrders = completedOrders.slice(0, visibleCount)
+  const hasMore = visibleCount < completedOrders.length
+  const canCollapse = visibleCount > PAGE_SIZE
 
   const pendingApproval = completedOrders.filter((o) => !o.approval).length
   const approved = completedOrders.filter((o) => o.approval).length
@@ -77,12 +84,35 @@ export function CompletedOrdersApprovalPanel() {
           No hay órdenes con estado Completada.
         </p>
       ) : (
-        <DataTable
-          columns={columns}
-          data={completedOrders}
-          keyExtractor={(r) => r.id}
-          onRowClick={(r) => openViewModal(r)}
-        />
+        <>
+          <DataTable
+            columns={columns}
+            data={visibleOrders}
+            keyExtractor={(r) => r.id}
+            onRowClick={(r) => openViewModal(r)}
+          />
+          {(hasMore || canCollapse) && (
+            <div className="mt-3 flex justify-center border-t border-slate-100 pt-3">
+              {hasMore ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Ver más
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(PAGE_SIZE)}
+                  className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+                >
+                  Ver menos
+                </button>
+              )}
+            </div>
+          )}
+        </>
       )}
     </Card>
   )

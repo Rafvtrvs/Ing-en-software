@@ -17,6 +17,7 @@ import { interventionController } from './controllers/intervention.controller.js
 import { documentController } from './controllers/document.controller.js'
 import { assetController } from './controllers/asset.controller.js'
 import { reportController } from './controllers/report.controller.js'
+import { userController } from './controllers/user.controller.js'
 
 export const router = Router()
 
@@ -119,6 +120,13 @@ router.get('/assets', optionalAuth, assetController.list)
 router.post('/assets', requireAuth, assetController.create)
 router.put('/assets/:id', requireAuth, assetController.update)
 router.delete('/assets/:id', requireAuth, assetController.remove)
+
+// Usuarios y roles (credenciales en PostgreSQL)
+const userManagers = requireRole('admin', 'jefe', 'supervisor')
+router.get('/users', requireAuth, userManagers, userController.list)
+router.post('/users', requireAuth, userManagers, userController.create)
+router.put('/users/:id', requireAuth, userManagers, userController.update)
+router.get('/roles', requireAuth, userManagers, userController.listRoles)
 
 // Reportes y auditoría
 router.get('/reports/summary', optionalAuth, reportController.summary)

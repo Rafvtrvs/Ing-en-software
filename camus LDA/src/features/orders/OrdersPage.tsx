@@ -25,6 +25,7 @@ import { CompletedOrdersApprovalPanel } from '@/features/orders/components/Compl
 import { RescheduleOrderModal } from '@/features/orders/components/RescheduleOrderModal'
 import { OrderModificationRequestModal } from '@/features/orders/components/OrderModificationRequestModal'
 import { ModificationRequestsPanel } from '@/features/orders/components/ModificationRequestsPanel'
+import { OperationsMap } from '@/features/operations/components/OperationsMap'
 import { useSessionUser } from '@/features/auth/useSessionUser'
 import { isFieldOperator } from '@/features/auth/roleAccess'
 import {
@@ -94,6 +95,11 @@ export function OrdersPage() {
             Sesión: <strong>{currentUser.name}</strong> ({currentUser.role}).
             Órdenes asignadas: <strong>{visibleOrders.length}</strong>
           </div>
+
+          <OperationsMap
+            title="Mapa de trabajo"
+            ordersOverride={visibleOrders}
+          />
 
           {/* Vista PC original del operador: cola + kanban (sin panel móvil de terreno) */}
           <PriorityQueuePanel ordersOverride={visibleOrders} />

@@ -10,6 +10,8 @@ import { useOrdersStore } from '@/store/useOrdersStore'
 import type { DelayAction, DelayLevel, DelaysResponse } from '@/types'
 import { cn } from '@/utils/cn'
 
+const PAGE_SIZE = 5
+
 const LEVEL_STYLE: Record<DelayLevel, string> = {
   Alto: 'bg-red-50 text-red-700',
   Medio: 'bg-amber-50 text-amber-700',
@@ -31,6 +33,7 @@ export function DelayedOrdersPanel() {
   const [error, setError] = useState<string | null>(null)
   const [rescheduling, setRescheduling] = useState<string | null>(null)
   const [newDate, setNewDate] = useState('')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   const load = useCallback(async () => {
     try {
@@ -43,8 +46,14 @@ export function DelayedOrdersPanel() {
   }, [level])
 
   useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
     void load()
   }, [load])
+
+  const delayedOrders = data?.orders ?? []
+  const visibleOrders = delayedOrders.slice(0, visibleCount)
+  const hasMore = visibleCount < delayedOrders.length
+  const canCollapse = visibleCount > PAGE_SIZE
 
   /** CU-95 */
   const handleNotify = async () => {
@@ -126,7 +135,7 @@ export function DelayedOrdersPanel() {
       )}
 
       <ul className="divide-y divide-slate-100">
-        {data?.orders.map((o) => (
+        {visibleOrders.map((o) => (
           <li key={o.id} className="space-y-2 py-3 first:pt-0">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
@@ -188,6 +197,28 @@ export function DelayedOrdersPanel() {
           </li>
         ))}
       </ul>
+
+      {(hasMore || canCollapse) && (
+        <div className="flex justify-center border-t border-slate-100 pt-3">
+          {hasMore ? (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Ver más
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setVisibleCount(PAGE_SIZE)}
+              className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+            >
+              Ver menos
+            </button>
+          )}
+        </div>
+      )}
     </Card>
   )
 }

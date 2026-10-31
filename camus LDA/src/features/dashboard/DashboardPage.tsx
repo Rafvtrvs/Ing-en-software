@@ -76,6 +76,12 @@ export function DashboardPage() {
   }, [priorityFilter])
 
   useEffect(() => {
+    void handleRefresh()
+    // Carga inicial desde la API (Postgres) al entrar al dashboard.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
     if (!refreshMinutes || refreshMinutes < 1) return
     const timer = window.setInterval(() => {
       void handleRefresh()

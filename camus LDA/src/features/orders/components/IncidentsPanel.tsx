@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Download, Pencil } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 import { Card, CardHeader } from '@/components/ui/Card'
@@ -13,6 +13,7 @@ import { INCIDENT_TYPES } from '@/features/orders/utils/priorityRules'
 import type { IncidentType, WorkOrder } from '@/types'
 
 const COLORS = ['#dc2626', '#ea580c', '#2563eb', '#0d9488', '#ca8a04', '#7c3aed', '#64748b']
+const PAGE_SIZE = 5
 
 /** CU-165–169: tabla, gráfico, filtro, edición y export CSV de incidentes */
 export function IncidentsPanel() {
@@ -21,6 +22,7 @@ export function IncidentsPanel() {
   const openEditModal = useOrdersStore((s) => s.openEditModal)
   const addToast = useOrdersStore((s) => s.addToast)
   const [typeFilter, setTypeFilter] = useState<IncidentType | 'all'>('all')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   const filtered = useMemo(() => {
     return orders.filter((o) => {
@@ -28,6 +30,14 @@ export function IncidentsPanel() {
       return typeFilter === 'all' || t === typeFilter
     })
   }, [orders, typeFilter])
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [typeFilter])
+
+  const visibleRows = filtered.slice(0, visibleCount)
+  const hasMore = visibleCount < filtered.length
+  const canCollapse = visibleCount > PAGE_SIZE
 
   const chartData = useMemo(() => {
     const map = new Map<string, number>()
@@ -138,9 +148,30 @@ export function IncidentsPanel() {
         />
         <DataTable
           columns={columns}
-          data={filtered}
+          data={visibleRows}
           keyExtractor={(r) => r.id}
         />
+        {(hasMore || canCollapse) && (
+          <div className="mt-3 flex justify-center border-t border-slate-100 pt-3">
+            {hasMore ? (
+              <button
+                type="button"
+                onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Ver más
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setVisibleCount(PAGE_SIZE)}
+                className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+              >
+                Ver menos
+              </button>
+            )}
+          </div>
+        )}
       </Card>
 
       <Card>

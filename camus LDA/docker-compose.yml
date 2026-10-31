@@ -1,0 +1,66 @@
+# Levanta el stack completo en local (igual idea que en la nube):
+#   Postgres + API + Frontend (nginx)
+#
+# Uso:
+#   docker compose up --build
+#   Front: http://localhost:3080
+#   API:   http://localhost:4000/api
+#
+# Login seed (tras seed opcional): admin@camus.cl / admin123
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: camus_lda
+    ports:
+      - '5432:5432'
+    volumes:
+      - camus_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d camus_lda']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./server
+    restart: unless-stopped
+    ports:
+      - '4000:4000'
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/camus_lda?schema=public
+      # Cambiá este valor antes de un deploy real
+      JWT_SECRET: camus-docker-dev-secret-cambiar-en-prod
+      JWT_EXPIRES_IN: 8h
+      AUTH_PROVIDER: local
+      CORS_ORIGIN: http://localhost:3080
+      STORAGE_PROVIDER: mock
+      MAIL_PROVIDER: mock
+      PUSH_PROVIDER: mock
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # URL que usa el NAVEGADOR para hablar con la API
+        VITE_API_URL: http://localhost:4000/api
+        VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN:-}
+    restart: unless-stopped
+    ports:
+      # 8080 suele estar ocupado por XAMPP/Apache en Windows
+      - '3080:80'
+    depends_on:
+      - api
+
+volumes:
+  camus_pgdata:
