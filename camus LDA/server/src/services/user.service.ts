@@ -52,6 +52,33 @@ function toRoleDto(r: {
   }
 }
 
+const MAX_AVATAR_CHARS = 7_000_000
+
+function normalizeAvatar(avatar?: string | null): string | undefined {
+  if (avatar === undefined) return undefined
+  const value = (avatar ?? '').trim()
+  if (!value) return ''
+  if (value.length > MAX_AVATAR_CHARS) {
+    const err = new Error('La imagen supera el tamaño máximo de 5 MB') as Error & {
+      status: number
+    }
+    err.status = 413
+    throw err
+  }
+  const ok =
+    value.startsWith('data:image/png') ||
+    value.startsWith('data:image/jpeg') ||
+    value.startsWith('data:image/jpg') ||
+    value.startsWith('https://') ||
+    value.startsWith('http://')
+  if (!ok) {
+    const err = new Error('Formato de avatar no permitido') as Error & { status: number }
+    err.status = 400
+    throw err
+  }
+  return value
+}
+
 interface UserInput {
   name: string
   email: string
@@ -60,6 +87,7 @@ interface UserInput {
   roleName?: string
   status?: string
   password?: string
+  avatar?: string
 }
 
 async function resolveRoleId(input: {
@@ -154,6 +182,7 @@ export const userService = {
     }
 
     const passwordHash = await bcrypt.hash(input.password, 10)
+    const avatarUrl = normalizeAvatar(input.avatar)
     const row = await prisma.usuario.create({
       data: {
         nombre: input.name.trim(),
@@ -162,6 +191,7 @@ export const userService = {
         passwordHash,
         idRol,
         estado: input.status || 'Activo',
+        ...(avatarUrl !== undefined ? { avatarUrl } : null),
       },
       include: { rol: true },
     })
@@ -217,6 +247,7 @@ export const userService = {
       estado?: string
       idRol?: number | null
       passwordHash?: string
+      avatarUrl?: string
     } = {}
     if (input.name !== undefined) data.nombre = input.name.trim()
     if (input.email !== undefined) data.correoElectronico = input.email.trim().toLowerCase()
@@ -225,6 +256,9 @@ export const userService = {
     if (idRol !== undefined) data.idRol = idRol
     if (input.password && input.password.length >= 6) {
       data.passwordHash = await bcrypt.hash(input.password, 10)
+    }
+    if (input.avatar !== undefined) {
+      data.avatarUrl = normalizeAvatar(input.avatar) ?? ''
     }
 
     const row = await prisma.usuario.update({

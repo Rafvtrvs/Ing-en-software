@@ -62,7 +62,7 @@ export function UserViewModal({ user, open, onClose }: UserViewModalProps) {
       }
     >
       <div className="mb-6 flex items-center gap-4">
-        <UserAvatar size="lg" />
+        <UserAvatar size="lg" src={user.avatar} alt={user.name} />
         <div>
           <h3 className="text-xl font-bold text-slate-900">{user.name}</h3>
           <p className="text-sm text-slate-500">{user.email}</p>

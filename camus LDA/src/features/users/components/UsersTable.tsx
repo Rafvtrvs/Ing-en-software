@@ -70,7 +70,7 @@ export function UsersTable({ onCreateClick }: UsersTableProps) {
       className: 'w-[30%]',
       render: (row) => (
         <div className="flex min-w-0 items-center gap-3">
-          <UserAvatar size="sm" />
+          <UserAvatar size="sm" src={row.avatar} alt={row.name} />
           <div className="min-w-0">
             <p className="truncate font-medium text-slate-900">{row.name}</p>
             <p className="truncate text-xs text-slate-500">{row.email}</p>

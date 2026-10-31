@@ -9,6 +9,7 @@ export interface CreateUserPayload {
   roleName?: string
   status?: SystemUserStatus
   password: string
+  avatar?: string
 }
 
 export interface UpdateUserPayload {
@@ -19,6 +20,7 @@ export interface UpdateUserPayload {
   roleName?: string
   status?: SystemUserStatus
   password?: string
+  avatar?: string
 }
 
 export const usersService = {

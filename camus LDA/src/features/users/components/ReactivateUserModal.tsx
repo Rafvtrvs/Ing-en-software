@@ -64,7 +64,7 @@ export function ReactivateUserModal({
     >
       <div className="space-y-4">
         <div className="flex items-center gap-4">
-          <UserAvatar size="lg" className="h-12 w-12" />
+          <UserAvatar size="lg" className="h-12 w-12" src={user.avatar} alt={user.name} />
           <div>
             <p className="font-semibold text-slate-900">{user.name}</p>
             <p className="text-sm text-slate-500">{user.email}</p>

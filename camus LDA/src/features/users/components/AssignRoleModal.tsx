@@ -91,7 +91,12 @@ export function AssignRoleModal({ user, open, onClose }: AssignRoleModalProps) {
       }
     >
       <div className="mb-5 flex items-center gap-4 rounded-xl border border-slate-100 bg-slate-50/80 p-4">
-        <UserAvatar size="lg" className="h-12 w-12 bg-white ring-2 ring-white" />
+        <UserAvatar
+          size="lg"
+          className="h-12 w-12 bg-white ring-2 ring-white"
+          src={user.avatar}
+          alt={user.name}
+        />
         <div className="min-w-0 flex-1">
           <p className="font-semibold text-slate-900">{user.name}</p>
           <p className="truncate text-sm text-slate-500">{user.email}</p>
