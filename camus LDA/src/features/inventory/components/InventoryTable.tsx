@@ -100,8 +100,8 @@ export function InventoryTable() {
   return (
     <Card>
       <CardHeader title="Inventario de Productos" />
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="min-w-[200px] flex-1">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="w-full min-w-0 flex-1 sm:min-w-[200px]">
           <Input
             placeholder="Buscar productos, códigos, categorías..."
             value={search}
@@ -112,26 +112,34 @@ export function InventoryTable() {
             icon={<Search className="h-4 w-4" />}
           />
         </div>
-        <Button
-          variant={showFilters ? 'primary' : 'outline'}
-          leftIcon={<Filter className="h-4 w-4" />}
-          onClick={toggleFilters}
-        >
-          Filtros
-        </Button>
-        <Button
-          variant="outline"
-          leftIcon={<Upload className="h-4 w-4" />}
-          onClick={() => {
-            exportProductsToCsv(filtered)
-            addToast(`${filtered.length} productos exportados a CSV`)
-          }}
-        >
-          Exportar
-        </Button>
-        <Button leftIcon={<Plus className="h-4 w-4" />} onClick={openCreateModal}>
-          Nuevo Producto
-        </Button>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          <Button
+            variant={showFilters ? 'primary' : 'outline'}
+            leftIcon={<Filter className="h-4 w-4" />}
+            className="w-full justify-center sm:w-auto"
+            onClick={toggleFilters}
+          >
+            Filtros
+          </Button>
+          <Button
+            variant="outline"
+            leftIcon={<Upload className="h-4 w-4" />}
+            className="w-full justify-center sm:w-auto"
+            onClick={() => {
+              exportProductsToCsv(filtered)
+              addToast(`${filtered.length} productos exportados a CSV`)
+            }}
+          >
+            Exportar
+          </Button>
+          <Button
+            leftIcon={<Plus className="h-4 w-4" />}
+            className="col-span-2 w-full justify-center sm:col-auto sm:w-auto"
+            onClick={openCreateModal}
+          >
+            Nuevo Producto
+          </Button>
+        </div>
       </div>
 
       {showFilters && (

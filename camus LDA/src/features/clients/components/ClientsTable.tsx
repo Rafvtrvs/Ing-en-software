@@ -71,11 +71,17 @@ export function ClientsTable({ onCreateClick }: ClientsTableProps) {
     {
       key: 'name',
       header: 'Cliente',
-      render: (row) => <p className="truncate font-medium text-slate-900">{row.name}</p>,
+      mobileTitle: true,
+      render: (row) => (
+        <div className="min-w-0">
+          <p className="truncate font-medium text-slate-900 dark:text-slate-100">{row.name}</p>
+          <p className="truncate text-xs font-normal text-slate-500 sm:hidden">{row.company}</p>
+        </div>
+      ),
     },
-    { key: 'company', header: 'Empresa' },
+    { key: 'company', header: 'Empresa', mobileHidden: true },
     { key: 'rut', header: 'RUT' },
-    { key: 'phone', header: 'Teléfono' },
+    { key: 'phone', header: 'Teléfono', mobileHidden: true },
     { key: 'email', header: 'Email' },
     {
       key: 'status',
@@ -130,8 +136,8 @@ export function ClientsTable({ onCreateClick }: ClientsTableProps) {
           )
         }
       />
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="min-w-[200px] flex-1">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="w-full min-w-0 flex-1 sm:min-w-[200px]">
           <Input
             placeholder="Buscar cliente..."
             value={search}
@@ -139,25 +145,29 @@ export function ClientsTable({ onCreateClick }: ClientsTableProps) {
             icon={<Search className="h-4 w-4" />}
           />
         </div>
-        <Button
-          variant={showFilters ? 'primary' : 'outline'}
-          size="md"
-          leftIcon={<Filter className="h-4 w-4" />}
-          onClick={toggleFilters}
-        >
-          Filtros
-          {statusFilter !== 'all' && (
-            <span className="ml-1 rounded-full bg-white/20 px-1.5 text-xs">1</span>
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          size="md"
-          leftIcon={<Upload className="h-4 w-4" />}
-          onClick={handleExport}
-        >
-          Exportar
-        </Button>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          <Button
+            variant={showFilters ? 'primary' : 'outline'}
+            size="md"
+            leftIcon={<Filter className="h-4 w-4" />}
+            onClick={toggleFilters}
+            className="w-full justify-center sm:w-auto"
+          >
+            Filtros
+            {statusFilter !== 'all' && (
+              <span className="ml-1 rounded-full bg-white/20 px-1.5 text-xs">1</span>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            size="md"
+            leftIcon={<Upload className="h-4 w-4" />}
+            onClick={handleExport}
+            className="w-full justify-center sm:w-auto"
+          >
+            Exportar
+          </Button>
+        </div>
       </div>
 
       {showFilters && (

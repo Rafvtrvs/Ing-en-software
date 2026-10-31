@@ -118,12 +118,24 @@ export function OrdersTable({
   }
 
   const columns: Column<WorkOrder>[] = [
-    { key: 'id', header: 'ID Orden', className: 'font-medium text-slate-900' },
-    { key: 'client', header: 'Cliente' },
+    {
+      key: 'id',
+      header: 'ID Orden',
+      className: 'font-medium text-slate-900',
+      mobileTitle: true,
+      render: (row) => (
+        <div className="min-w-0">
+          <p className="font-medium text-slate-900 dark:text-slate-100">{row.id}</p>
+          <p className="truncate text-xs font-normal text-slate-500 sm:hidden">{row.client}</p>
+        </div>
+      ),
+    },
+    { key: 'client', header: 'Cliente', mobileHidden: true },
     { key: 'service', header: 'Servicio', render: (row) => row.service ?? '—' },
     {
       key: 'incidentType',
       header: 'Incidente',
+      mobileHidden: true,
       render: (row) => row.incidentType ?? row.category,
     },
     {
@@ -136,7 +148,7 @@ export function OrdersTable({
       header: 'Estado',
       render: (row) => <Badge label={row.status} context="order" />,
     },
-    { key: 'createdAt', header: 'Fecha Creación' },
+    { key: 'createdAt', header: 'Fecha Creación', mobileHidden: true },
     {
       key: 'actions',
       header: 'Acciones',
@@ -182,8 +194,8 @@ export function OrdersTable({
     <Card>
       <CardHeader title="Últimas Órdenes de Trabajo" />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="min-w-[220px] flex-1">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="w-full min-w-0 flex-1 sm:min-w-[220px]">
           <Input
             placeholder="Buscar por ID, cliente, dirección, servicio..."
             value={search}
@@ -194,38 +206,43 @@ export function OrdersTable({
             icon={<Search className="h-4 w-4" />}
           />
         </div>
-        {!hideAssignedToggle && (
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          {!hideAssignedToggle && (
+            <Button
+              variant={onlyAssigned ? 'primary' : 'outline'}
+              leftIcon={<UserCheck className="h-4 w-4" />}
+              className="w-full justify-center sm:w-auto"
+              onClick={() => {
+                setOnlyAssigned(!onlyAssigned)
+                setCurrentPage(1)
+              }}
+            >
+              Mis asignadas
+            </Button>
+          )}
           <Button
-            variant={onlyAssigned ? 'primary' : 'outline'}
-            leftIcon={<UserCheck className="h-4 w-4" />}
+            variant={showFilters ? 'primary' : 'outline'}
+            leftIcon={<Filter className="h-4 w-4" />}
+            className="w-full justify-center sm:w-auto"
+            onClick={toggleFilters}
+          >
+            Filtros
+            {(statusFilter !== 'all' || onlyThirdParties) && (
+              <span className="ml-1 rounded-full bg-white/20 px-1.5 text-xs">1+</span>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            leftIcon={<Upload className="h-4 w-4" />}
+            className="w-full justify-center sm:w-auto"
             onClick={() => {
-              setOnlyAssigned(!onlyAssigned)
-              setCurrentPage(1)
+              exportOrdersToCsv(filtered)
+              addToast(`${filtered.length} órdenes exportadas a CSV`)
             }}
           >
-            Mis asignadas
+            Exportar
           </Button>
-        )}
-        <Button
-          variant={showFilters ? 'primary' : 'outline'}
-          leftIcon={<Filter className="h-4 w-4" />}
-          onClick={toggleFilters}
-        >
-          Filtros
-          {(statusFilter !== 'all' || onlyThirdParties) && (
-            <span className="ml-1 rounded-full bg-white/20 px-1.5 text-xs">1+</span>
-          )}
-        </Button>
-        <Button
-          variant="outline"
-          leftIcon={<Upload className="h-4 w-4" />}
-          onClick={() => {
-            exportOrdersToCsv(filtered)
-            addToast(`${filtered.length} órdenes exportadas a CSV`)
-          }}
-        >
-          Exportar
-        </Button>
+        </div>
       </div>
 
       {showFilters && (

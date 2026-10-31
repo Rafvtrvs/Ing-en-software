@@ -22,11 +22,11 @@ export function Pagination({
   const pages = Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1)
 
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+    <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
       <p className="text-sm text-slate-500">
-        Mostrando {start} a {end} de {totalItems} clientes
+        Mostrando {start}–{end} de {totalItems}
       </p>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-center gap-1 sm:justify-end">
         <button
           type="button"
           onClick={() => onPageChange(currentPage - 1)}

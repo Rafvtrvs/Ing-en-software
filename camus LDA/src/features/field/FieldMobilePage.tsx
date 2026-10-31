@@ -8,6 +8,7 @@ import {
   MapPinned,
   PlusCircle,
   RefreshCw,
+  Settings2,
   UserCheck,
   Wifi,
 } from 'lucide-react'
@@ -21,7 +22,13 @@ import { useSessionUser } from '@/features/auth/useSessionUser'
 import { isFieldOperator } from '@/features/auth/roleAccess'
 import { listAssignedOrders } from '@/features/orders/utils/canEditOrder'
 import { FieldOrderView } from '@/features/field/components/FieldOrderView'
+import {
+  FieldMobileSettings,
+  loadFieldMobilePrefs,
+  type FieldMobilePrefs,
+} from '@/features/field/components/FieldMobileSettings'
 import { OperationsMap } from '@/features/operations/components/OperationsMap'
+import { useSettingsStore } from '@/store/useSettingsStore'
 
 /** Ancho lógico iPhone 16 (CSS px) — layout de terreno sin marco visual */
 const IPHONE_16_WIDTH = 393
@@ -60,6 +67,8 @@ export function FieldMobilePage() {
   const closeModal = useOrdersStore((s) => s.closeModal)
   const toasts = useOrdersStore((s) => s.toasts)
   const removeToast = useOrdersStore((s) => s.removeToast)
+  const settingsToasts = useSettingsStore((s) => s.toasts)
+  const removeSettingsToast = useSettingsStore((s) => s.removeToast)
 
   const [online, setOnline] = useState(navigator.onLine)
   const [pending, setPending] = useState(() => loadQueue().length)
@@ -69,6 +78,10 @@ export function FieldMobilePage() {
   const [tab, setTab] = useState<MobileTab>('terreno')
   const [assignedModalOpen, setAssignedModalOpen] = useState(false)
   const [visibleAssigned, setVisibleAssigned] = useState(5)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [fieldPrefs, setFieldPrefs] = useState<FieldMobilePrefs>(() =>
+    loadFieldMobilePrefs(),
+  )
 
   const allowed = isFieldOperator(user)
   const assigned = useMemo(() => listAssignedOrders(orders, user), [orders, user])
@@ -195,6 +208,22 @@ export function FieldMobilePage() {
 
             <NotificationsPanel variant="onPrimary" />
 
+            <button
+              type="button"
+              aria-label="Personalización"
+              aria-pressed={settingsOpen}
+              className={cn(
+                'flex h-9 w-9 items-center justify-center rounded-lg text-white hover:bg-white/15',
+                settingsOpen && 'bg-white/20',
+              )}
+              onClick={() => {
+                setSettingsOpen((v) => !v)
+                setSelectedId(null)
+              }}
+            >
+              <Settings2 className="h-5 w-5" />
+            </button>
+
             <UserAvatar
               size="sm"
               className="ring-2 ring-white/30"
@@ -223,10 +252,13 @@ export function FieldMobilePage() {
               onClick={() => {
                 setTab(t.id)
                 setSelectedId(null)
+                setSettingsOpen(false)
               }}
               className={cn(
                 'flex flex-col items-center gap-0.5 rounded-md px-1 py-1.5 text-[10px] font-medium',
-                tab === t.id ? 'bg-white text-primary' : 'text-white/80',
+                tab === t.id && !settingsOpen
+                  ? 'bg-white text-primary'
+                  : 'text-white/80',
               )}
             >
               <t.icon className="h-4 w-4" />
@@ -237,134 +269,164 @@ export function FieldMobilePage() {
       </header>
 
       <main className="space-y-4 p-4 pb-8">
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 bg-white p-3 shadow-sm">
-          <span className="text-sm text-slate-700">
-            Pendientes de envío: <strong>{pending}</strong>
-          </span>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              leftIcon={<UserCheck className="h-4 w-4" />}
-              onClick={() => setAssignedModalOpen(true)}
-            >
-              Mis asignadas
-            </Button>
-            <Button
-              size="sm"
-              leftIcon={
-                <RefreshCw className={syncing ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
-              }
-              disabled={syncing || !online}
-              onClick={() => void sync()}
-            >
-              Sincronizar
-            </Button>
-          </div>
-        </div>
-
-        {syncMessage && (
-          <p role="status" className="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700">
-            {syncMessage}
-          </p>
-        )}
-
-        {!selected && (
-          <OperationsMap
-            title="Mapa de trabajo"
-            ordersOverride={assigned}
-            compact
+        {settingsOpen ? (
+          <FieldMobileSettings
+            prefs={fieldPrefs}
+            onPrefsChange={setFieldPrefs}
+            onBack={() => setSettingsOpen(false)}
           />
-        )}
-
-        {tab === 'terreno' &&
-          (selected ? (
-            <FieldOrderView
-              order={selected}
-              onBack={() => setSelectedId(null)}
-              onAction={handleAction}
-            />
-          ) : (
-            <section className="space-y-2">
-              <h1 className="text-base font-semibold text-slate-900">
-                Mis órdenes ({assigned.length})
-              </h1>
-              {assigned.length === 0 && (
-                <p className="text-sm text-slate-500">No tienes órdenes asignadas.</p>
-              )}
-              {visibleAssignedOrders.map((o) => (
-                <button
-                  key={o.id}
-                  type="button"
-                  onClick={() => setSelectedId(o.id)}
-                  className="w-full rounded-xl border border-slate-100 bg-white p-4 text-left shadow-sm active:bg-slate-50"
+        ) : (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-100 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <span className="text-sm text-slate-700 dark:text-slate-200">
+                Pendientes de envío: <strong>{pending}</strong>
+              </span>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  leftIcon={<UserCheck className="h-4 w-4" />}
+                  onClick={() => setAssignedModalOpen(true)}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-500">{o.id}</span>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs">
-                      {o.status}
-                    </span>
-                  </div>
-                  <p className="font-medium text-slate-900">{o.client}</p>
-                  <p className="text-sm text-slate-600">{o.address}</p>
-                </button>
-              ))}
-              {(hasMoreAssigned || canCollapseAssigned) && (
-                <div className="flex justify-center border-t border-slate-100 pt-3">
-                  {hasMoreAssigned ? (
-                    <button
-                      type="button"
-                      onClick={() => setVisibleAssigned((n) => n + 5)}
-                      className="text-sm font-medium text-primary hover:underline"
-                    >
-                      Ver más
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setVisibleAssigned(5)}
-                      className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
-                    >
-                      Ver menos
-                    </button>
-                  )}
-                </div>
-              )}
-            </section>
-          ))}
-
-        {tab === 'cola' && (
-          <div className="space-y-2">
-            <h2 className="text-base font-semibold text-slate-900">Cola de atención</h2>
-            <p className="text-xs text-slate-500">
-              Solo órdenes asignadas a ti (misma lógica que en la vista PC).
-            </p>
-            <PriorityQueuePanel ordersOverride={assigned} />
-          </div>
-        )}
-
-        {tab === 'kanban' && (
-          <div className="space-y-2">
-            <h2 className="text-base font-semibold text-slate-900">Kanban</h2>
-            <p className="text-xs text-slate-500">
-              Desliza horizontalmente para ver todas las columnas.
-            </p>
-            <div className="-mx-4 overflow-x-auto px-4 pb-2">
-              <OrdersBoard ordersOverride={assigned} horizontalScroll />
+                  Mis asignadas
+                </Button>
+                <Button
+                  size="sm"
+                  leftIcon={
+                    <RefreshCw className={syncing ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+                  }
+                  disabled={syncing || !online}
+                  onClick={() => void sync()}
+                >
+                  Sincronizar
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
 
-        {tab === 'nueva' && (
-          <div className="space-y-2">
-            <h2 className="text-base font-semibold text-slate-900">
-              Registrar OT en terreno
-            </h2>
-            <FieldOrderPanel />
-          </div>
+            {syncMessage && (
+              <p
+                role="status"
+                className="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                {syncMessage}
+              </p>
+            )}
+
+            {!selected && fieldPrefs.showMap && (
+              <OperationsMap
+                title="Mapa de trabajo"
+                ordersOverride={assigned}
+                compact
+              />
+            )}
+
+            {tab === 'terreno' &&
+              (selected ? (
+                <FieldOrderView
+                  order={selected}
+                  onBack={() => setSelectedId(null)}
+                  onAction={handleAction}
+                />
+              ) : (
+                <section className="space-y-2">
+                  <h1 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                    Mis órdenes ({assigned.length})
+                  </h1>
+                  {assigned.length === 0 && (
+                    <p className="text-sm text-slate-500">No tienes órdenes asignadas.</p>
+                  )}
+                  {visibleAssignedOrders.map((o) => (
+                    <button
+                      key={o.id}
+                      type="button"
+                      onClick={() => setSelectedId(o.id)}
+                      className={cn(
+                        'w-full rounded-xl border border-slate-100 bg-white text-left shadow-sm active:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:active:bg-slate-700',
+                        fieldPrefs.compactCards ? 'p-3' : 'p-4',
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-500">{o.id}</span>
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs dark:bg-slate-700">
+                          {o.status}
+                        </span>
+                      </div>
+                      <p
+                        className={cn(
+                          'font-medium text-slate-900 dark:text-slate-100',
+                          fieldPrefs.compactCards && 'text-sm',
+                        )}
+                      >
+                        {o.client}
+                      </p>
+                      {!fieldPrefs.compactCards && (
+                        <p className="text-sm text-slate-600 dark:text-slate-300">{o.address}</p>
+                      )}
+                    </button>
+                  ))}
+                  {(hasMoreAssigned || canCollapseAssigned) && (
+                    <div className="flex justify-center border-t border-slate-100 pt-3 dark:border-slate-700">
+                      {hasMoreAssigned ? (
+                        <button
+                          type="button"
+                          onClick={() => setVisibleAssigned((n) => n + 5)}
+                          className="text-sm font-medium text-primary hover:underline"
+                        >
+                          Ver más
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setVisibleAssigned(5)}
+                          className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:underline"
+                        >
+                          Ver menos
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </section>
+              ))}
+
+            {tab === 'cola' && (
+              <div className="space-y-2">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  Cola de atención
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Solo órdenes asignadas a ti (misma lógica que en la vista PC).
+                </p>
+                <PriorityQueuePanel ordersOverride={assigned} />
+              </div>
+            )}
+
+            {tab === 'kanban' && (
+              <div className="space-y-2">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  Kanban
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Desliza horizontalmente para ver todas las columnas.
+                </p>
+                <div className="-mx-4 overflow-x-auto px-4 pb-2">
+                  <OrdersBoard ordersOverride={assigned} horizontalScroll />
+                </div>
+              </div>
+            )}
+
+            {tab === 'nueva' && (
+              <div className="space-y-2">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  Registrar OT en terreno
+                </h2>
+                <FieldOrderPanel />
+              </div>
+            )}
+          </>
         )}
       </main>
       <ToastContainerView toasts={toasts} onRemove={removeToast} />
+      <ToastContainerView toasts={settingsToasts} onRemove={removeSettingsToast} />
     </div>
 
       <MyAssignedOrdersModal

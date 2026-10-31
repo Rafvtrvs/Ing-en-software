@@ -30,7 +30,7 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-auto bg-surface text-slate-800 dark:text-slate-100">
+    <div className="min-h-screen overflow-x-hidden bg-surface text-slate-800 dark:text-slate-100">
       <MobileFormsMode />
       <Sidebar />
 
