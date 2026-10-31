@@ -6,6 +6,8 @@ import { FormField } from '@/components/ui/FormField'
 import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { useSettingsStore } from '@/store/useSettingsStore'
+import { authService } from '@/services/authService'
+import { applySessionUser } from '@/features/auth/sessionAvatar'
 import type { UserProfileSettings } from '@/types'
 import { UserAvatar } from '@/components/layout/UserAvatar'
 import { SettingsCard } from './SettingsCard'
@@ -57,9 +59,45 @@ export function ProfileSettingsPanel() {
     reset(profile)
   }, [profile, reset])
 
-  const onSubmit = (data: UserProfileSettings) => {
-    updateProfile(data)
-    addToast('Perfil actualizado correctamente')
+  const persistProfile = async (payload: {
+    name?: string
+    phone?: string
+    avatar?: string
+    email?: string
+  }) => {
+    const authUser = await authService.updateMe({
+      name: payload.name,
+      phone: payload.phone,
+      avatar: payload.avatar,
+    })
+    applySessionUser({
+      name: authUser.name,
+      role: authUser.role,
+      email: authUser.email,
+      phone: authUser.phone,
+      avatar: authUser.avatar,
+    })
+    if (payload.email !== undefined) {
+      updateProfile({ email: payload.email })
+    }
+    return authUser
+  }
+
+  const onSubmit = async (data: UserProfileSettings) => {
+    setBusy(true)
+    try {
+      await persistProfile({
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        avatar: data.avatar,
+      })
+      addToast('Perfil actualizado correctamente')
+    } catch {
+      addToast('No se pudo guardar el perfil en el servidor', 'error')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const handlePickPhoto = async (file: File | null) => {
@@ -84,17 +122,31 @@ export function ProfileSettingsPanel() {
     }
   }
 
-  const handleCropConfirm = (croppedDataUrl: string) => {
-    setValue('avatar', croppedDataUrl, { shouldDirty: true })
-    updateProfile({ avatar: croppedDataUrl })
-    setCropSrc(null)
-    addToast('Foto de perfil actualizada')
+  const handleCropConfirm = async (croppedDataUrl: string) => {
+    setBusy(true)
+    try {
+      setValue('avatar', croppedDataUrl, { shouldDirty: true })
+      await persistProfile({ avatar: croppedDataUrl })
+      setCropSrc(null)
+      addToast('Foto de perfil actualizada')
+    } catch {
+      addToast('No se pudo guardar la foto en el servidor', 'error')
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const handleRemovePhoto = () => {
-    setValue('avatar', '', { shouldDirty: true })
-    updateProfile({ avatar: '' })
-    addToast('Foto de perfil eliminada')
+  const handleRemovePhoto = async () => {
+    setBusy(true)
+    try {
+      setValue('avatar', '', { shouldDirty: true })
+      await persistProfile({ avatar: '' })
+      addToast('Foto de perfil eliminada')
+    } catch {
+      addToast('No se pudo eliminar la foto en el servidor', 'error')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (

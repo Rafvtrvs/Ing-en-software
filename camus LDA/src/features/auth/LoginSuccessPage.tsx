@@ -27,6 +27,9 @@ export function LoginSuccessPage() {
       applySessionUser({
         name: authUser.name,
         role: authUser.role,
+        email: authUser.email,
+        phone: authUser.phone,
+        avatar: authUser.avatar,
       })
       useAccessLogStore.getState().recordLogin({
         id: authUser.id,

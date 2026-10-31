@@ -8,6 +8,8 @@ import { Switch } from '@/components/ui/Switch'
 import { UserAvatar } from '@/components/layout/UserAvatar'
 import { AvatarCropModal } from '@/features/settings/components/AvatarCropModal'
 import { useSettingsStore } from '@/store/useSettingsStore'
+import { authService } from '@/services/authService'
+import { applySessionUser } from '@/features/auth/sessionAvatar'
 import type { AppAppearanceSettings } from '@/types'
 
 const ACCENT_PRESETS = ['#1B8634', '#2563eb', '#0f766e', '#7c3aed', '#c2410c']
@@ -77,7 +79,6 @@ export function FieldMobileSettings({
 }: FieldMobileSettingsProps) {
   const profile = useSettingsStore((s) => s.config.profile)
   const appearance = useSettingsStore((s) => s.config.appearance)
-  const updateProfile = useSettingsStore((s) => s.updateProfile)
   const updateAppearance = useSettingsStore((s) => s.updateAppearance)
   const resetAppearance = useSettingsStore((s) => s.resetAppearance)
   const addToast = useSettingsStore((s) => s.addToast)
@@ -171,9 +172,26 @@ export function FieldMobileSettings({
                 size="sm"
                 variant="ghost"
                 leftIcon={<Trash2 className="h-4 w-4" />}
+                disabled={busy}
                 onClick={() => {
-                  updateProfile({ avatar: '' })
-                  addToast('Foto de perfil eliminada')
+                  void (async () => {
+                    setBusy(true)
+                    try {
+                      const user = await authService.updateMe({ avatar: '' })
+                      applySessionUser({
+                        name: user.name,
+                        role: user.role,
+                        email: user.email,
+                        phone: user.phone,
+                        avatar: user.avatar,
+                      })
+                      addToast('Foto de perfil eliminada')
+                    } catch {
+                      addToast('No se pudo eliminar la foto', 'error')
+                    } finally {
+                      setBusy(false)
+                    }
+                  })()
                 }}
               >
                 Quitar foto
@@ -191,9 +209,29 @@ export function FieldMobileSettings({
         <Button
           type="button"
           className="w-full justify-center"
+          disabled={busy}
           onClick={() => {
-            updateProfile({ name: name.trim(), phone: phone.trim() })
-            addToast('Perfil actualizado')
+            void (async () => {
+              setBusy(true)
+              try {
+                const user = await authService.updateMe({
+                  name: name.trim(),
+                  phone: phone.trim(),
+                })
+                applySessionUser({
+                  name: user.name,
+                  role: user.role,
+                  email: user.email,
+                  phone: user.phone,
+                  avatar: user.avatar,
+                })
+                addToast('Perfil actualizado')
+              } catch {
+                addToast('No se pudo guardar el perfil', 'error')
+              } finally {
+                setBusy(false)
+              }
+            })()
           }}
         >
           Guardar perfil
@@ -302,9 +340,25 @@ export function FieldMobileSettings({
         imageSrc={cropSrc}
         onClose={() => setCropSrc(null)}
         onConfirm={(url) => {
-          updateProfile({ avatar: url })
-          setCropSrc(null)
-          addToast('Foto de perfil actualizada')
+          void (async () => {
+            setBusy(true)
+            try {
+              const user = await authService.updateMe({ avatar: url })
+              applySessionUser({
+                name: user.name,
+                role: user.role,
+                email: user.email,
+                phone: user.phone,
+                avatar: user.avatar,
+              })
+              setCropSrc(null)
+              addToast('Foto de perfil actualizada')
+            } catch {
+              addToast('No se pudo guardar la foto', 'error')
+            } finally {
+              setBusy(false)
+            }
+          })()
         }}
       />
     </div>

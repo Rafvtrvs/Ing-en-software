@@ -10,8 +10,10 @@ function toUserDto(u: {
   estado: string
   ultimoAcceso: Date | null
   idRol: number | null
+  avatarUrl?: string | null
   rol?: { id: number; nombre: string } | null
 }) {
+  const stored = u.avatarUrl?.trim()
   return {
     id: String(u.id),
     name: u.nombre,
@@ -22,7 +24,9 @@ function toUserDto(u: {
     status: u.estado,
     lastLogin: u.ultimoAcceso ? u.ultimoAcceso.toISOString() : '—',
     createdAt: undefined as string | undefined,
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.nombre)}`,
+    avatar:
+      stored ||
+      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.nombre)}`,
     emailLinked: Boolean(u.correoElectronico),
   }
 }

@@ -4,20 +4,28 @@ import { useAppStore } from '@/store/useAppStore'
 import { applySessionUser } from '@/features/auth/sessionAvatar'
 import type { OrderPermissionUser } from '@/features/orders/utils/canEditOrder'
 
-/** Usuario de sesión (JWT) + hidrata el store al montar (conserva foto de perfil). */
+/** Usuario de sesión (JWT) + hidrata el store al montar (avatar desde BD). */
 export function useSessionUser(): OrderPermissionUser {
   const appUser = useAppStore((s) => s.user)
 
   useEffect(() => {
     const authUser = authService.getUser()
     if (!authUser) return
-    if (appUser.name !== authUser.name || appUser.role !== authUser.role) {
+    const avatar = authUser.avatar?.trim() || ''
+    const needsSync =
+      appUser.name !== authUser.name ||
+      appUser.role !== authUser.role ||
+      (appUser.avatar || '') !== avatar
+    if (needsSync) {
       applySessionUser({
         name: authUser.name,
         role: authUser.role,
+        email: authUser.email,
+        phone: authUser.phone,
+        avatar: authUser.avatar,
       })
     }
-  }, [appUser.name, appUser.role])
+  }, [appUser.name, appUser.role, appUser.avatar])
 
   return useMemo(() => {
     const authUser = authService.getUser()

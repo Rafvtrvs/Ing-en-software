@@ -52,6 +52,8 @@ model Usuario {
   passwordHash     String    @default("") @map("password_hash") @db.VarChar(255)
   firebaseUid      String    @default("") @map("firebase_uid") @db.VarChar(128)
   telefono         String    @default("") @db.VarChar(20)
+  // Foto de perfil (data URL o URL http) por usuario
+  avatarUrl        String    @default("") @map("avatar_url") @db.Text
   idRol            Int?      @map("id_rol")
   estado           String    @default("Activo") @db.VarChar(20)
   ultimoAcceso     DateTime? @map("ultimo_acceso")

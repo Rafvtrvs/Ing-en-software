@@ -16,7 +16,26 @@ export const authController = {
     }
   },
 
-  me(req: Request, res: Response) {
-    res.json({ user: req.user ?? null })
+  async me(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.user?.sub
+      if (id == null) return res.status(401).json({ error: 'No autenticado' })
+      const user = await authService.getMe(id)
+      res.json({ user })
+    } catch (err) {
+      next(err)
+    }
+  },
+
+  async updateMe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.user?.sub
+      if (id == null) return res.status(401).json({ error: 'No autenticado' })
+      const { name, phone, avatar } = req.body ?? {}
+      const user = await authService.updateMe(id, { name, phone, avatar })
+      res.json({ user })
+    } catch (err) {
+      next(err)
+    }
   },
 }

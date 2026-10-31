@@ -33,6 +33,7 @@ router.get('/map/orders/:id', (_req, res) => {
 // Auth
 router.post('/auth/login', authController.login)
 router.get('/auth/me', requireAuth, authController.me)
+router.put('/auth/me', requireAuth, authController.updateMe)
 
 // Clientes
 router.get('/clients', optionalAuth, clientController.list)
