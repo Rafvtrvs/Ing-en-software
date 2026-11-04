@@ -77,7 +77,7 @@ export function InvoiceFormModal({ mode, invoice, open, onClose }: InvoiceFormMo
     }
   }, [open, mode, invoice, reset])
 
-  const onSubmit = (data: InvoiceFormValues) => {
+  const onSubmit = async (data: InvoiceFormValues) => {
     const amount = Number(data.amount.replace(/\D/g, '')) || 0
     const payload = {
       client: data.client,
@@ -91,11 +91,22 @@ export function InvoiceFormModal({ mode, invoice, open, onClose }: InvoiceFormMo
     }
 
     if (mode === 'create') {
-      addInvoice(payload)
-      addToast(`Factura para "${data.client}" creada correctamente`)
+      const result = await addInvoice(payload)
+      if (!result.ok) {
+        addToast(result.message ?? 'No se pudo crear la factura', 'error')
+        return
+      }
+      addToast(
+        result.message ??
+          `Factura para "${data.client}" creada correctamente`,
+      )
     } else if (invoice) {
-      updateInvoice(invoice.id, payload)
-      addToast(`Factura ${invoice.number} actualizada`)
+      const result = await updateInvoice(invoice.id, payload)
+      if (!result.ok) {
+        addToast(result.message ?? 'No se pudo actualizar la factura', 'error')
+        return
+      }
+      addToast(result.message ?? `Factura ${invoice.number} actualizada`)
     }
     onClose()
   }

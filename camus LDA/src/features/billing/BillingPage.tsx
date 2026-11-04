@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -17,12 +18,17 @@ import { RegisterPaymentModal } from './components/RegisterPaymentModal'
 
 export function BillingPage() {
   const invoices = useBillingStore((s) => s.invoices)
+  const syncFromApi = useBillingStore((s) => s.syncFromApi)
   const modalMode = useBillingStore((s) => s.modalMode)
   const selectedInvoice = useBillingStore((s) => s.selectedInvoice)
   const openCreateModal = useBillingStore((s) => s.openCreateModal)
   const closeModal = useBillingStore((s) => s.closeModal)
   const toasts = useBillingStore((s) => s.toasts)
   const removeToast = useBillingStore((s) => s.removeToast)
+
+  useEffect(() => {
+    void syncFromApi()
+  }, [syncFromApi])
 
   const kpis = getBillingKpis(invoices)
 

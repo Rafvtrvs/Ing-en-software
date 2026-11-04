@@ -53,9 +53,14 @@ export function ReportsPage() {
 
   const orders = useOrdersStore((s) => s.orders)
   const invoices = useBillingStore((s) => s.invoices)
+  const syncBillingFromApi = useBillingStore((s) => s.syncFromApi)
   const products = useInventoryStore((s) => s.products)
   const clients = useClientsStore((s) => s.clients)
   const [searchParams] = useSearchParams()
+
+  useEffect(() => {
+    void syncBillingFromApi()
+  }, [syncBillingFromApi])
 
   useEffect(() => {
     const tab = searchParams.get('tab') as ReportTab | null

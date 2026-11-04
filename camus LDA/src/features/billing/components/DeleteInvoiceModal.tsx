@@ -16,9 +16,13 @@ export function DeleteInvoiceModal({ invoice, open, onClose }: DeleteInvoiceModa
 
   if (!invoice) return null
 
-  const handleDelete = () => {
-    deleteInvoice(invoice.id)
-    addToast(`Factura ${invoice.number} eliminada`, 'info')
+  const handleDelete = async () => {
+    const result = await deleteInvoice(invoice.id)
+    if (!result.ok) {
+      addToast(result.message ?? 'No se pudo eliminar la factura', 'error')
+      return
+    }
+    addToast(result.message ?? `Factura ${invoice.number} eliminada`, 'info')
     onClose()
   }
 

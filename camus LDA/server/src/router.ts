@@ -18,6 +18,7 @@ import { documentController } from './controllers/document.controller.js'
 import { assetController } from './controllers/asset.controller.js'
 import { reportController } from './controllers/report.controller.js'
 import { userController } from './controllers/user.controller.js'
+import { invoiceController } from './controllers/invoice.controller.js'
 
 export const router = Router()
 
@@ -100,6 +101,27 @@ router.post('/estimates/calculate', requireAuth, costRoles, estimateController.c
 router.post('/estimates', requireAuth, costRoles, estimateController.create)
 router.get('/estimates', requireAuth, costRoles, estimateController.list)
 router.get('/estimates/:id', requireAuth, costRoles, estimateController.get)
+
+// Facturación (Factura + Pago en PostgreSQL)
+const billingRoles = requireRole('admin', 'jefe', 'supervisor')
+router.get('/invoices', requireAuth, billingRoles, invoiceController.list)
+router.get('/invoices/payments', requireAuth, billingRoles, invoiceController.listPayments)
+router.get('/invoices/:id', requireAuth, billingRoles, invoiceController.get)
+router.post('/invoices', requireAuth, billingRoles, invoiceController.create)
+router.put('/invoices/:id', requireAuth, billingRoles, invoiceController.update)
+router.delete('/invoices/:id', requireAuth, billingRoles, invoiceController.remove)
+router.post(
+  '/invoices/:id/payments',
+  requireAuth,
+  billingRoles,
+  invoiceController.registerPayment,
+)
+router.post(
+  '/invoices/:id/mark-paid',
+  requireAuth,
+  billingRoles,
+  invoiceController.markAsPaid,
+)
 
 // Documentos / contratos / reportes (RF-40..42)
 router.get(

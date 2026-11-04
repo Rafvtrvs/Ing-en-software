@@ -44,7 +44,7 @@ export function RegisterPaymentModal({ invoice, open, onClose }: RegisterPayment
 
   if (!invoice) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const value = Number(amount)
     if (!value || value <= 0) {
@@ -55,16 +55,21 @@ export function RegisterPaymentModal({ invoice, open, onClose }: RegisterPayment
       addToast('El monto supera el saldo pendiente', 'error')
       return
     }
-    registerPayment(invoice.id, {
+    const result = await registerPayment(invoice.id, {
       amount: value,
       method,
       reference,
       notes,
     })
+    if (!result.ok) {
+      addToast(result.message ?? 'No se pudo registrar el pago', 'error')
+      return
+    }
     addToast(
-      value >= pending
-        ? `Pago total registrado — Factura ${invoice.number}`
-        : `Abono parcial registrado — Factura ${invoice.number}`,
+      result.message ??
+        (value >= pending
+          ? `Pago total registrado — Factura ${invoice.number}`
+          : `Abono parcial registrado — Factura ${invoice.number}`),
     )
     onClose()
   }

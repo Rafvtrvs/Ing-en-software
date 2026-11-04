@@ -40,6 +40,7 @@ export function DashboardPage() {
   const user = useAppStore((s) => s.user)
   const orders = useOrdersStore((s) => s.orders)
   const syncFromApi = useOrdersStore((s) => s.syncFromApi)
+  const syncBillingFromApi = useBillingStore((s) => s.syncFromApi)
   const invoices = useBillingStore((s) => s.invoices)
   const payments = useBillingStore((s) => s.payments)
   const products = useInventoryStore((s) => s.products)
@@ -63,7 +64,7 @@ export function DashboardPage() {
   const handleRefresh = async () => {
     setRefreshing(true)
     try {
-      await syncFromApi()
+      await Promise.all([syncFromApi(), syncBillingFromApi()])
     } finally {
       setLastUpdated(new Date())
       setRefreshTick((t) => t + 1)

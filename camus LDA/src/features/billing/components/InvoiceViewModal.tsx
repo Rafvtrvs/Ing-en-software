@@ -47,9 +47,13 @@ export function InvoiceViewModal({ invoice, open, onClose }: InvoiceViewModalPro
     openEditModal(invoice)
   }
 
-  const handleMarkPaid = () => {
-    markAsPaid(invoice.id, 'Transferencia')
-    addToast(`Factura ${invoice.number} marcada como pagada`)
+  const handleMarkPaid = async () => {
+    const result = await markAsPaid(invoice.id, 'Transferencia')
+    if (!result.ok) {
+      addToast(result.message ?? 'No se pudo marcar como pagada', 'error')
+      return
+    }
+    addToast(result.message ?? `Factura ${invoice.number} marcada como pagada`)
     onClose()
   }
 
