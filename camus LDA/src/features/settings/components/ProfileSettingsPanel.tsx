@@ -161,7 +161,7 @@ export function ProfileSettingsPanel() {
             <UserAvatar size="lg" src={avatar || null} />
             <div className="space-y-2">
               <p className="text-sm text-slate-500">
-                Subí un PNG o JPG y ajustá el recorte (máx. 5 MB).
+                Sube un PNG o JPG y ajustá el recorte (máx. 5 MB).
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button

@@ -1,6 +1,132 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from '../db/prisma.js'
+import { env } from '../config/env.js'
+import { getFirebaseAuth } from '../external/firebaseAdmin.js'
 import { auditService } from './audit.service.js'
+
+/**
+ * Crea o vincula el usuario en Firebase Auth y devuelve el uid.
+ * Si AUTH_PROVIDER=firebase y no hay Admin SDK, falla (no dejamos altas a medias).
+ */
+async function ensureFirebaseAuthUser(opts: {
+  email: string
+  password: string
+  displayName: string
+  existingUid?: string
+}): Promise<string | null> {
+  const auth = getFirebaseAuth()
+  if (!auth) {
+    if (env.auth.provider === 'firebase') {
+      const err = new Error(
+        'Firebase Admin no está configurado: no se puede crear el usuario en Authentication',
+      ) as Error & { status: number }
+      err.status = 503
+      throw err
+    }
+    return null
+  }
+
+  const email = opts.email.trim().toLowerCase()
+
+  if (opts.existingUid) {
+    try {
+      await auth.updateUser(opts.existingUid, {
+        email,
+        password: opts.password,
+        displayName: opts.displayName,
+        disabled: false,
+      })
+      return opts.existingUid
+    } catch (e: unknown) {
+      const code = (e as { code?: string }).code
+      if (code !== 'auth/user-not-found') throw mapFirebaseAuthError(e)
+    }
+  }
+
+  try {
+    const created = await auth.createUser({
+      email,
+      password: opts.password,
+      displayName: opts.displayName,
+      emailVerified: false,
+      disabled: false,
+    })
+    return created.uid
+  } catch (e: unknown) {
+    const code = (e as { code?: string }).code
+    if (code === 'auth/email-already-exists') {
+      const existing = await auth.getUserByEmail(email)
+      await auth.updateUser(existing.uid, {
+        password: opts.password,
+        displayName: opts.displayName,
+        disabled: false,
+      })
+      return existing.uid
+    }
+    throw mapFirebaseAuthError(e)
+  }
+}
+
+async function syncFirebasePasswordAndProfile(opts: {
+  uid: string
+  email?: string
+  password?: string
+  displayName?: string
+  disabled?: boolean
+}) {
+  const auth = getFirebaseAuth()
+  if (!auth) {
+    if (env.auth.provider === 'firebase' && opts.password) {
+      const err = new Error(
+        'Firebase Admin no está configurado: no se pudo actualizar la contraseña en Authentication',
+      ) as Error & { status: number }
+      err.status = 503
+      throw err
+    }
+    return
+  }
+  try {
+    await auth.updateUser(opts.uid, {
+      ...(opts.email ? { email: opts.email } : null),
+      ...(opts.password ? { password: opts.password } : null),
+      ...(opts.displayName !== undefined ? { displayName: opts.displayName } : null),
+      ...(opts.disabled !== undefined ? { disabled: opts.disabled } : null),
+    })
+  } catch (e: unknown) {
+    const code = (e as { code?: string }).code
+    if (code === 'auth/user-not-found' && opts.password && opts.email) {
+      const created = await auth.createUser({
+        uid: opts.uid,
+        email: opts.email,
+        password: opts.password,
+        displayName: opts.displayName,
+        disabled: opts.disabled ?? false,
+      })
+      return created.uid
+    }
+    throw mapFirebaseAuthError(e)
+  }
+}
+
+function mapFirebaseAuthError(e: unknown): Error & { status: number } {
+  const code = (e as { code?: string }).code ?? ''
+  const message = (e as { message?: string }).message ?? 'Error de Firebase Auth'
+  const err = new Error(message) as Error & { status: number }
+  if (code === 'auth/invalid-password' || code === 'auth/weak-password') {
+    err.message = 'La contraseña no cumple la política de Firebase (mín. 6 caracteres)'
+    err.status = 400
+  } else if (code === 'auth/invalid-email') {
+    err.message = 'Email inválido para Firebase Auth'
+    err.status = 400
+  } else if (code === 'auth/email-already-exists') {
+    err.message = 'Ese email ya existe en Firebase Auth'
+    err.status = 409
+  } else {
+    err.message = `Firebase Auth: ${message}`
+    err.status = 502
+  }
+  return err
+}
 
 function toUserDto(u: {
   id: number
@@ -146,10 +272,11 @@ export const userService = {
       err.status = 400
       throw err
     }
-    if (!input.password || input.password.length < 6) {
-      const err = new Error('La contraseña debe tener al menos 6 caracteres') as Error & {
-        status: number
-      }
+    const minPass = env.auth.provider === 'firebase' ? 8 : 6
+    if (!input.password || input.password.length < minPass) {
+      const err = new Error(
+        `La contraseña debe tener al menos ${minPass} caracteres`,
+      ) as Error & { status: number }
       err.status = 400
       throw err
     }
@@ -181,25 +308,51 @@ export const userService = {
       throw err
     }
 
+    // 1) Firebase Auth (si hay Admin / modo firebase) → 2) Postgres con firebaseUid
+    const displayName = input.name.trim()
+    const firebaseUid = await ensureFirebaseAuthUser({
+      email,
+      password: input.password,
+      displayName,
+    })
+
     const passwordHash = await bcrypt.hash(input.password, 10)
     const avatarUrl = normalizeAvatar(input.avatar)
-    const row = await prisma.usuario.create({
-      data: {
-        nombre: input.name.trim(),
-        correoElectronico: email,
-        telefono: input.phone?.trim() ?? '',
-        passwordHash,
-        idRol,
-        estado: input.status || 'Activo',
-        ...(avatarUrl !== undefined ? { avatarUrl } : null),
-      },
-      include: { rol: true },
-    })
+    let row
+    try {
+      row = await prisma.usuario.create({
+        data: {
+          nombre: displayName,
+          correoElectronico: email,
+          telefono: input.phone?.trim() ?? '',
+          passwordHash,
+          idRol,
+          estado: input.status || 'Activo',
+          ...(firebaseUid ? { firebaseUid } : null),
+          ...(avatarUrl !== undefined ? { avatarUrl } : null),
+        },
+        include: { rol: true },
+      })
+    } catch (dbErr) {
+      // Evitar usuario huérfano en Firebase si falló Postgres
+      if (firebaseUid) {
+        try {
+          await getFirebaseAuth()?.deleteUser(firebaseUid)
+        } catch {
+          /* ignore */
+        }
+      }
+      throw dbErr
+    }
 
     await auditService.log({
       modulo: 'usuarios',
       accion: 'crear',
-      valorNuevo: { id: row.id, email: row.correoElectronico },
+      valorNuevo: {
+        id: row.id,
+        email: row.correoElectronico,
+        firebaseUid: firebaseUid || undefined,
+      },
       idUsuario: actorId,
     })
 
@@ -248,17 +401,51 @@ export const userService = {
       idRol?: number | null
       passwordHash?: string
       avatarUrl?: string
+      firebaseUid?: string
     } = {}
     if (input.name !== undefined) data.nombre = input.name.trim()
     if (input.email !== undefined) data.correoElectronico = input.email.trim().toLowerCase()
     if (input.phone !== undefined) data.telefono = input.phone.trim()
     if (input.status !== undefined) data.estado = input.status
     if (idRol !== undefined) data.idRol = idRol
-    if (input.password && input.password.length >= 6) {
+    const minPass = env.auth.provider === 'firebase' ? 8 : 6
+    if (input.password && input.password.length > 0 && input.password.length < minPass) {
+      const err = new Error(
+        `La contraseña debe tener al menos ${minPass} caracteres`,
+      ) as Error & { status: number }
+      err.status = 400
+      throw err
+    }
+    if (input.password && input.password.length >= minPass) {
       data.passwordHash = await bcrypt.hash(input.password, 10)
     }
     if (input.avatar !== undefined) {
       data.avatarUrl = normalizeAvatar(input.avatar) ?? ''
+    }
+
+    const nextEmail = data.correoElectronico ?? before.correoElectronico
+    const nextName = data.nombre ?? before.nombre
+    const nextStatus = data.estado ?? before.estado
+    const disabled = nextStatus !== 'Activo'
+
+    // Mantener Firebase alineado (clave / email / baja lógica)
+    if (before.firebaseUid) {
+      await syncFirebasePasswordAndProfile({
+        uid: before.firebaseUid,
+        email: nextEmail,
+        displayName: nextName,
+        ...(input.password && input.password.length >= minPass
+          ? { password: input.password }
+          : null),
+        disabled,
+      })
+    } else if (input.password && input.password.length >= minPass) {
+      const uid = await ensureFirebaseAuthUser({
+        email: nextEmail,
+        password: input.password,
+        displayName: nextName,
+      })
+      if (uid) data.firebaseUid = uid
     }
 
     const row = await prisma.usuario.update({
@@ -271,7 +458,11 @@ export const userService = {
       modulo: 'usuarios',
       accion: 'actualizar',
       valorAnterior: { id: before.id, email: before.correoElectronico },
-      valorNuevo: { id: row.id, email: row.correoElectronico },
+      valorNuevo: {
+        id: row.id,
+        email: row.correoElectronico,
+        firebaseUid: row.firebaseUid || undefined,
+      },
       idUsuario: actorId,
     })
 

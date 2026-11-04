@@ -76,7 +76,7 @@ async function resolveUserFromFirebase(uid: string, email: string) {
   })
   if (!user) {
     throw Object.assign(
-      new Error('Usuario no registrado en Camus. Pedí alta al administrador.'),
+      new Error('Usuario no registrado en CamusLDA.'),
       { status: 403 },
     )
   }
@@ -102,7 +102,7 @@ export const authService = {
   async login(email: string, password: string) {
     if (env.auth.provider === 'firebase') {
       throw Object.assign(
-        new Error('Usá Firebase Auth: enviá idToken en el body'),
+        new Error('Usa Firebase Auth: envía idToken en el body'),
         { status: 400 },
       )
     }
