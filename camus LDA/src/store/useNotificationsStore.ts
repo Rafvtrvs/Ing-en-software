@@ -109,7 +109,7 @@ export const useNotificationsStore = create<NotificationsState>()(
           message: `La orden de ${client} cambió de "${previousStatus}" a "${newStatus}".`,
           type: 'order',
           orderId,
-          link: ROUTES.ORDENES,
+          link: `${ROUTES.ORDENES}?order=${encodeURIComponent(orderId)}`,
         })
       },
 
@@ -127,7 +127,7 @@ export const useNotificationsStore = create<NotificationsState>()(
           message: `La orden de ${client} — ${detail}`,
           type: 'order',
           orderId,
-          link: ROUTES.ORDENES,
+          link: `${ROUTES.ORDENES}?order=${encodeURIComponent(orderId)}`,
         })
       },
 
@@ -138,7 +138,7 @@ export const useNotificationsStore = create<NotificationsState>()(
           message: `Se creó una orden para ${client}${detail} (estado: ${status}).`,
           type: 'order',
           orderId,
-          link: ROUTES.ORDENES,
+          link: `${ROUTES.ORDENES}?order=${encodeURIComponent(orderId)}`,
         })
       },
 

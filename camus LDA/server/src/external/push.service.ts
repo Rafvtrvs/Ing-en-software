@@ -9,6 +9,10 @@ export interface PushMessage {
   token: string
   title: string
   body: string
+  /** Ruta de la app, p. ej. /ordenes?order=OT-1 */
+  link?: string
+  orderId?: string
+  notifType?: 'order' | 'system' | 'inventory'
 }
 
 export interface PushService {
@@ -18,7 +22,9 @@ export interface PushService {
 class MockPushService implements PushService {
   async notify(message: PushMessage) {
     const id = `mock-push-${Date.now()}`
-    console.log(`[push:mock] -> ${message.title} | ${message.body} (id: ${id})`)
+    console.log(
+      `[push:mock] -> ${message.title} | ${message.body} | link=${message.link ?? '-'} (id: ${id})`,
+    )
     return { id }
   }
 }
@@ -32,16 +38,24 @@ class FcmPushService implements PushService {
     }
     const title = String(message.title ?? 'Camus LDA')
     const body = String(message.body ?? '')
-    // `notification` = texto visible en el sistema (detallado).
-    // `data` = mismo contenido para campanita / SW.
-    // El SW NO vuelve a llamar showNotification si ya viene `notification`.
+    const link = String(message.link ?? '/')
+    const data: Record<string, string> = {
+      title,
+      body,
+      link,
+      notifType: message.notifType ?? 'system',
+    }
+    if (message.orderId) data.orderId = String(message.orderId)
+
     const id = await messaging.send({
       token: message.token,
       notification: { title, body },
-      data: { title, body },
+      data,
       webpush: {
         fcmOptions: {
-          link: process.env.CORS_ORIGIN?.split(',')[0]?.trim() || 'https://camuslda.web.app',
+          link:
+            (process.env.CORS_ORIGIN?.split(',')[0]?.trim() || 'https://camuslda.web.app') +
+            (link.startsWith('/') ? link : `/${link}`),
         },
         headers: { Urgency: 'high' },
       },

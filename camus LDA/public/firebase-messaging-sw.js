@@ -18,7 +18,7 @@ function configFromQuery() {
   }
 }
 
-function titleBody(payload) {
+function pickPayload(payload) {
   const title =
     (payload.notification && payload.notification.title) ||
     (payload.data && payload.data.title) ||
@@ -27,10 +27,19 @@ function titleBody(payload) {
     (payload.notification && payload.notification.body) ||
     (payload.data && payload.data.body) ||
     ''
-  return { title: String(title), body: String(body) }
+  const link = (payload.data && payload.data.link) || '/'
+  const orderId = (payload.data && payload.data.orderId) || ''
+  const notifType = (payload.data && payload.data.notifType) || 'system'
+  return {
+    title: String(title),
+    body: String(body),
+    link: String(link),
+    orderId: String(orderId),
+    notifType: String(notifType),
+  }
 }
 
-function queueInbox(title, body) {
+function queueInbox(item) {
   try {
     const req = indexedDB.open('camus-fcm', 1)
     req.onupgradeneeded = () => {
@@ -42,15 +51,15 @@ function queueInbox(title, body) {
     req.onsuccess = () => {
       const db = req.result
       const tx = db.transaction('inbox', 'readwrite')
-      tx.objectStore('inbox').add({ title, body, at: Date.now() })
+      tx.objectStore('inbox').add({ ...item, at: Date.now() })
     }
   } catch (_) {
     /* ignore */
   }
 }
 
-function notifyOpenClients(title, body) {
-  const msg = { type: 'CAMUS_FCM', title, body }
+function notifyOpenClients(item) {
+  const msg = { type: 'CAMUS_FCM', ...item }
   try {
     const bc = new BroadcastChannel('camus-fcm')
     bc.postMessage(msg)
@@ -68,19 +77,35 @@ if (cfg.apiKey && cfg.projectId && cfg.appId) {
   firebase.initializeApp(cfg)
   const messaging = firebase.messaging()
   messaging.onBackgroundMessage((payload) => {
-    const { title, body } = titleBody(payload)
-    // Si FCM ya trae `notification`, el navegador la muestra solo.
-    // Solo dibujamos nosotros cuando el payload es data-only.
+    const item = pickPayload(payload)
     if (!payload.notification) {
-      self.registration.showNotification(title, {
-        body,
+      self.registration.showNotification(item.title, {
+        body: item.body,
         icon: '/vite.svg',
-        tag: `camus-${title}`.slice(0, 64),
+        tag: `camus-${item.title}`.slice(0, 64),
         renotify: false,
-        data: payload.data || {},
+        data: { link: item.link, orderId: item.orderId },
       })
     }
-    queueInbox(title, body)
-    notifyOpenClients(title, body)
+    queueInbox(item)
+    notifyOpenClients(item)
   })
 }
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const link =
+    (event.notification.data && event.notification.data.link) || '/'
+  const url = new URL(link, self.location.origin).href
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ('focus' in client) {
+          client.postMessage({ type: 'CAMUS_FCM_NAV', link })
+          return client.focus()
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(url)
+    }),
+  )
+})

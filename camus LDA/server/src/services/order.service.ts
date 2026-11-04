@@ -224,6 +224,9 @@ export const orderService = {
       await notifyAdmins({
         title: `OT ${id}: ${before.estado} → ${row.estado}`,
         body: `${clienteNombre} · ${servicio}. Estado cambió de "${before.estado}" a "${row.estado}".`,
+        link: `/ordenes?order=${encodeURIComponent(id)}`,
+        orderId: id,
+        notifType: 'order',
         excludeUserId: userId,
       })
     }

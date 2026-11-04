@@ -2,6 +2,8 @@ import { getToken, onMessage } from 'firebase/messaging'
 import { authService } from '@/services/authService'
 import { firebaseVapidKey, getFirebaseMessaging, isFirebaseConfigured } from '@/lib/firebase'
 import { useNotificationsStore } from '@/store/useNotificationsStore'
+import { ROUTES } from '@/constants/routes'
+import type { NotificationType } from '@/types'
 
 const TOKEN_STORAGE = 'camus_fcm_token'
 const INBOX_DB = 'camus-fcm'
@@ -18,12 +20,53 @@ function isAdminRole(role: string): boolean {
     .includes('administrador')
 }
 
-function pushToCampanita(title: string, body: string) {
+type FcmCampanitaItem = {
+  title: string
+  body: string
+  link?: string
+  orderId?: string
+  notifType?: string
+}
+
+function resolveLink(item: FcmCampanitaItem): string {
+  if (item.link && item.link !== '/') return item.link
+  if (item.orderId) return `${ROUTES.ORDENES}?order=${encodeURIComponent(item.orderId)}`
+  const blob = `${item.title} ${item.body}`.toLowerCase()
+  if (blob.includes('inicio de sesión') || blob.includes('inicio de sesion')) {
+    return ROUTES.USUARIOS
+  }
+  if (blob.includes('ot ') || blob.includes('orden') || blob.includes('estado')) {
+    const match = `${item.title} ${item.body}`.match(/OT-[\w-]+/i)
+    if (match) return `${ROUTES.ORDENES}?order=${encodeURIComponent(match[0])}`
+    return ROUTES.ORDENES
+  }
+  if (blob.includes('inventario') || blob.includes('producto') || blob.includes('maquinaria')) {
+    return ROUTES.INVENTARIO
+  }
+  return ROUTES.DASHBOARD
+}
+
+function resolveType(item: FcmCampanitaItem): NotificationType {
+  if (item.notifType === 'order' || item.notifType === 'inventory' || item.notifType === 'system') {
+    return item.notifType
+  }
+  const link = resolveLink(item)
+  if (link.startsWith(ROUTES.ORDENES)) return 'order'
+  if (link.startsWith(ROUTES.INVENTARIO)) return 'inventory'
+  return 'system'
+}
+
+function pushToCampanita(item: FcmCampanitaItem) {
+  const link = resolveLink(item)
+  const orderId =
+    item.orderId ||
+    (link.includes('order=') ? decodeURIComponent(link.split('order=')[1] ?? '') : undefined)
   useNotificationsStore.getState().addNotification({
-    title: title || 'Camus LDA',
-    message: body || '',
-    type: 'system',
-    link: '/',
+    title: item.title || 'Camus LDA',
+    message: item.body || '',
+    type: resolveType(item),
+    link,
+    ...(orderId ? { orderId } : null),
   })
 }
 
@@ -41,7 +84,6 @@ function openInboxDb(): Promise<IDBDatabase> {
   })
 }
 
-/** Vacía la cola que el SW guardó mientras la pestaña estaba minimizada. */
 export async function drainFcmInboxToCampanita(): Promise<void> {
   try {
     const db = await openInboxDb()
@@ -49,10 +91,10 @@ export async function drainFcmInboxToCampanita(): Promise<void> {
       db.close()
       return
     }
-    const items = await new Promise<Array<{ title?: string; body?: string }>>((resolve, reject) => {
+    const items = await new Promise<FcmCampanitaItem[]>((resolve, reject) => {
       const tx = db.transaction(INBOX_STORE, 'readonly')
       const req = tx.objectStore(INBOX_STORE).getAll()
-      req.onsuccess = () => resolve((req.result as Array<{ title?: string; body?: string }>) ?? [])
+      req.onsuccess = () => resolve((req.result as FcmCampanitaItem[]) ?? [])
       req.onerror = () => reject(req.error)
     })
     const clearTx = db.transaction(INBOX_STORE, 'readwrite')
@@ -63,7 +105,13 @@ export async function drainFcmInboxToCampanita(): Promise<void> {
     })
     db.close()
     for (const item of items) {
-      pushToCampanita(item.title ?? 'Camus LDA', item.body ?? '')
+      pushToCampanita({
+        title: item.title ?? 'Camus LDA',
+        body: item.body ?? '',
+        link: item.link,
+        orderId: item.orderId,
+        notifType: item.notifType,
+      })
     }
   } catch {
     /* ignore */
@@ -74,20 +122,31 @@ function bindCampanitaBridges() {
   if (bridgesBound || typeof window === 'undefined') return
   bridgesBound = true
 
+  const onFcmMessage = (data: FcmCampanitaItem & { type?: string }) => {
+    if (data.type === 'CAMUS_FCM_NAV' && data.link) {
+      window.location.assign(data.link.startsWith('http') ? data.link : data.link)
+      return
+    }
+    if (data.type && data.type !== 'CAMUS_FCM') return
+    pushToCampanita({
+      title: data.title ?? 'Camus LDA',
+      body: data.body ?? '',
+      link: data.link,
+      orderId: data.orderId,
+      notifType: data.notifType,
+    })
+  }
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', (event) => {
-      const data = event.data as { type?: string; title?: string; body?: string } | undefined
-      if (data?.type !== 'CAMUS_FCM') return
-      pushToCampanita(data.title ?? 'Camus LDA', data.body ?? '')
+      onFcmMessage((event.data ?? {}) as FcmCampanitaItem & { type?: string })
     })
   }
 
   try {
     const bc = new BroadcastChannel('camus-fcm')
     bc.addEventListener('message', (event) => {
-      const data = event.data as { type?: string; title?: string; body?: string } | undefined
-      if (data?.type !== 'CAMUS_FCM') return
-      pushToCampanita(data.title ?? 'Camus LDA', data.body ?? '')
+      onFcmMessage((event.data ?? {}) as FcmCampanitaItem & { type?: string })
     })
   } catch {
     /* ignore */
@@ -103,7 +162,6 @@ function bindCampanitaBridges() {
   flush()
 }
 
-/** Registra token FCM si el usuario es Administrador (idempotente). */
 export async function registerAdminPushIfNeeded(role: string): Promise<void> {
   if (!isFirebaseConfigured() || !isAdminRole(role)) return
   if (!firebaseVapidKey) {
@@ -154,10 +212,13 @@ export async function registerAdminPushIfNeeded(role: string): Promise<void> {
     localStorage.setItem(TOKEN_STORAGE, token)
 
     onMessage(messaging, (payload) => {
-      const title =
-        payload.notification?.title ?? payload.data?.title ?? 'Camus LDA'
-      const body = payload.notification?.body ?? payload.data?.body ?? ''
-      pushToCampanita(title, body)
+      pushToCampanita({
+        title: payload.notification?.title ?? payload.data?.title ?? 'Camus LDA',
+        body: payload.notification?.body ?? payload.data?.body ?? '',
+        link: payload.data?.link,
+        orderId: payload.data?.orderId,
+        notifType: payload.data?.notifType,
+      })
     })
 
     pushSetupDone = true

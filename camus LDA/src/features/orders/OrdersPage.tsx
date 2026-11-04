@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { FileSpreadsheet, Plus, UserCheck } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -35,6 +36,7 @@ import {
 } from '@/features/orders/utils/canEditOrder'
 
 export function OrdersPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const allOrders = useOrdersStore((s) => s.orders)
   const modalMode = useOrdersStore((s) => s.modalMode)
   const selectedOrder = useOrdersStore((s) => s.selectedOrder)
@@ -56,6 +58,18 @@ export function OrdersPage() {
   useEffect(() => {
     void syncFromApi()
   }, [syncFromApi])
+
+  // Deep link desde campanita / push: /ordenes?order=OT-...
+  useEffect(() => {
+    const orderId = searchParams.get('order')?.trim()
+    if (!orderId || allOrders.length === 0) return
+    const order = allOrders.find((o) => o.id === orderId)
+    if (!order) return
+    openViewModal(order)
+    const next = new URLSearchParams(searchParams)
+    next.delete('order')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, allOrders, openViewModal, setSearchParams])
 
   const visibleOrders = useMemo(() => {
     if (isOperator) return listAssignedOrders(allOrders, currentUser)

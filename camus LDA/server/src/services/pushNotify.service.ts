@@ -5,6 +5,9 @@ import { pushService } from '../external/push.service.js'
 export async function notifyAdmins(opts: {
   title: string
   body: string
+  link?: string
+  orderId?: string
+  notifType?: 'order' | 'system' | 'inventory'
   excludeUserId?: number
 }): Promise<void> {
   try {
@@ -23,7 +26,6 @@ export async function notifyAdmins(opts: {
     })
     if (devices.length === 0) return
 
-    // Un envío por token (evita duplicados si quedó más de un registro)
     const uniqueTokens = [...new Set(devices.map((d) => d.fcmToken))]
 
     await Promise.allSettled(
@@ -32,6 +34,9 @@ export async function notifyAdmins(opts: {
           token,
           title: opts.title,
           body: opts.body,
+          link: opts.link ?? '/',
+          orderId: opts.orderId,
+          notifType: opts.notifType ?? 'system',
         }),
       ),
     )
