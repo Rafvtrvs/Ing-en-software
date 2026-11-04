@@ -23,10 +23,13 @@ export async function notifyAdmins(opts: {
     })
     if (devices.length === 0) return
 
+    // Un envío por token (evita duplicados si quedó más de un registro)
+    const uniqueTokens = [...new Set(devices.map((d) => d.fcmToken))]
+
     await Promise.allSettled(
-      devices.map((d) =>
+      uniqueTokens.map((token) =>
         pushService.notify({
-          token: d.fcmToken,
+          token,
           title: opts.title,
           body: opts.body,
         }),

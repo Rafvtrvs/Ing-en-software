@@ -5,6 +5,9 @@ import { useNotificationsStore } from '@/store/useNotificationsStore'
 
 const TOKEN_STORAGE = 'camus_fcm_token'
 
+let pushSetupDone = false
+let swMessageBound = false
+
 function isAdminRole(role: string): boolean {
   return role
     .normalize('NFD')
@@ -13,13 +16,39 @@ function isAdminRole(role: string): boolean {
     .includes('administrador')
 }
 
-/** Registra token FCM si el usuario es Administrador. */
+function pushToCampanita(title: string, body: string) {
+  useNotificationsStore.getState().addNotification({
+    title: title || 'Camus LDA',
+    message: body || '',
+    type: 'system',
+    link: '/',
+  })
+}
+
+function bindServiceWorkerCampanitaBridge() {
+  if (swMessageBound || typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    return
+  }
+  swMessageBound = true
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    const data = event.data as { type?: string; title?: string; body?: string } | undefined
+    if (data?.type !== 'CAMUS_FCM') return
+    pushToCampanita(data.title ?? 'Camus LDA', data.body ?? '')
+  })
+}
+
+/** Registra token FCM si el usuario es Administrador (idempotente). */
 export async function registerAdminPushIfNeeded(role: string): Promise<void> {
   if (!isFirebaseConfigured() || !isAdminRole(role)) return
   if (!firebaseVapidKey) {
     console.warn('[FCM] Falta VITE_FIREBASE_VAPID_KEY')
     return
   }
+
+  bindServiceWorkerCampanitaBridge()
+
+  if (pushSetupDone) return
+
   try {
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
       await Notification.requestPermission()
@@ -53,16 +82,15 @@ export async function registerAdminPushIfNeeded(role: string): Promise<void> {
     await authService.registerPushToken(token, 'web')
     localStorage.setItem(TOKEN_STORAGE, token)
 
+    // Un solo listener foreground → campanita (sin Notification nativa extra)
     onMessage(messaging, (payload) => {
-      const title = payload.notification?.title ?? 'Camus LDA'
-      const body = payload.notification?.body ?? ''
-      useNotificationsStore.getState().addNotification({
-        title,
-        message: body,
-        type: 'system',
-        link: '/',
-      })
+      const title =
+        payload.data?.title ?? payload.notification?.title ?? 'Camus LDA'
+      const body = payload.data?.body ?? payload.notification?.body ?? ''
+      pushToCampanita(title, body)
     })
+
+    pushSetupDone = true
   } catch (err) {
     console.warn('[FCM] No se pudo registrar push', err)
   }
@@ -74,4 +102,5 @@ export async function unregisterPushOnLogout(): Promise<void> {
     await authService.unregisterPushToken(token)
     localStorage.removeItem(TOKEN_STORAGE)
   }
+  pushSetupDone = false
 }

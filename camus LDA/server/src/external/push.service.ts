@@ -1,6 +1,7 @@
 // ============================================================
 //  Push Notifications  ->  Firebase Cloud Messaging
 //  PUSH_PROVIDER=mock | fcm
+//  Data-only: evita doble notificación del navegador + SW.
 // ============================================================
 import { env } from '../config/env.js'
 import { getFirebaseMessaging } from './firebaseAdmin.js'
@@ -30,15 +31,20 @@ class FcmPushService implements PushService {
       console.warn('[push:fcm] Admin no inicializado; fallback mock')
       return new MockPushService().notify(message)
     }
+    // Solo `data`: el cliente/SW muestran UNA notificación y pueden
+    // alimentar la campanita. Con `notification` el browser duplica.
     const id = await messaging.send({
       token: message.token,
-      notification: {
+      data: {
         title: message.title,
         body: message.body,
       },
       webpush: {
         fcmOptions: {
           link: process.env.CORS_ORIGIN?.split(',')[0]?.trim() || 'https://camuslda.web.app',
+        },
+        headers: {
+          Urgency: 'high',
         },
       },
     })
