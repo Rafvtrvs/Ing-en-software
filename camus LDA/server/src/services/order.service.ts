@@ -216,9 +216,15 @@ export const orderService = {
       })
       // RF29 CU-98: notificar el cambio de estado (FCM a administradores)
       const { notifyAdmins } = await import('./pushNotify.service.js')
+      const clienteNombre =
+        row.cliente?.nombre?.trim() ||
+        row.cliente?.empresa?.trim() ||
+        'Cliente'
+      const servicio = row.servicio?.trim() || 'Sin servicio'
       await notifyAdmins({
-        title: 'Cambio de estado en orden',
-        body: `${id}: ${before.estado} → ${row.estado}`,
+        title: `OT ${id}: ${before.estado} → ${row.estado}`,
+        body: `${clienteNombre} · ${servicio}. Estado cambió de "${before.estado}" a "${row.estado}".`,
+        excludeUserId: userId,
       })
     }
     return toOrderDto(row)

@@ -35,6 +35,10 @@ function bindServiceWorkerCampanitaBridge() {
     if (data?.type !== 'CAMUS_FCM') return
     pushToCampanita(data.title ?? 'Camus LDA', data.body ?? '')
   })
+  // Si el SW ya estaba activo (pestaña en segundo plano), pedimos control
+  void navigator.serviceWorker.ready.then((reg) => {
+    reg.active?.postMessage({ type: 'CAMUS_FCM_PING' })
+  })
 }
 
 /** Registra token FCM si el usuario es Administrador (idempotente). */

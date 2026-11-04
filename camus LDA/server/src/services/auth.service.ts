@@ -135,7 +135,7 @@ export const authService = {
 
     void notifyAdmins({
       title: 'Inicio de sesión',
-      body: `${user.correoElectronico} ingresó a Camus LDA`,
+      body: `${user.nombre} (${user.correoElectronico}) inició sesión en Camus LDA.`,
       excludeUserId: user.id,
     })
 
@@ -179,7 +179,7 @@ export const authService = {
 
     void notifyAdmins({
       title: 'Inicio de sesión',
-      body: `${user.correoElectronico} ingresó a Camus LDA`,
+      body: `${user.nombre} (${user.correoElectronico}) inició sesión en Camus LDA.`,
       excludeUserId: user.id,
     })
 

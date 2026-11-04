@@ -35,6 +35,16 @@ import {
 } from '@/features/orders/utils/orderSort'
 import { useNotificationsStore } from '@/store/useNotificationsStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
+import { authService } from '@/services/authService'
+
+function sessionIsAdmin(): boolean {
+  const role = authService.getUser()?.role ?? ''
+  return role
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .includes('administrador')
+}
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
 import { calcDurationHours, validateServiceTimeSequence } from '@/features/orders/utils/orderDates'
 import {
@@ -521,11 +531,14 @@ export const useOrdersStore = create<OrdersState>()(
           if (options?.fromForm) {
             const changes = getOrderFieldChanges(existing, merged)
             if (changes.length > 0) {
-              useNotificationsStore.getState().pushOrderFieldChanges({
-                orderId: existing.id,
-                client: merged.client,
-                changes,
-              })
+              // Campanita local solo para admin; operadores avisan vía FCM al admin
+              if (sessionIsAdmin()) {
+                useNotificationsStore.getState().pushOrderFieldChanges({
+                  orderId: existing.id,
+                  client: merged.client,
+                  changes,
+                })
+              }
               const userId = 'session'
               const userName = 'Sistema'
               for (const change of changes) {
@@ -540,12 +553,14 @@ export const useOrdersStore = create<OrdersState>()(
               }
             }
           } else if (data.status && data.status !== existing.status) {
-            useNotificationsStore.getState().pushOrderStatusChange({
-              orderId: existing.id,
-              client: existing.client,
-              previousStatus: existing.status,
-              newStatus: data.status,
-            })
+            if (sessionIsAdmin()) {
+              useNotificationsStore.getState().pushOrderStatusChange({
+                orderId: existing.id,
+                client: existing.client,
+                previousStatus: existing.status,
+                newStatus: data.status,
+              })
+            }
             // RF-8 — registrar cambio de estado en historial de la OT
             get().addModificationHistory(existing.id, {
               field: 'status',
@@ -1171,7 +1186,7 @@ export const useOrdersStore = create<OrdersState>()(
 
         set({ orders, selectedOrder })
 
-        if (targetStatus !== active.status) {
+        if (targetStatus !== active.status && sessionIsAdmin()) {
           useNotificationsStore.getState().pushOrderStatusChange({
             orderId: active.id,
             client: active.client,
