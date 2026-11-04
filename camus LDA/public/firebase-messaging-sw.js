@@ -58,17 +58,15 @@ function queueInbox(item) {
   }
 }
 
-function notifyOpenClients(item) {
+/** Una sola vía: postMessage a ventanas abiertas; si no hay, cola IndexedDB. */
+function deliverToApp(item) {
   const msg = { type: 'CAMUS_FCM', ...item }
-  try {
-    const bc = new BroadcastChannel('camus-fcm')
-    bc.postMessage(msg)
-    bc.close()
-  } catch (_) {
-    /* ignore */
-  }
-  self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-    clients.forEach((client) => client.postMessage(msg))
+  return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    if (clients.length > 0) {
+      clients.forEach((client) => client.postMessage(msg))
+      return
+    }
+    queueInbox(item)
   })
 }
 
@@ -82,13 +80,12 @@ if (cfg.apiKey && cfg.projectId && cfg.appId) {
       self.registration.showNotification(item.title, {
         body: item.body,
         icon: '/vite.svg',
-        tag: `camus-${item.title}`.slice(0, 64),
+        tag: `camus-${item.orderId || item.title}`.slice(0, 64),
         renotify: false,
         data: { link: item.link, orderId: item.orderId },
       })
     }
-    queueInbox(item)
-    notifyOpenClients(item)
+    return deliverToApp(item)
   })
 }
 

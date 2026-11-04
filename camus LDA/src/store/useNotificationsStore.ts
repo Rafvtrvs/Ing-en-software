@@ -72,6 +72,15 @@ export const useNotificationsStore = create<NotificationsState>()(
       closePanel: () => set({ panelOpen: false }),
 
       addNotification: (notification) => {
+        const now = Date.now()
+        const dupWindowMs = 90_000
+        const isDup = get().items.some((n) => {
+          if (n.title !== notification.title || n.message !== notification.message) return false
+          const created = Date.parse(n.createdAt)
+          return Number.isFinite(created) && now - created < dupWindowMs
+        })
+        if (isDup) return
+
         const item: AppNotification = {
           ...notification,
           id: safeId(),

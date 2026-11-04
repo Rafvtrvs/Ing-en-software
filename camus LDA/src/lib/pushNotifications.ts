@@ -11,6 +11,9 @@ const INBOX_STORE = 'inbox'
 
 let pushSetupDone = false
 let bridgesBound = false
+/** Evita triplicar el mismo aviso (SW + inbox + onMessage / SW viejo). */
+const recentCampanitaKeys = new Map<string, number>()
+const CAMPANITA_DEDUPE_MS = 90_000
 
 function isAdminRole(role: string): boolean {
   return role
@@ -56,7 +59,23 @@ function resolveType(item: FcmCampanitaItem): NotificationType {
   return 'system'
 }
 
+function campanitaFingerprint(item: FcmCampanitaItem): string {
+  return [item.title ?? '', item.body ?? '', item.orderId ?? '', item.link ?? '']
+    .join('|')
+    .trim()
+    .toLowerCase()
+}
+
 function pushToCampanita(item: FcmCampanitaItem) {
+  const key = campanitaFingerprint(item)
+  const now = Date.now()
+  const prev = recentCampanitaKeys.get(key)
+  if (prev != null && now - prev < CAMPANITA_DEDUPE_MS) return
+  recentCampanitaKeys.set(key, now)
+  for (const [k, at] of recentCampanitaKeys) {
+    if (now - at >= CAMPANITA_DEDUPE_MS) recentCampanitaKeys.delete(k)
+  }
+
   const link = resolveLink(item)
   const orderId =
     item.orderId ||
@@ -141,15 +160,6 @@ function bindCampanitaBridges() {
     navigator.serviceWorker.addEventListener('message', (event) => {
       onFcmMessage((event.data ?? {}) as FcmCampanitaItem & { type?: string })
     })
-  }
-
-  try {
-    const bc = new BroadcastChannel('camus-fcm')
-    bc.addEventListener('message', (event) => {
-      onFcmMessage((event.data ?? {}) as FcmCampanitaItem & { type?: string })
-    })
-  } catch {
-    /* ignore */
   }
 
   const flush = () => {
