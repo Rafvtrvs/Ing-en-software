@@ -4,9 +4,11 @@ import { firebaseVapidKey, getFirebaseMessaging, isFirebaseConfigured } from '@/
 import { useNotificationsStore } from '@/store/useNotificationsStore'
 
 const TOKEN_STORAGE = 'camus_fcm_token'
+const INBOX_DB = 'camus-fcm'
+const INBOX_STORE = 'inbox'
 
 let pushSetupDone = false
-let swMessageBound = false
+let bridgesBound = false
 
 function isAdminRole(role: string): boolean {
   return role
@@ -25,20 +27,80 @@ function pushToCampanita(title: string, body: string) {
   })
 }
 
-function bindServiceWorkerCampanitaBridge() {
-  if (swMessageBound || typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
-    return
+function openInboxDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(INBOX_DB, 1)
+    req.onupgradeneeded = () => {
+      const db = req.result
+      if (!db.objectStoreNames.contains(INBOX_STORE)) {
+        db.createObjectStore(INBOX_STORE, { autoIncrement: true })
+      }
+    }
+    req.onsuccess = () => resolve(req.result)
+    req.onerror = () => reject(req.error ?? new Error('indexedDB'))
+  })
+}
+
+/** Vacía la cola que el SW guardó mientras la pestaña estaba minimizada. */
+export async function drainFcmInboxToCampanita(): Promise<void> {
+  try {
+    const db = await openInboxDb()
+    if (!db.objectStoreNames.contains(INBOX_STORE)) {
+      db.close()
+      return
+    }
+    const items = await new Promise<Array<{ title?: string; body?: string }>>((resolve, reject) => {
+      const tx = db.transaction(INBOX_STORE, 'readonly')
+      const req = tx.objectStore(INBOX_STORE).getAll()
+      req.onsuccess = () => resolve((req.result as Array<{ title?: string; body?: string }>) ?? [])
+      req.onerror = () => reject(req.error)
+    })
+    const clearTx = db.transaction(INBOX_STORE, 'readwrite')
+    clearTx.objectStore(INBOX_STORE).clear()
+    await new Promise<void>((resolve, reject) => {
+      clearTx.oncomplete = () => resolve()
+      clearTx.onerror = () => reject(clearTx.error)
+    })
+    db.close()
+    for (const item of items) {
+      pushToCampanita(item.title ?? 'Camus LDA', item.body ?? '')
+    }
+  } catch {
+    /* ignore */
   }
-  swMessageBound = true
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    const data = event.data as { type?: string; title?: string; body?: string } | undefined
-    if (data?.type !== 'CAMUS_FCM') return
-    pushToCampanita(data.title ?? 'Camus LDA', data.body ?? '')
+}
+
+function bindCampanitaBridges() {
+  if (bridgesBound || typeof window === 'undefined') return
+  bridgesBound = true
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      const data = event.data as { type?: string; title?: string; body?: string } | undefined
+      if (data?.type !== 'CAMUS_FCM') return
+      pushToCampanita(data.title ?? 'Camus LDA', data.body ?? '')
+    })
+  }
+
+  try {
+    const bc = new BroadcastChannel('camus-fcm')
+    bc.addEventListener('message', (event) => {
+      const data = event.data as { type?: string; title?: string; body?: string } | undefined
+      if (data?.type !== 'CAMUS_FCM') return
+      pushToCampanita(data.title ?? 'Camus LDA', data.body ?? '')
+    })
+  } catch {
+    /* ignore */
+  }
+
+  const flush = () => {
+    void drainFcmInboxToCampanita()
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') flush()
   })
-  // Si el SW ya estaba activo (pestaña en segundo plano), pedimos control
-  void navigator.serviceWorker.ready.then((reg) => {
-    reg.active?.postMessage({ type: 'CAMUS_FCM_PING' })
-  })
+  window.addEventListener('focus', flush)
+  flush()
 }
 
 /** Registra token FCM si el usuario es Administrador (idempotente). */
@@ -49,9 +111,12 @@ export async function registerAdminPushIfNeeded(role: string): Promise<void> {
     return
   }
 
-  bindServiceWorkerCampanitaBridge()
+  bindCampanitaBridges()
 
-  if (pushSetupDone) return
+  if (pushSetupDone) {
+    void drainFcmInboxToCampanita()
+    return
+  }
 
   try {
     if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
@@ -73,6 +138,8 @@ export async function registerAdminPushIfNeeded(role: string): Promise<void> {
     const registration = await navigator.serviceWorker.register(
       `/firebase-messaging-sw.js?${params.toString()}`,
     )
+    await navigator.serviceWorker.ready
+
     const token = await getToken(messaging, {
       vapidKey: firebaseVapidKey,
       serviceWorkerRegistration: registration,
@@ -86,15 +153,15 @@ export async function registerAdminPushIfNeeded(role: string): Promise<void> {
     await authService.registerPushToken(token, 'web')
     localStorage.setItem(TOKEN_STORAGE, token)
 
-    // Un solo listener foreground → campanita (sin Notification nativa extra)
     onMessage(messaging, (payload) => {
       const title =
-        payload.data?.title ?? payload.notification?.title ?? 'Camus LDA'
-      const body = payload.data?.body ?? payload.notification?.body ?? ''
+        payload.notification?.title ?? payload.data?.title ?? 'Camus LDA'
+      const body = payload.notification?.body ?? payload.data?.body ?? ''
       pushToCampanita(title, body)
     })
 
     pushSetupDone = true
+    void drainFcmInboxToCampanita()
   } catch (err) {
     console.warn('[FCM] No se pudo registrar push', err)
   }

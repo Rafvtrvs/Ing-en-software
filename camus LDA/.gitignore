@@ -27,5 +27,7 @@ dist-ssr
 *.sln
 *.sw?
 _legado_fastapi_sqlite
+docs
+grupo 21-Documento 0 MODI
 
 .env.txt
