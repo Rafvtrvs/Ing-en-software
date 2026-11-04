@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { UserCheck } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -23,25 +24,35 @@ export function ReactivateUserModal({
   onClose: () => void
 }) {
   const roles = useUsersStore((s) => s.roles)
-  const reactivateUser = useUsersStore((s) => s.reactivateUser)
+  const reactivateUserInDb = useUsersStore((s) => s.reactivateUserInDb)
   const addToast = useUsersStore((s) => s.addToast)
   const currentUser = useSessionUser()
+  const [loading, setLoading] = useState(false)
 
   if (!user) return null
 
   const role = roles.find((r) => r.id === user.roleId)
 
-  const handleReactivate = () => {
+  const handleReactivate = async () => {
     if (user.status === 'Activo') {
       addToast('El usuario ya está activo', 'error')
       return
     }
-    reactivateUser(user.id, {
-      id: currentUser.id ?? 'session',
-      name: currentUser.name ?? 'Jefe',
-    })
-    addToast('Usuario reactivado correctamente. Revisa la pestaña Historial.')
-    onClose()
+    setLoading(true)
+    try {
+      const result = await reactivateUserInDb(user.id, {
+        id: currentUser.id ?? 'session',
+        name: currentUser.name ?? 'Jefe',
+      })
+      if (!result.ok) {
+        addToast(result.message, 'error')
+        return
+      }
+      addToast('Usuario reactivado en Camus y Firebase.')
+      onClose()
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -56,8 +67,12 @@ export function ReactivateUserModal({
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
-          <Button leftIcon={<UserCheck className="h-4 w-4" />} onClick={handleReactivate}>
-            Reactivar Usuario
+          <Button
+            leftIcon={<UserCheck className="h-4 w-4" />}
+            onClick={() => void handleReactivate()}
+            disabled={loading}
+          >
+            {loading ? 'Reactivando…' : 'Reactivar Usuario'}
           </Button>
         </>
       }

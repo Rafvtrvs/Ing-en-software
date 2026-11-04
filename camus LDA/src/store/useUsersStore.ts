@@ -58,8 +58,20 @@ interface UsersState {
   ) => Promise<{ ok: true; user: SystemUser } | { ok: false; message: string }>
   updateUser: (id: string, data: Partial<Omit<SystemUser, 'id'>>) => void
   deleteUser: (id: string, performedBy: { id: string; name: string }) => void
+  deleteUserInDb: (
+    id: string,
+    performedBy: { id: string; name: string },
+  ) => Promise<{ ok: true } | { ok: false; message: string }>
   deactivateUser: (id: string, performedBy: { id: string; name: string }) => void
+  deactivateUserInDb: (
+    id: string,
+    performedBy: { id: string; name: string },
+  ) => Promise<{ ok: true } | { ok: false; message: string }>
   reactivateUser: (id: string, performedBy: { id: string; name: string }) => void
+  reactivateUserInDb: (
+    id: string,
+    performedBy: { id: string; name: string },
+  ) => Promise<{ ok: true } | { ok: false; message: string }>
   assignRoleToUser: (
     userId: string,
     roleId: string,
@@ -278,6 +290,30 @@ export const useUsersStore = create<UsersState>()(
         }))
       },
 
+      deleteUserInDb: async (id, performedBy) => {
+        const user = get().users.find((u) => u.id === id)
+        if (!user) return { ok: false as const, message: 'Usuario no encontrado' }
+        try {
+          await usersService.remove(id)
+          get().deleteUser(id, performedBy)
+          set({ apiAvailable: true })
+          return { ok: true as const }
+        } catch (err) {
+          if (isOfflineApiError(err)) {
+            get().deleteUser(id, performedBy)
+            return {
+              ok: false as const,
+              message:
+                'Sin conexión a la API: se quitó solo en el navegador (Postgres/Firebase intactos).',
+            }
+          }
+          const message =
+            (err as { response?: { data?: { error?: string } } })?.response?.data
+              ?.error ?? 'No se pudo eliminar el usuario'
+          return { ok: false as const, message }
+        }
+      },
+
       deactivateUser: (id, performedBy) => {
         const now = new Date().toISOString()
         const user = get().users.find((u) => u.id === id)
@@ -292,6 +328,42 @@ export const useUsersStore = create<UsersState>()(
           performedByName: performedBy.name,
           performedAt: now,
         })
+      },
+
+      deactivateUserInDb: async (id, performedBy) => {
+        const result = await get().updateUserInDb(id, { status: 'Inactivo' })
+        if (!result.ok) return result
+        const user = get().users.find((u) => u.id === id)
+        if (user) {
+          get().addLifecycleEvent({
+            userId: user.id,
+            userName: user.name,
+            userEmail: user.email,
+            action: 'desactivado',
+            performedBy: performedBy.id,
+            performedByName: performedBy.name,
+            performedAt: new Date().toISOString(),
+          })
+        }
+        return { ok: true as const }
+      },
+
+      reactivateUserInDb: async (id, performedBy) => {
+        const result = await get().updateUserInDb(id, { status: 'Activo' })
+        if (!result.ok) return result
+        const user = get().users.find((u) => u.id === id)
+        if (user) {
+          get().addLifecycleEvent({
+            userId: user.id,
+            userName: user.name,
+            userEmail: user.email,
+            action: 'reactivado',
+            performedBy: performedBy.id,
+            performedByName: performedBy.name,
+            performedAt: new Date().toISOString(),
+          })
+        }
+        return { ok: true as const }
       },
 
       reactivateUser: (id, performedBy) => {

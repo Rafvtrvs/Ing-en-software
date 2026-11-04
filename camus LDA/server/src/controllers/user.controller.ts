@@ -39,4 +39,13 @@ export const userController = {
       next(err)
     }
   },
+
+  async remove(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await userService.remove(Number(req.params.id), req.user?.sub)
+      res.json(result)
+    } catch (err) {
+      next(err)
+    }
+  },
 }

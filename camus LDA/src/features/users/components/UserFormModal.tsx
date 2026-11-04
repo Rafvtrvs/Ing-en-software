@@ -336,11 +336,8 @@ export function UserFormModal({ mode, user, open, onClose }: UserFormModalProps)
               })}
             />
           </FormField>
-          <FormField label="Teléfono" error={errors.phone?.message} required>
-            <Input
-              placeholder="+56 9 1234 5678"
-              {...register('phone', { required: 'El teléfono es obligatorio' })}
-            />
+          <FormField label="Teléfono" error={errors.phone?.message}>
+            <Input placeholder="+56 9 1234 5678" {...register('phone')} />
           </FormField>
           <FormField label="Rol" required>
             <Select {...register('roleId', { required: true })}>

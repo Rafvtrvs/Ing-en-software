@@ -129,6 +129,7 @@ const userManagers = requireRole('admin', 'jefe', 'supervisor')
 router.get('/users', requireAuth, userManagers, userController.list)
 router.post('/users', requireAuth, userManagers, userController.create)
 router.put('/users/:id', requireAuth, userManagers, userController.update)
+router.delete('/users/:id', requireAuth, userManagers, userController.remove)
 router.get('/roles', requireAuth, userManagers, userController.listRoles)
 
 // Reportes y auditoría

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { AlertTriangle, Mail, Shield, User } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -16,24 +17,35 @@ interface DeleteUserModalProps {
 
 /**
  * RF64 — CDS 219: Eliminando usuarios del sistema
+ * Borra en Postgres (Render/local) y en Firebase Auth.
  */
 export function DeleteUserModal({ user, open, onClose }: DeleteUserModalProps) {
   const roles = useUsersStore((s) => s.roles)
-  const deleteUser = useUsersStore((s) => s.deleteUser)
+  const deleteUserInDb = useUsersStore((s) => s.deleteUserInDb)
   const addToast = useUsersStore((s) => s.addToast)
   const currentUser = useSessionUser()
+  const [loading, setLoading] = useState(false)
 
   if (!user) return null
 
   const role = roles.find((r) => r.id === user.roleId)
 
-  const handleDelete = () => {
-    deleteUser(user.id, {
-      id: currentUser.id ?? 'session',
-      name: currentUser.name ?? 'Jefe',
-    })
-    addToast('Usuario eliminado del sistema. Registro guardado en Historial.')
-    onClose()
+  const handleDelete = async () => {
+    setLoading(true)
+    try {
+      const result = await deleteUserInDb(user.id, {
+        id: currentUser.id ?? 'session',
+        name: currentUser.name ?? 'Jefe',
+      })
+      if (!result.ok) {
+        addToast(result.message, 'error')
+        return
+      }
+      addToast('Usuario eliminado en Camus y Firebase Auth.')
+      onClose()
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -41,15 +53,19 @@ export function DeleteUserModal({ user, open, onClose }: DeleteUserModalProps) {
       open={open}
       onClose={onClose}
       title="Eliminar Usuario"
-      description="Esta acción eliminará permanentemente al usuario del sistema."
+      description="Se eliminará de la base de datos y de Firebase Authentication."
       size="md"
       footer={
         <>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
-          <Button className="bg-red-600 hover:bg-red-700" onClick={handleDelete}>
-            Eliminar Usuario
+          <Button
+            className="bg-red-600 hover:bg-red-700"
+            onClick={() => void handleDelete()}
+            disabled={loading}
+          >
+            {loading ? 'Eliminando…' : 'Eliminar Usuario'}
           </Button>
         </>
       }

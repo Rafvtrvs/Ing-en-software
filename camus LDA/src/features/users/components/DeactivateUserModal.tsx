@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { UserX } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -11,6 +12,7 @@ import type { SystemUser } from '@/types'
 
 /**
  * RF64 — CDS 221: Desactivando usuario del sistema
+ * Marca Inactivo en Postgres y disabled en Firebase Auth.
  */
 export function DeactivateUserModal({
   user,
@@ -22,25 +24,35 @@ export function DeactivateUserModal({
   onClose: () => void
 }) {
   const roles = useUsersStore((s) => s.roles)
-  const deactivateUser = useUsersStore((s) => s.deactivateUser)
+  const deactivateUserInDb = useUsersStore((s) => s.deactivateUserInDb)
   const addToast = useUsersStore((s) => s.addToast)
   const currentUser = useSessionUser()
+  const [loading, setLoading] = useState(false)
 
   if (!user) return null
 
   const role = roles.find((r) => r.id === user.roleId)
 
-  const handleDeactivate = () => {
+  const handleDeactivate = async () => {
     if (user.status === 'Inactivo') {
       addToast('El usuario ya está desactivado', 'error')
       return
     }
-    deactivateUser(user.id, {
-      id: currentUser.id ?? 'session',
-      name: currentUser.name ?? 'Jefe',
-    })
-    addToast('Usuario desactivado correctamente. Revisa la pestaña Historial.')
-    onClose()
+    setLoading(true)
+    try {
+      const result = await deactivateUserInDb(user.id, {
+        id: currentUser.id ?? 'session',
+        name: currentUser.name ?? 'Jefe',
+      })
+      if (!result.ok) {
+        addToast(result.message, 'error')
+        return
+      }
+      addToast('Usuario desactivado en Camus y Firebase.')
+      onClose()
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -52,15 +64,16 @@ export function DeactivateUserModal({
       size="md"
       footer={
         <>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
           <Button
             className="bg-amber-600 hover:bg-amber-700"
             leftIcon={<UserX className="h-4 w-4" />}
-            onClick={handleDeactivate}
+            onClick={() => void handleDeactivate()}
+            disabled={loading}
           >
-            Desactivar Usuario
+            {loading ? 'Desactivando…' : 'Desactivar Usuario'}
           </Button>
         </>
       }

@@ -40,4 +40,7 @@ export const usersService = {
     const { data } = await api.put<SystemUser>(`/users/${id}`, payload)
     return data
   },
+  async remove(id: string): Promise<void> {
+    await api.delete(`/users/${id}`)
+  },
 }

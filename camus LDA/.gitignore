@@ -26,5 +26,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+_legado_fastapi_sqlite
 
 .env.txt

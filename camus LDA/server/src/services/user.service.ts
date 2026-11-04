@@ -468,4 +468,75 @@ export const userService = {
 
     return toUserDto(row)
   },
+
+  /**
+   * Eliminación real: Firebase Auth + Postgres.
+   * Libera FKs (operador en OT, bitácora) antes de borrar la fila.
+   */
+  async remove(id: number, actorId?: number) {
+    const before = await prisma.usuario.findUnique({ where: { id } })
+    if (!before) {
+      const err = new Error('Usuario no encontrado') as Error & { status: number }
+      err.status = 404
+      throw err
+    }
+    if (actorId != null && actorId === id) {
+      const err = new Error('No podés eliminar tu propia cuenta') as Error & { status: number }
+      err.status = 400
+      throw err
+    }
+
+    const auth = getFirebaseAuth()
+    if (auth) {
+      try {
+        if (before.firebaseUid) {
+          await auth.deleteUser(before.firebaseUid)
+        } else if (before.correoElectronico) {
+          const fbUser = await auth.getUserByEmail(before.correoElectronico)
+          await auth.deleteUser(fbUser.uid)
+        }
+      } catch (e: unknown) {
+        const code = (e as { code?: string }).code
+        // Ya no existe en Firebase: seguimos con Postgres
+        if (code !== 'auth/user-not-found') {
+          if (env.auth.provider === 'firebase') {
+            throw mapFirebaseAuthError(e)
+          }
+          console.warn('[users] no se pudo borrar en Firebase Auth', e)
+        }
+      }
+    } else if (env.auth.provider === 'firebase') {
+      const err = new Error(
+        'Firebase Admin no está configurado: no se puede eliminar la cuenta en Authentication',
+      ) as Error & { status: number }
+      err.status = 503
+      throw err
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.ordenTrabajo.updateMany({
+        where: { idOperador: id },
+        data: { idOperador: null },
+      })
+      await tx.bitacoraAuditoria.updateMany({
+        where: { idUsuario: id },
+        data: { idUsuario: null },
+      })
+      // dispositivo_push tiene onDelete: Cascade
+      await tx.usuario.delete({ where: { id } })
+    })
+
+    await auditService.log({
+      modulo: 'usuarios',
+      accion: 'eliminar',
+      valorAnterior: {
+        id: before.id,
+        email: before.correoElectronico,
+        firebaseUid: before.firebaseUid || undefined,
+      },
+      idUsuario: actorId,
+    })
+
+    return { ok: true }
+  },
 }
