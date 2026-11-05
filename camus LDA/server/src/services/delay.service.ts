@@ -146,8 +146,8 @@ export const delayService = {
       })
       await mailService.send({
         to: mailOpsRecipient(),
-        subject: `Camus LDA · Alerta de retraso`,
-        body: `Se detectó un retraso alto en una orden de trabajo.\n\nOrden: ${d.id}\nCliente: ${d.client}\nDías de retraso: ${d.daysLate}\nEstado: ${d.status}`,
+        subject: 'Camus LDA · Notificación',
+        body: `Alerta de retraso\n\nID: ${d.id}\nCliente: ${d.client}\nDías de retraso: ${d.daysLate}\nEstado: ${d.status}`,
       })
       await auditService.log({
         modulo: 'ordenes',

@@ -37,5 +37,5 @@ export function useSessionUser(): OrderPermissionUser {
       role: session?.role ?? appUser.role,
       email: session?.email,
     }
-  }, [appUser.name, appUser.role, appUser.email, authUser?.id, authUser?.role, authUser?.name])
+  }, [appUser.name, appUser.role, authUser?.id, authUser?.role, authUser?.name, authUser?.email])
 }

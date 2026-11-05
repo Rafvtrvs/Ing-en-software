@@ -490,8 +490,8 @@ export const machineryService = {
       void mailService
         .send({
           to: mailOpsRecipient(),
-          subject: `Camus LDA · Disponibilidad de equipo`,
-          body: `Se actualizó el estado de un equipo.\n\nEquipo: ${label}\nEstado anterior: ${before.estado}\nEstado actual: ${nextStatus}`,
+          subject: 'Camus LDA · Notificación',
+          body: `Cambio de estado de equipo\n\nEquipo: ${label}\nEstado anterior: ${before.estado}\nEstado actual: ${nextStatus}`,
         })
         .catch((err) => console.error('[machinery] mail status', err))
 
@@ -559,8 +559,8 @@ export const machineryService = {
       await mailService
         .send({
           to: mailOpsRecipient(),
-          subject: `Camus LDA · Alerta de mantención`,
-          body: `Alerta de mantención de equipo.\n\nEquipo: ${label}\nEstado: ${row.estado}\nPróxima mantención: ${due}\nCondición: ${overdue ? 'Vencida' : 'Próxima'}`,
+          subject: 'Camus LDA · Notificación',
+          body: `Alerta de mantención\n\nEquipo: ${label}\nEstado: ${row.estado}\nPróxima mantención: ${due}\nCondición: ${overdue ? 'Vencida' : 'Próxima'}`,
         })
         .catch((err) => console.error('[machinery] mail due', err))
 

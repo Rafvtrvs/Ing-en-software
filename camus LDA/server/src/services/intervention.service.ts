@@ -93,8 +93,8 @@ export const interventionService = {
     void mailService
       .send({
         to: mailOpsRecipient(),
-        subject: `Camus LDA · Intervención ${orderId}`,
-        body: `Se registró una solicitud de intervención.\n\nOrden: ${orderId}\nCliente: ${clienteNombre}\nServicio: ${order.servicio?.trim() || '—'}\nSolicitante: ${who}\nDetalle: ${trimmed}`,
+        subject: 'Camus LDA · Notificación',
+        body: `Solicitud de intervención\n\nID: ${orderId}\nCliente: ${clienteNombre}\nServicio: ${order.servicio?.trim() || '—'}\nUsuario: ${who}\nDetalle: ${trimmed}`,
       })
       .catch((err) => console.error('[intervention] mail create', err))
 

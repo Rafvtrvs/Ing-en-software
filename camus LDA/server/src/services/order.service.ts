@@ -406,8 +406,8 @@ export const orderService = {
     void mailService
       .send({
         to: mailOpsRecipient(),
-        subject: `Camus LDA · Nueva orden ${row.id}`,
-        body: `Se creó una nueva orden de trabajo.\n\nOrden: ${row.id}\nCliente: ${clienteNombre}\nServicio: ${row.servicio?.trim() || '—'}\nDirección: ${row.direccion || '—'}${operadorActor ? `\nRegistrada por: ${operadorActor.name}` : ''}`,
+        subject: 'Camus LDA · Notificación',
+        body: `Nueva orden de trabajo\n\nID: ${row.id}\nCliente: ${clienteNombre}\nServicio: ${row.servicio?.trim() || '—'}\nDirección: ${row.direccion || '—'}${operadorActor ? `\nUsuario: ${operadorActor.name}` : ''}`,
       })
       .catch((err) => console.error('[order] mail create', err))
 
@@ -531,8 +531,8 @@ export const orderService = {
       void mailService
         .send({
           to: mailOpsRecipient(),
-          subject: `Camus LDA · Cambio de estado ${id}`,
-          body: `Se actualizó el estado de una orden de trabajo.\n\nOrden: ${id}\nCliente: ${clienteNombre}\nServicio: ${servicio}\nEstado anterior: ${before.estado}\nEstado actual: ${row.estado}${operadorActor ? `\nActualizado por: ${operadorActor.name}` : ''}`,
+          subject: 'Camus LDA · Notificación',
+          body: `Cambio de estado\n\nID: ${id}\nCliente: ${clienteNombre}\nServicio: ${servicio}\nEstado anterior: ${before.estado}\nEstado actual: ${row.estado}${operadorActor ? `\nUsuario: ${operadorActor.name}` : ''}`,
         })
         .catch((err) => console.error('[order] mail status', err))
     } else if (
