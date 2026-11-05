@@ -53,8 +53,9 @@ function agendaTimeRange(order: WorkOrder): string {
 }
 
 /** Agenda del día con OT reales del sistema (fecha de ejecución / inicio / creación = hoy). */
-export function DaySchedule() {
-  const orders = useOrdersStore((s) => s.orders)
+export function DaySchedule({ ordersOverride }: { ordersOverride?: WorkOrder[] }) {
+  const storeOrders = useOrdersStore((s) => s.orders)
+  const orders = ordersOverride ?? storeOrders
   const syncFromApi = useOrdersStore((s) => s.syncFromApi)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
 

@@ -10,6 +10,7 @@ import { createApp } from './app.js'
 import { env } from './config/env.js'
 import { connectDb, disconnectDb } from './db/prisma.js'
 import { delayService } from './services/delay.service.js'
+import { machineryService } from './services/machinery.service.js'
 
 async function main() {
   await connectDb()
@@ -25,6 +26,18 @@ async function main() {
     delayService.notifyHighDelays().catch((err) => console.error('[delay] revisión fallida', err))
   }, 60 * 60 * 1000)
   delayTimer.unref()
+
+  // Mantenciones vencidas o próximas (cada hora; deduplica en bitácora)
+  const maintTimer = setInterval(() => {
+    machineryService
+      .notifyDueMaintenance()
+      .catch((err) => console.error('[machinery] revisión mantención fallida', err))
+  }, 60 * 60 * 1000)
+  maintTimer.unref()
+  // Primera pasada al arrancar (no esperar una hora)
+  machineryService
+    .notifyDueMaintenance()
+    .catch((err) => console.error('[machinery] revisión mantención inicial fallida', err))
 
   const shutdown = async () => {
     console.log('\n[server] cerrando...')

@@ -5,7 +5,7 @@
 //  CU-96: gestiona una orden retrasada (reprogramar, priorizar, intervenir).
 // ============================================================
 import { prisma } from '../db/prisma.js'
-import { mailService } from '../external/mail.service.js'
+import { mailOpsRecipient, mailService } from '../external/mail.service.js'
 import { pushService } from '../external/push.service.js'
 import { auditService } from './audit.service.js'
 import { toOrderDto } from './mappers.js'
@@ -145,9 +145,9 @@ export const delayService = {
         body: `${d.id} lleva ${d.daysLate} días de retraso`,
       })
       await mailService.send({
-        to: 'operaciones@camus.cl',
-        subject: `Alto retraso en orden ${d.id}`,
-        body: `La orden ${d.id} (${d.client}) tiene ${d.daysLate} días de retraso. Estado: ${d.status}.`,
+        to: mailOpsRecipient(),
+        subject: `Camus LDA · Alerta de retraso`,
+        body: `Se detectó un retraso alto en una orden de trabajo.\n\nOrden: ${d.id}\nCliente: ${d.client}\nDías de retraso: ${d.daysLate}\nEstado: ${d.status}`,
       })
       await auditService.log({
         modulo: 'ordenes',

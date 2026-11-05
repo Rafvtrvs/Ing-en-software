@@ -29,7 +29,10 @@ export function allocateOrderId(
   const ids = Array.from(existingIds)
   const set = new Set(ids)
   const trimmed = preferred?.trim()
-  if (trimmed && !set.has(trimmed)) return trimmed
+  const year = new Date().getFullYear()
+  const standard = new RegExp(`^OT-${year}-\\d{4,}$`)
+  // Solo respeta IDs correlativos estándar; ignora OT-T-* u otros temporales
+  if (trimmed && standard.test(trimmed) && !set.has(trimmed)) return trimmed
   let candidate = nextOrderId(ids)
   let guard = 0
   while (set.has(candidate) && guard < 10_000) {

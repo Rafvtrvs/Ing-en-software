@@ -9,6 +9,9 @@ import { useOrdersStore } from '@/store/useOrdersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import { geocodeAddress } from '@/services/geocodeService'
+import { registerFieldWorkOrder } from '@/features/field/utils/registerFieldWorkOrder'
+import { todayLocalIso } from '@/features/orders/utils/orderDates'
+import type { IncidentType, WorkOrder } from '@/types'
 
 /**
  * RF-43 CU-147/148 — registrar y completar OT desde terreno (operador).
@@ -16,9 +19,7 @@ import { geocodeAddress } from '@/services/geocodeService'
  */
 export function FieldOrderPanel() {
   const user = useSessionUser()
-  const { reducedData } = useNetworkStatus()
-  const createFieldOrder = useOrdersStore((s) => s.createFieldOrder)
-  const updateOrder = useOrdersStore((s) => s.updateOrder)
+  const { online, reducedData } = useNetworkStatus()
   const completeFieldOrderForm = useOrdersStore((s) => s.completeFieldOrderForm)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
   const orders = useOrdersStore((s) => s.orders)
@@ -52,26 +53,51 @@ export function FieldOrderPanel() {
     }
     setBusy(true)
     try {
-      const coords = await geocodeAddress(address)
-      const order = createFieldOrder({
-        client,
-        address,
-        service,
-        category,
+      const today = todayLocalIso()
+      const draft: Omit<WorkOrder, 'id'> & { id?: string } = {
+        id: '',
+        client: client.trim(),
+        address: address.trim(),
+        service: service.trim(),
+        category: category.trim() || 'Terreno',
+        incidentType: (category as IncidentType) || 'Mantención',
+        status: 'En Curso',
+        createdAt: today,
+        executionDate: today,
+        startDate: today,
+        priority: 'Media',
         technician: user.name ?? 'Operador',
-        notes,
-      })
-      if (coords) {
-        updateOrder(order.id, {
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        })
+        operatorIds: user.id ? [user.id] : [],
+        operators: user.id
+          ? [{ id: user.id, name: user.name ?? 'Operador' }]
+          : [],
+        progress: 10,
       }
+
+      // Geocode solo con red; offline no bloquea el alta
+      if (navigator.onLine) {
+        try {
+          const coords = await geocodeAddress(address)
+          if (coords) {
+            draft.latitude = coords.latitude
+            draft.longitude = coords.longitude
+          }
+        } catch {
+          /* sin coords: la OT igual se registra */
+        }
+      }
+
+      const result = await registerFieldWorkOrder({
+        order: draft,
+        notes: notes.trim() || undefined,
+      })
+
+      const created = useOrdersStore.getState().orders.find((o) => o.id === result.id)
       setClient('')
       setAddress('')
       setService('')
       setNotes('')
-      openViewModal(order)
+      if (created) openViewModal(created)
     } finally {
       setBusy(false)
     }
@@ -100,7 +126,11 @@ export function FieldOrderPanel() {
             </p>
             <p className="text-xs text-emerald-800">
               Formulario adaptado a móvil
-              {reducedData ? ' · modo datos reducidos' : ''}
+              {!online
+                ? ' · sin conexión (se guarda local)'
+                : reducedData
+                  ? ' · modo datos reducidos'
+                  : ''}
             </p>
           </div>
         </div>

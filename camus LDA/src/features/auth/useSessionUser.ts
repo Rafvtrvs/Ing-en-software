@@ -27,13 +27,15 @@ export function useSessionUser(): OrderPermissionUser {
     }
   }, [appUser.name, appUser.role, appUser.avatar])
 
+  const authUser = authService.getUser()
+
   return useMemo(() => {
-    const authUser = authService.getUser()
+    const session = authService.getUser()
     return {
-      id: authUser?.id,
-      name: authUser?.name ?? appUser.name,
-      role: authUser?.role ?? appUser.role,
-      email: authUser?.email,
+      id: session?.id,
+      name: session?.name ?? appUser.name,
+      role: session?.role ?? appUser.role,
+      email: session?.email,
     }
-  }, [appUser.name, appUser.role])
+  }, [appUser.name, appUser.role, appUser.email, authUser?.id, authUser?.role, authUser?.name])
 }

@@ -3,9 +3,14 @@ import type { Request, Response, NextFunction } from 'express'
 import { orderService } from '../services/order.service.js'
 
 export const orderController = {
-  async list(_req: Request, res: Response, next: NextFunction) {
+  async list(req: Request, res: Response, next: NextFunction) {
     try {
-      res.json(await orderService.list())
+      res.json(
+        await orderService.list({
+          userId: req.user?.sub,
+          role: req.user?.rol,
+        }),
+      )
     } catch (err) {
       next(err)
     }
@@ -13,7 +18,10 @@ export const orderController = {
 
   async get(req: Request, res: Response, next: NextFunction) {
     try {
-      const row = await orderService.get(req.params.id)
+      const row = await orderService.get(req.params.id, {
+        userId: req.user?.sub,
+        role: req.user?.rol,
+      })
       res.json(row)
     } catch (err) {
       next(err)

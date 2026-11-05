@@ -15,7 +15,11 @@ import {
   canEditOrder,
   orderEditBlockedMessage,
 } from '@/features/orders/utils/canEditOrder'
-import { calcDurationHours, toInputDate } from '@/features/orders/utils/orderDates'
+import {
+  calcDurationHours,
+  toInputDate,
+  todayLocalIso,
+} from '@/features/orders/utils/orderDates'
 import {
   autoPriorityForIncident,
   INCIDENT_TYPES,
@@ -126,7 +130,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       operatorIds: [],
       truckCode: '',
       progress: 0,
-      startDate: '',
+      startDate: todayLocalIso(),
       endDate: '',
       durationHours: undefined,
     },
@@ -168,6 +172,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         durationHours: order.durationHours,
       })
     } else {
+      const today = todayLocalIso()
       reset({
         id: '',
         client: '',
@@ -182,7 +187,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         operatorIds: [],
         truckCode: '',
         progress: 0,
-        startDate: '',
+        startDate: today,
         endDate: '',
         durationHours: undefined,
       })
@@ -238,7 +243,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       category: data.incidentType || data.category,
       incidentType: data.incidentType,
       status: data.status,
-      createdAt: order?.createdAt ?? new Date().toLocaleDateString('es-CL'),
+      createdAt: order?.createdAt ?? todayLocalIso(),
       priority: data.priority,
       priorityManual: data.priorityManual,
       technician:
@@ -254,8 +259,13 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       progress: Number.isFinite(data.progress)
         ? Math.min(100, Math.max(0, Math.round(Number(data.progress))))
         : 0,
-      startDate: data.startDate || (mode === 'edit' ? '' : undefined),
+      startDate:
+        data.startDate ||
+        (mode === 'edit' ? '' : todayLocalIso()),
       endDate: data.endDate || (mode === 'edit' ? '' : undefined),
+      ...(mode !== 'edit'
+        ? { executionDate: data.startDate || todayLocalIso() }
+        : null),
       durationHours: (() => {
         const hours = Number(data.durationHours)
         return Number.isFinite(hours) ? hours : undefined

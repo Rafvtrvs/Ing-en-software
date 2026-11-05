@@ -37,11 +37,14 @@ export function permissionsForRole(roleName?: string | null): PermissionKey[] {
     return [...(initialRoles.find((r) => r.id === 'role-admin')?.permissions ?? [])]
   }
 
+  const roleNorm = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
   if (
-    name.includes('técnico') ||
-    name.includes('tecnico') ||
-    name.includes('operador') ||
-    name.includes('campo')
+    roleNorm.includes('tecnico') ||
+    roleNorm.includes('operador') ||
+    roleNorm.includes('operario') ||
+    roleNorm.includes('campo')
   ) {
     return [
       ...(initialRoles.find((r) => r.id === 'role-tecnico')?.permissions ?? [

@@ -123,6 +123,8 @@ export interface WorkOrder {
   approval?: OrderApprovalRecord
   /** RF66 — fecha de ejecución programada (reprogramación) */
   executionDate?: string
+  /** OT creada offline / aún no confirmada en Postgres */
+  pendingSync?: boolean
 }
 
 /** RF65 CDS 224/226 — comentario en OT con trazabilidad automática */

@@ -6,12 +6,15 @@ export function formatCurrency(value: number): string {
   }).format(value)
 }
 
+const CHILE_TZ = 'America/Santiago'
+
 export function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date
   return new Intl.DateTimeFormat('es-CL', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+    timeZone: CHILE_TZ,
   }).format(d)
 }
 
@@ -29,7 +32,8 @@ export function formatTime(date: Date | string): string {
   return new Intl.DateTimeFormat('es-CL', {
     hour: '2-digit',
     minute: '2-digit',
-    second: '2-digit',
+    hour12: false,
+    timeZone: CHILE_TZ,
   }).format(d)
 }
 
@@ -41,5 +45,7 @@ export function formatDateTime(date: Date | string): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
+    timeZone: CHILE_TZ,
   }).format(d)
 }

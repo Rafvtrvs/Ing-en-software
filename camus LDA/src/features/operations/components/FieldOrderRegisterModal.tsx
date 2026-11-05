@@ -8,8 +8,9 @@ import { FormField } from '@/components/ui/FormField'
 import { FormGrid } from '@/components/ui/FormGrid'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
-import { enqueue, flushQueue } from '@/features/field/utils/fieldQueue'
+import { registerFieldWorkOrder } from '@/features/field/utils/registerFieldWorkOrder'
 import { nextOrderId } from '@/features/orders/utils/nextOrderId'
+import { todayLocalIso } from '@/features/orders/utils/orderDates'
 import type { IncidentType, OrderPriority, WorkOrder } from '@/types'
 
 const INCIDENT_TYPES: IncidentType[] = [
@@ -30,7 +31,6 @@ interface FieldOrderRegisterModalProps {
 /** RF43 — CU-147 / CU-148: registro y formulario de OT en terreno */
 export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterModalProps) {
   const orders = useOrdersStore((s) => s.orders)
-  const addOrder = useOrdersStore((s) => s.addOrder)
   const addToast = useOrdersStore((s) => s.addToast)
   const currentUser = useSessionUser()
 
@@ -42,6 +42,7 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
   const [priority, setPriority] = useState<OrderPriority>('Media')
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [busy, setBusy] = useState(false)
 
   const suggestedId = useMemo(
     () => nextOrderId(orders.map((o) => o.id)),
@@ -57,6 +58,7 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
     setPriority('Media')
     setNotes('')
     setErrors({})
+    setBusy(false)
   }
 
   const handleClose = () => {
@@ -73,10 +75,10 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
     return Object.keys(next).length === 0
   }
 
-  const buildOrder = (): WorkOrder => {
-    const today = new Date().toISOString().slice(0, 10)
+  const buildOrder = (): Omit<WorkOrder, 'id'> & { id?: string } => {
+    const today = todayLocalIso()
     return {
-      id: suggestedId,
+      id: '',
       client: client.trim(),
       address: address.trim(),
       service: service.trim(),
@@ -104,55 +106,17 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
   }
 
   const handleSubmit = async () => {
-    if (!validateStep2()) return
-    const draft = buildOrder()
-    const offline = !navigator.onLine
-
-    // ID correlativo lo asigna el store; se reutiliza en la cola de sync
-    const createdId = addOrder({ ...draft, id: '' })
-    const order = { ...draft, id: createdId }
-
-    if (offline) {
-      const queued = enqueue({
-        kind: 'create-order',
-        order,
+    if (!validateStep2() || busy) return
+    setBusy(true)
+    try {
+      await registerFieldWorkOrder({
+        order: buildOrder(),
         notes: notes.trim() || undefined,
       })
-      if (!queued.ok) {
-        addToast('No se pudo guardar en el dispositivo (almacenamiento lleno)', 'error')
-        return
-      }
-      addToast(
-        `Orden ${createdId} guardada localmente. Sincronice cuando recupere conexión.`,
-        'info',
-      )
       handleClose()
-      return
+    } finally {
+      setBusy(false)
     }
-
-    const queued = enqueue({
-      kind: 'create-order',
-      order,
-      notes: notes.trim() || undefined,
-    })
-    if (queued.ok) {
-      const res = await flushQueue()
-      if (res.synced > 0) {
-        addToast(`Registro exitoso: ${createdId} creada desde terreno`)
-      } else if (res.offline) {
-        addToast(
-          `Sin conexión estable: ${createdId} quedó pendiente de sincronizar`,
-          'info',
-        )
-      } else if (res.failed.length > 0) {
-        addToast(res.failed[0].message, 'error')
-      } else {
-        addToast(`Registro exitoso: ${createdId} creada desde terreno`)
-      }
-    } else {
-      addToast(`Orden ${createdId} creada localmente; no se pudo encolar para la API`, 'info')
-    }
-    handleClose()
   }
 
   return (
@@ -176,13 +140,15 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
           </>
         ) : (
           <>
-            <Button variant="outline" onClick={() => setStep(1)}>
+            <Button variant="outline" onClick={() => setStep(1)} disabled={busy}>
               Volver
             </Button>
-            <Button variant="outline" onClick={handleSaveDraft}>
+            <Button variant="outline" onClick={handleSaveDraft} disabled={busy}>
               Guardar temporalmente
             </Button>
-            <Button onClick={handleSubmit}>Finalizar registro</Button>
+            <Button onClick={() => void handleSubmit()} disabled={busy}>
+              {busy ? 'Guardando…' : 'Finalizar registro'}
+            </Button>
           </>
         )
       }

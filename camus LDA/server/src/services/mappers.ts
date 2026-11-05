@@ -14,8 +14,13 @@ import type {
 } from '@prisma/client'
 import { isConsumableStockCategory } from '../utils/stockCategories.js'
 
+/** Día calendario sin corrimiento UTC (Chile UTC-3: toISOString restaba un día). */
 function dateOnly(d: Date | null | undefined): string {
-  return d ? d.toISOString().slice(0, 10) : ''
+  if (!d) return ''
+  const y = d.getUTCFullYear()
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(d.getUTCDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function money(n: { toNumber?: () => number } | number | null | undefined): number {
@@ -47,7 +52,11 @@ export function toOrderDto(
 ) {
   return {
     id: o.id,
-    client: o.cliente?.nombre ?? '',
+    client:
+      o.cliente?.nombre?.trim() ||
+      o.nombreCliente?.trim() ||
+      o.cliente?.empresa?.trim() ||
+      '',
     address: o.direccion,
     service: o.servicio,
     category: o.categoria,

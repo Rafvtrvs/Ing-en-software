@@ -27,7 +27,8 @@
     "express": "^4.21.2",
     "firebase-admin": "^14.5.0",
     "jsonwebtoken": "^9.0.2",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "resend": "^6.37.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

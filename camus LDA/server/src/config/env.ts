@@ -33,6 +33,12 @@ export const env = {
     mailProvider: get('MAIL_PROVIDER', 'mock'),
     pushProvider: get('PUSH_PROVIDER', 'mock'),
     storageLocalDir: get('STORAGE_LOCAL_DIR', './.storage'),
+    /** Resend: https://resend.com/api-keys */
+    resendApiKey: get('RESEND_API_KEY'),
+    /** Remitente verificado en Resend, p. ej. Camus LDA <noreply@tudominio.cl> */
+    mailFrom: get('MAIL_FROM', 'Camus LDA <onboarding@resend.dev>'),
+    /** Bandeja de operaciones / alertas */
+    mailOpsTo: get('MAIL_OPS_TO', 'operaciones@camus.cl'),
   },
 }
 

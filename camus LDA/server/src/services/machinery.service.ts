@@ -1,8 +1,35 @@
 import { prisma } from '../db/prisma.js'
+import { mailOpsRecipient, mailService } from '../external/mail.service.js'
 import { auditService } from './audit.service.js'
 import { toEquipmentDto } from './mappers.js'
 
 const ACTIVE_ORDER_STATUSES = new Set(['Pendiente', 'En Curso'])
+/** Evita repetir alertas de mantención programada (mismo criterio que retrasos). */
+const MAINT_NOTIFY_DEDUPE_HOURS = 24
+/** Avisa mantenciones vencidas o que vencen en esta ventana. */
+const MAINT_LOOKAHEAD_DAYS = 7
+
+function equipmentLabel(row: {
+  id: number
+  codigo?: string | null
+  nombre?: string | null
+  patente?: string | null
+  marca?: string | null
+}): string {
+  const code = row.codigo?.trim() || row.patente?.trim() || `MAQ-${row.id}`
+  const name =
+    row.nombre?.trim() ||
+    [row.marca, row.patente].filter(Boolean).join(' ') ||
+    `Equipo ${row.id}`
+  return `${code} — ${name}`
+}
+
+function dateOnlyIso(value: Date | string | null | undefined): string {
+  if (!value) return 'sin fecha'
+  const d = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(d.getTime())) return 'sin fecha'
+  return d.toISOString().slice(0, 10)
+}
 
 interface MachineryCreateInput {
   code?: string
@@ -454,10 +481,110 @@ export const machineryService = {
       idUsuario: userId,
     })
 
+    if (
+      nextStatus &&
+      nextStatus !== before.estado &&
+      (nextStatus === 'Mantenimiento' || nextStatus === 'Fuera de servicio')
+    ) {
+      const label = equipmentLabel(row)
+      void mailService
+        .send({
+          to: mailOpsRecipient(),
+          subject: `Camus LDA · Disponibilidad de equipo`,
+          body: `Se actualizó el estado de un equipo.\n\nEquipo: ${label}\nEstado anterior: ${before.estado}\nEstado actual: ${nextStatus}`,
+        })
+        .catch((err) => console.error('[machinery] mail status', err))
+
+      const { notifyAdmins } = await import('./pushNotify.service.js')
+      void notifyAdmins({
+        title: `${label}: ${nextStatus}`,
+        body: `Pasó de ${before.estado} a ${nextStatus}`,
+        link: `/inventario`,
+        notifType: 'inventory',
+        excludeUserId: userId,
+      }).catch((err) => console.error('[machinery] push status', err))
+    }
+
     const activeUso = row.usos.find(
       (u) => u.orden && ACTIVE_ORDER_STATUSES.has(u.orden.estado),
     )
     return toEquipmentDto(row, activeUso?.idOt)
+  },
+
+  /**
+   * Alerta por correo (y push) de mantenciones vencidas o próximas
+   * (ventana de MAINT_LOOKAHEAD_DAYS). Deduplica con bitácora.
+   */
+  async notifyDueMaintenance(userId?: number) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const horizon = new Date(today)
+    horizon.setDate(horizon.getDate() + MAINT_LOOKAHEAD_DAYS)
+
+    const rows = await prisma.maquinaria.findMany({
+      where: {
+        proximaMantencion: { not: null, lte: horizon },
+      },
+      orderBy: { proximaMantencion: 'asc' },
+    })
+    if (rows.length === 0) return []
+
+    const since = new Date(Date.now() - MAINT_NOTIFY_DEDUPE_HOURS * 60 * 60 * 1000)
+    const recent = await prisma.bitacoraAuditoria.findMany({
+      where: {
+        moduloAfectado: 'inventario',
+        accion: 'notificar_mantencion',
+        fechaHora: { gte: since },
+      },
+    })
+    const alreadyNotified = new Set<number>()
+    for (const r of recent) {
+      try {
+        const id = Number(JSON.parse(r.valorNuevo ?? '{}').machineryId)
+        if (Number.isFinite(id)) alreadyNotified.add(id)
+      } catch {
+        /* formato inesperado */
+      }
+    }
+
+    const pending = rows.filter((r) => !alreadyNotified.has(r.id))
+    const { notifyAdmins } = await import('./pushNotify.service.js')
+
+    for (const row of pending) {
+      const label = equipmentLabel(row)
+      const due = dateOnlyIso(row.proximaMantencion)
+      const dueDate = row.proximaMantencion ? new Date(row.proximaMantencion) : null
+      const overdue = dueDate != null && dueDate < today
+
+      await mailService
+        .send({
+          to: mailOpsRecipient(),
+          subject: `Camus LDA · Alerta de mantención`,
+          body: `Alerta de mantención de equipo.\n\nEquipo: ${label}\nEstado: ${row.estado}\nPróxima mantención: ${due}\nCondición: ${overdue ? 'Vencida' : 'Próxima'}`,
+        })
+        .catch((err) => console.error('[machinery] mail due', err))
+
+      await notifyAdmins({
+        title: overdue ? `Mantención vencida: ${label}` : `Mantención próxima: ${label}`,
+        body: `Fecha: ${due} · Estado: ${row.estado}`,
+        link: `/inventario`,
+        notifType: 'inventory',
+        excludeUserId: userId,
+      }).catch((err) => console.error('[machinery] push due', err))
+
+      await auditService.log({
+        modulo: 'inventario',
+        accion: 'notificar_mantencion',
+        valorNuevo: {
+          machineryId: row.id,
+          nextMaintenance: due,
+          overdue,
+        },
+        idUsuario: userId,
+      })
+    }
+
+    return pending.map((r) => toEquipmentDto(r))
   },
 
   async remove(id: number, userId?: number) {

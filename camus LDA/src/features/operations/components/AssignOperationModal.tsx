@@ -64,10 +64,9 @@ export function AssignOperationModal({ open, onClose }: AssignOperationModalProp
     setError(null)
   }, [orderId, open, assignableOrders])
 
-  const toggle = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    )
+  /** Un solo operador a cargo (el modelo persiste id_operador). */
+  const selectOne = (id: string) => {
+    setSelected((prev) => (prev.length === 1 && prev[0] === id ? [] : [id]))
   }
 
   const toOperators = (): OrderOperator[] =>
@@ -86,7 +85,7 @@ export function AssignOperationModal({ open, onClose }: AssignOperationModalProp
       return
     }
     if (selected.length === 0) {
-      setError('Selecciona al menos un técnico u operador')
+      setError('Selecciona el técnico u operador a cargo')
       return
     }
     const operators = toOperators()
@@ -107,7 +106,7 @@ export function AssignOperationModal({ open, onClose }: AssignOperationModalProp
       open={open}
       onClose={handleClose}
       title="Asignar Operación"
-      description="Elige una OT activa y los técnicos u operadores que la ejecutarán."
+      description="Elige una OT activa y el técnico u operador a cargo."
       size="md"
       footer={
         <>
@@ -156,7 +155,7 @@ export function AssignOperationModal({ open, onClose }: AssignOperationModalProp
         <div>
           <div className="mb-2 flex items-center gap-2">
             <Users className="h-4 w-4 text-slate-400" />
-            <p className="text-sm font-semibold text-slate-900">Técnicos / operadores</p>
+            <p className="text-sm font-semibold text-slate-900">Técnico / operador a cargo</p>
           </div>
           {technicians.length === 0 ? (
             <p className="text-sm text-slate-500">
@@ -177,10 +176,11 @@ export function AssignOperationModal({ open, onClose }: AssignOperationModalProp
                       )}
                     >
                       <input
-                        type="checkbox"
+                        type="radio"
+                        name="assign-operator"
                         checked={checked}
-                        onChange={() => toggle(t.id)}
-                        className="rounded border-slate-300 text-primary focus:ring-primary"
+                        onChange={() => selectOne(t.id)}
+                        className="border-slate-300 text-primary focus:ring-primary"
                       />
                       {t.name}
                     </label>

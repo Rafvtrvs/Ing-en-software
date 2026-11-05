@@ -44,19 +44,31 @@ export function Drawer({
       clearStackedFormStyles(root)
       return
     }
-    const apply = () => stackFormGrids(root)
+    let scheduled = 0
+    const apply = () => {
+      // Evita bucle infinito: stackFormGrids muta atributos/estilos
+      stackFormGrids(root)
+    }
+    const schedule = () => {
+      if (scheduled) return
+      scheduled = window.setTimeout(() => {
+        scheduled = 0
+        apply()
+      }, 50)
+    }
     apply()
-    const obs = new MutationObserver(apply)
-    obs.observe(root, { childList: true, subtree: true, attributes: true })
+    const obs = new MutationObserver(schedule)
+    obs.observe(root, { childList: true, subtree: true, attributes: false })
     const t1 = window.setTimeout(apply, 0)
-    const t2 = window.setTimeout(apply, 100)
+    const t2 = window.setTimeout(apply, 120)
     return () => {
       obs.disconnect()
       window.clearTimeout(t1)
       window.clearTimeout(t2)
+      if (scheduled) window.clearTimeout(scheduled)
       clearStackedFormStyles(root)
     }
-  }, [open, isMobile, children])
+  }, [open, isMobile])
 
   if (!open) return null
 

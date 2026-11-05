@@ -21,14 +21,19 @@ import type {
 } from '@/types'
 import { ordersService } from '@/services/ordersService'
 import { authService } from '@/services/authService'
+import { useAppStore } from '@/store/useAppStore'
 
 /** Usuario autenticado para trazabilidad de cambios en OT. */
 function currentHistoryActor(): { id: string; name: string } {
   const user = authService.getUser()
-  return {
-    id: user?.id?.trim() || 'sistema',
-    name: user?.name?.trim() || user?.email?.trim() || 'Sistema',
-  }
+  const session = useAppStore.getState().user
+  const id = user?.id?.trim() || 'sistema'
+  const name =
+    user?.name?.trim() ||
+    session?.name?.trim() ||
+    user?.email?.trim() ||
+    'Sistema'
+  return { id, name }
 }
 import {
   applySortOrderToColumn,
@@ -58,6 +63,10 @@ import {
   resolveOrderPriority,
 } from '@/features/orders/utils/priorityRules'
 import { allocateOrderId } from '@/features/orders/utils/nextOrderId'
+import {
+  pendingCreateOrderIds,
+  pendingCreateOrders,
+} from '@/features/field/utils/fieldQueue'
 
 export type OrderModalMode =
   | 'create'
@@ -139,7 +148,10 @@ interface OrdersState {
   showFilters: boolean
   toasts: ToastMessage[]
   syncFromApi: () => Promise<void>
-  addOrder: (order: WorkOrder) => string
+  addOrder: (
+    order: WorkOrder,
+    options?: { deferApi?: boolean },
+  ) => string
   updateOrder: (id: string, data: Partial<WorkOrder>, options?: { fromForm?: boolean }) => void
   deleteOrder: (id: string) => void
   addIntervention: (orderId: string, detail: string) => Promise<OrderIntervention>
@@ -332,9 +344,10 @@ function eventId(prefix: string) {
 function mergeApiOrders(
   apiOrders: WorkOrder[],
   localOrders: WorkOrder[],
+  pendingCreateIds: Set<string>,
 ): WorkOrder[] {
   const localById = new Map(localOrders.map((o) => [o.id, o]))
-  return apiOrders.map((api) => {
+  const merged = apiOrders.map((api) => {
     const local = localById.get(api.id)
     if (!local) return api
     return {
@@ -366,6 +379,23 @@ function mergeApiOrders(
         : (api.priority ?? local.priority),
     }
   })
+  const apiIds = new Set(apiOrders.map((o) => o.id))
+  // OT creadas offline aún no subidas: no eliminarlas al sincronizar
+  const pendingLocals = new Map<string, WorkOrder>()
+  for (const local of localOrders) {
+    if (
+      !apiIds.has(local.id) &&
+      (pendingCreateIds.has(local.id) || local.pendingSync)
+    ) {
+      pendingLocals.set(local.id, { ...local, pendingSync: true })
+    }
+  }
+  for (const fromQueue of pendingCreateOrders()) {
+    if (!apiIds.has(fromQueue.id) && !pendingLocals.has(fromQueue.id)) {
+      pendingLocals.set(fromQueue.id, fromQueue)
+    }
+  }
+  return [...pendingLocals.values(), ...merged]
 }
 
 function withDerivedDuration(data: Partial<WorkOrder>, existing?: WorkOrder): Partial<WorkOrder> {
@@ -403,7 +433,7 @@ export const useOrdersStore = create<OrdersState>()(
             ordersService.listModificationRequests().catch(() => [] as OrderModificationRequest[]),
           ])
           const merged = applyServiceClocks(
-            mergeApiOrders(orders, get().orders),
+            mergeApiOrders(orders, get().orders, pendingCreateOrderIds()),
             get().serviceClocks,
           )
           const nextOrders = normalizeOrdersSort(merged)
@@ -435,7 +465,7 @@ export const useOrdersStore = create<OrdersState>()(
         }
       },
 
-      addOrder: (order) => {
+      addOrder: (order, options) => {
         const newId = allocateOrderId(
           get().orders.map((o) => o.id),
           order.id,
@@ -453,6 +483,9 @@ export const useOrdersStore = create<OrdersState>()(
           sortOrder: 0,
           priority,
           incidentType: order.incidentType ?? (order.category as WorkOrder['incidentType']),
+          ...(options?.deferApi || !navigator.onLine
+            ? { pendingSync: true }
+            : null),
         }
         set((state) => {
           const status = order.status
@@ -472,11 +505,14 @@ export const useOrdersStore = create<OrdersState>()(
           status: order.status,
         })
 
-        ordersService
-          .create({ ...newOrder })
-          .then(() => set({ apiAvailable: true }))
-          .catch(() => set({ apiAvailable: false }))
-          .finally(() => syncEquipmentLocations())
+        const deferApi = Boolean(options?.deferApi) || !navigator.onLine
+        if (!deferApi) {
+          ordersService
+            .create({ ...newOrder })
+            .then(() => set({ apiAvailable: true }))
+            .catch(() => set({ apiAvailable: false }))
+            .finally(() => syncEquipmentLocations())
+        }
 
         if (newOrder.truckCode || newOrder.equipmentId) {
           syncEquipmentLocations()
@@ -774,43 +810,46 @@ export const useOrdersStore = create<OrdersState>()(
 
       assignOperators: (orderId, operators) => {
         const order = get().orders.find((o) => o.id === orderId)
-        const technician = operators[0]?.name ?? ''
+        // Un operador a cargo (id_operador en Postgres)
+        const primary = operators[0]
+        const assigned = primary ? [primary] : []
+        const technician = primary?.name ?? ''
         get().updateOrder(orderId, {
-          operatorIds: operators.map((o) => o.id),
-          operators,
+          operatorIds: assigned.map((o) => o.id),
+          operators: assigned,
           technician,
         })
         get().addToast(
-          operators.length
-            ? `Cuadrilla asignada (${operators.length})`
-            : 'Asignación limpiada',
+          primary ? `Operador asignado: ${primary.name}` : 'Asignación limpiada',
           'info',
         )
-        if (order && operators.length > 0) {
+        if (order && primary) {
           useNotificationsStore.getState().pushOrderActivity({
             orderId,
-            title: `Orden ${orderId}: cuadrilla asignada`,
-            message: `${operators.map((o) => o.name).join(', ')} asignado(s) a la OT de ${order.client}.`,
+            title: `Orden ${orderId}: operador asignado`,
+            message: `${primary.name} asignado a la OT de ${order.client}.`,
           })
         }
       },
 
-      /** Reasignar: revoca permisos previos al reemplazar operatorIds (CU-161 / CU-187) */
+      /** Reasignar: revoca permisos previos al reemplazar el operador a cargo (CU-161 / CU-187) */
       reassignOperators: (orderId, operators) => {
         const order = get().orders.find((o) => o.id === orderId)
-        const technician = operators[0]?.name ?? ''
+        const primary = operators[0]
+        const assigned = primary ? [primary] : []
+        const technician = primary?.name ?? ''
         get().updateOrder(orderId, {
-          operatorIds: operators.map((o) => o.id),
-          operators,
+          operatorIds: assigned.map((o) => o.id),
+          operators: assigned,
           technician,
         })
-        get().addToast('Operadores reasignados — permisos previos revocados', 'info')
+        get().addToast('Operador reasignado — permisos previos revocados', 'info')
         if (order) {
           useNotificationsStore.getState().pushOrderActivity({
             orderId,
-            title: `Orden ${orderId}: operadores reasignados`,
-            message: operators.length
-              ? `Nueva cuadrilla: ${operators.map((o) => o.name).join(', ')} (${order.client}).`
+            title: `Orden ${orderId}: operador reasignado`,
+            message: primary
+              ? `Nuevo responsable: ${primary.name} (${order.client}).`
               : `Se limpió la asignación de la OT de ${order.client}.`,
           })
         }
@@ -1131,30 +1170,39 @@ export const useOrdersStore = create<OrdersState>()(
       },
 
       createFieldOrder: (data) => {
-        const id = eventId('OT-T')
-        const order: WorkOrder = {
-          id,
-          client: data.client.trim(),
-          address: data.address.trim(),
-          service: data.service.trim(),
-          category: data.category.trim() || 'Terreno',
-          status: 'En Curso',
-          createdAt: new Date().toISOString().slice(0, 10),
-          priority: 'Media',
-          technician: data.technician.trim(),
-          operators: data.technician
-            ? [{ id: 'field', name: data.technician.trim() }]
-            : [],
-          progress: 10,
-          startDate: new Date().toISOString().slice(0, 10),
-        }
-        get().addOrder(order)
-        if (data.notes?.trim()) {
-          get().addToast(`OT en terreno creada: ${id}`)
-        } else {
-          get().addToast(`OT en terreno creada: ${id}`)
-        }
-        return order
+        const actor = currentHistoryActor()
+        const techName = data.technician.trim() || actor.name
+        // Preferir registerFieldWorkOrder en UI; este método queda para compat.
+        const createdId = get().addOrder(
+          {
+            id: '',
+            client: data.client.trim(),
+            address: data.address.trim(),
+            service: data.service.trim(),
+            category: data.category.trim() || 'Terreno',
+            status: 'En Curso',
+            createdAt: new Date().toISOString().slice(0, 10),
+            priority: 'Media',
+            technician: techName,
+            operatorIds: actor.id !== 'sistema' ? [actor.id] : [],
+            operators:
+              actor.id !== 'sistema'
+                ? [{ id: actor.id, name: techName }]
+                : techName
+                  ? [{ id: 'field', name: techName }]
+                  : [],
+            progress: 10,
+            startDate: new Date().toISOString().slice(0, 10),
+          },
+          { deferApi: !navigator.onLine },
+        )
+        get().addToast(
+          navigator.onLine
+            ? `OT en terreno creada: ${createdId}`
+            : `OT ${createdId} guardada localmente (sin conexión)`,
+          navigator.onLine ? 'success' : 'info',
+        )
+        return get().orders.find((o) => o.id === createdId)!
       },
 
       completeFieldOrderForm: (orderId, data) => {

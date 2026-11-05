@@ -51,7 +51,7 @@ export function OrderModificationHistoryPanel({ orderId }: { orderId: string }) 
                     {formatDate(e.changedAt)}
                   </td>
                   <td className="px-2 py-2 text-slate-600">
-                    {formatTime(e.changedAt).slice(0, 5)}
+                    {formatTime(e.changedAt)}
                   </td>
                   <td className="px-2 py-2">
                     <span className="font-medium text-slate-900">{e.fieldLabel}</span>

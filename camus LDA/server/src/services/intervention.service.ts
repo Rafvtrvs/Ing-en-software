@@ -2,6 +2,7 @@
 //  InterventionService — intervenciones por OT (CU-149–151)
 // ============================================================
 import { prisma } from '../db/prisma.js'
+import { mailOpsRecipient, mailService } from '../external/mail.service.js'
 import { auditService } from './audit.service.js'
 
 export class InterventionError extends Error {
@@ -51,7 +52,10 @@ export const interventionService = {
       throw new InterventionError(400, 'La descripción no puede superar 255 caracteres')
     }
 
-    const order = await prisma.ordenTrabajo.findUnique({ where: { id: orderId } })
+    const order = await prisma.ordenTrabajo.findUnique({
+      where: { id: orderId },
+      include: { cliente: true, operador: true },
+    })
     if (!order) {
       throw new InterventionError(404, 'Orden de trabajo no encontrada')
     }
@@ -74,6 +78,35 @@ export const interventionService = {
       },
       idUsuario: userId,
     })
+
+    const solicitante =
+      userId != null
+        ? await prisma.usuario.findUnique({ where: { id: userId }, select: { nombre: true } })
+        : null
+    const clienteNombre =
+      order.cliente?.nombre?.trim() ||
+      order.nombreCliente?.trim() ||
+      order.cliente?.empresa?.trim() ||
+      'Cliente'
+    const who = solicitante?.nombre?.trim() || order.operador?.nombre?.trim() || '—'
+
+    void mailService
+      .send({
+        to: mailOpsRecipient(),
+        subject: `Camus LDA · Intervención ${orderId}`,
+        body: `Se registró una solicitud de intervención.\n\nOrden: ${orderId}\nCliente: ${clienteNombre}\nServicio: ${order.servicio?.trim() || '—'}\nSolicitante: ${who}\nDetalle: ${trimmed}`,
+      })
+      .catch((err) => console.error('[intervention] mail create', err))
+
+    const { notifyAdmins } = await import('./pushNotify.service.js')
+    void notifyAdmins({
+      title: `Intervención · OT ${orderId}`,
+      body: `${who}: ${trimmed}`,
+      link: `/ordenes?order=${encodeURIComponent(orderId)}`,
+      orderId,
+      notifType: 'order',
+      excludeUserId: userId,
+    }).catch((err) => console.error('[intervention] push create', err))
 
     return toDto(row)
   },

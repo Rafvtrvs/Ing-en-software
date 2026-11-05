@@ -220,6 +220,8 @@ model OrdenTrabajo {
   /// Código del camión/equipo asignado (p. ej. CAM-012)
   codigoCamion String?  @map("codigo_camion") @db.VarChar(50)
   idMaquinaria Int?     @map("id_maquinaria")
+  /// Nombre de cliente capturado en formulario (aunque no exista en tabla cliente)
+  nombreCliente String  @default("") @map("nombre_cliente") @db.VarChar(150)
   progreso     Int      @default(0)
   ordenVisual  Int      @default(0) @map("orden_visual")
   idCliente    Int?     @map("id_cliente")

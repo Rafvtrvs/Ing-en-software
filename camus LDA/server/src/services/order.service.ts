@@ -6,8 +6,7 @@
 import { prisma } from '../db/prisma.js'
 import { auditService } from './audit.service.js'
 import { toOrderDto } from './mappers.js'
-import { mailService } from '../external/mail.service.js'
-import { pushService } from '../external/push.service.js'
+import { mailOpsRecipient, mailService } from '../external/mail.service.js'
 
 interface OrderInput {
   id?: string
@@ -41,7 +40,10 @@ function parseOptionalDate(
   if (value === null || String(value).trim() === '') return null
   const raw = String(value).trim()
   const isoDay = /^\d{4}-\d{2}-\d{2}/.test(raw) ? raw.slice(0, 10) : raw
-  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(isoDay) ? `${isoDay}T12:00:00` : raw)
+  // Mediodía UTC: el día calendario no se corre al serializar con getUTC*
+  const d = new Date(
+    /^\d{4}-\d{2}-\d{2}$/.test(isoDay) ? `${isoDay}T12:00:00.000Z` : raw,
+  )
   return Number.isNaN(d.getTime()) ? null : d
 }
 
@@ -148,6 +150,92 @@ async function resolveCliente(name?: string): Promise<number | null> {
   return c?.id ?? null
 }
 
+/** ¿El usuario autenticado es técnico/operador de campo? */
+async function resolveFieldOperatorActor(
+  userId?: number,
+): Promise<{ id: number; name: string } | null> {
+  if (userId == null || !Number.isFinite(userId)) return null
+  const user = await prisma.usuario.findUnique({
+    where: { id: userId },
+    include: { rol: true },
+  })
+  if (!user || user.estado !== 'Activo') return null
+  const role = (user.rol?.nombre ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+  const isField =
+    role.includes('tecnico') ||
+    role.includes('operador') ||
+    role.includes('operario') ||
+    role.includes('campo')
+  if (!isField) return null
+  return { id: user.id, name: user.nombre }
+}
+
+function clientLabel(row: {
+  nombreCliente?: string | null
+  cliente?: { nombre?: string | null; empresa?: string | null } | null
+}): string {
+  return (
+    row.cliente?.nombre?.trim() ||
+    row.nombreCliente?.trim() ||
+    row.cliente?.empresa?.trim() ||
+    'Cliente'
+  )
+}
+
+/** Campos de negocio relevantes (ignora solo reorden visual). */
+function hasBusinessFieldChange(
+  before: {
+    direccion: string
+    servicio: string
+    categoria: string
+    estado: string
+    prioridad: string
+    progreso: number
+    idCliente: number | null
+    idOperador: number | null
+    nombreCliente?: string | null
+    codigoCamion?: string | null
+    idMaquinaria?: number | null
+    fechaInicio?: Date | null
+    fechaTermino?: Date | null
+    fechaLimite?: Date | null
+    latitud?: number | null
+    longitud?: number | null
+  },
+  after: typeof before,
+): boolean {
+  const keys: (keyof typeof before)[] = [
+    'direccion',
+    'servicio',
+    'categoria',
+    'estado',
+    'prioridad',
+    'progreso',
+    'idCliente',
+    'idOperador',
+    'nombreCliente',
+    'codigoCamion',
+    'idMaquinaria',
+    'latitud',
+    'longitud',
+  ]
+  for (const k of keys) {
+    if (before[k] !== after[k]) return true
+  }
+  const sameDay = (a?: Date | null, b?: Date | null) => {
+    if (!a && !b) return true
+    if (!a || !b) return false
+    return a.toISOString().slice(0, 10) === b.toISOString().slice(0, 10)
+  }
+  if (!sameDay(before.fechaInicio, after.fechaInicio)) return true
+  if (!sameDay(before.fechaTermino, after.fechaTermino)) return true
+  if (!sameDay(before.fechaLimite, after.fechaLimite)) return true
+  return false
+}
+
 async function resolveOperador(input: {
   technician?: string
   operatorIds?: string[]
@@ -155,28 +243,76 @@ async function resolveOperador(input: {
 }): Promise<number | null | undefined> {
   if (input.idOperador !== undefined) return input.idOperador
   if (input.operatorIds?.length) {
-    const raw = input.operatorIds[0]
-    const asNum = Number(raw)
-    if (Number.isFinite(asNum) && String(asNum) === raw) return asNum
+    for (const raw of input.operatorIds) {
+      const asNum = Number(String(raw).trim())
+      if (Number.isFinite(asNum) && asNum > 0) return asNum
+    }
   }
   const name = input.technician?.trim()
   if (!name) return undefined
-  const byName = await prisma.usuario.findFirst({ where: { nombre: name } })
+  const byName = await prisma.usuario.findFirst({
+    where: { nombre: { equals: name, mode: 'insensitive' } },
+  })
   return byName?.id ?? null
 }
 
+function normalizeRoleName(role?: string | null): string {
+  return (role ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
+
+/** Técnico / operador / operario de campo: solo ve OT asignadas. */
+function isFieldOperatorRole(role?: string | null): boolean {
+  const n = normalizeRoleName(role)
+  if (!n) return false
+  if (
+    n.includes('admin') ||
+    n.includes('supervisor') ||
+    n.includes('gerente')
+  ) {
+    return false
+  }
+  return (
+    n.includes('tecnico') ||
+    n.includes('operador') ||
+    n.includes('operario') ||
+    n.includes('campo')
+  )
+}
+
 export const orderService = {
-  async list() {
+  async list(actor?: { userId?: number; role?: string | null }) {
+    const fieldOnly =
+      actor?.userId != null &&
+      Number.isFinite(actor.userId) &&
+      isFieldOperatorRole(actor.role)
+
     const rows = await prisma.ordenTrabajo.findMany({
+      where: fieldOnly ? { idOperador: actor!.userId } : undefined,
       include: { cliente: true, operador: true },
       orderBy: { ordenVisual: 'asc' },
     })
     return rows.map(toOrderDto)
   },
 
-  async get(id: string) {
-    const row = await prisma.ordenTrabajo.findUnique({ where: { id }, include: { cliente: true, operador: true } })
+  async get(id: string, actor?: { userId?: number; role?: string | null }) {
+    const row = await prisma.ordenTrabajo.findUnique({
+      where: { id },
+      include: { cliente: true, operador: true },
+    })
     if (!row) {
+      const e: any = new Error('Orden no encontrada')
+      e.status = 404
+      throw e
+    }
+    if (
+      actor?.userId != null &&
+      isFieldOperatorRole(actor.role) &&
+      row.idOperador !== actor.userId
+    ) {
       const e: any = new Error('Orden no encontrada')
       e.status = 404
       throw e
@@ -185,8 +321,26 @@ export const orderService = {
   },
 
   async create(input: OrderInput, userId?: number) {
+    const requestedId = input.id?.trim() || ''
+    // Idempotencia offline: si el ID ya existe, devolver la OT (no duplicar)
+    if (requestedId) {
+      const existing = await prisma.ordenTrabajo.findUnique({
+        where: { id: requestedId },
+        include: { cliente: true, operador: true },
+      })
+      if (existing) return toOrderDto(existing)
+    }
+
     const idCliente = input.idCliente ?? (await resolveCliente(input.client))
-    const idOperador = await resolveOperador(input)
+    let idOperador = await resolveOperador(input)
+    // Si el técnico crea la OT y no vino operador, queda asignada a quien la registra
+    if (
+      (idOperador === undefined || idOperador === null) &&
+      userId != null &&
+      Number.isFinite(userId)
+    ) {
+      idOperador = userId
+    }
     const maquinaria = await resolveMaquinaria(input)
     const fechaInicio = parseOptionalDate(input.startDate)
     const fechaTermino = parseOptionalDate(input.endDate)
@@ -195,9 +349,10 @@ export const orderService = {
     requireAddressOrCoordinates(input.address, input.latitude, input.longitude)
     validateCoordinates(input.latitude, input.longitude)
 
+    const nombreCliente = input.client?.trim() || ''
     const row = await prisma.ordenTrabajo.create({
       data: {
-        id: input.id?.trim() || (await genId()),
+        id: requestedId || (await genId()),
         direccion: input.address ?? '',
         servicio: input.service ?? '',
         categoria: input.category ?? '',
@@ -216,6 +371,7 @@ export const orderService = {
             : Number(input.durationHours),
         codigoCamion: maquinaria?.codigoCamion ?? null,
         idMaquinaria: maquinaria?.idMaquinaria ?? null,
+        nombreCliente,
         idCliente,
         idOperador: idOperador ?? null,
       },
@@ -239,16 +395,32 @@ export const orderService = {
         idUsuario: userId,
       })
     }
-    await mailService.send({
-      to: 'operaciones@camus.cl',
-      subject: `Nueva orden ${row.id}`,
-      body: `Se creó la orden ${row.id}.`,
-    })
-    await pushService.notify({
-      token: 'field-team',
-      title: 'Nueva orden asignada',
-      body: row.id,
-    })
+    const clienteNombre =
+      row.cliente?.nombre?.trim() ||
+      row.nombreCliente?.trim() ||
+      row.cliente?.empresa?.trim() ||
+      'Cliente'
+    const operadorActor = await resolveFieldOperatorActor(userId)
+
+    // Notificaciones externas: nunca deben tumbar la creación de la OT
+    void mailService
+      .send({
+        to: mailOpsRecipient(),
+        subject: `Camus LDA · Nueva orden ${row.id}`,
+        body: `Se creó una nueva orden de trabajo.\n\nOrden: ${row.id}\nCliente: ${clienteNombre}\nServicio: ${row.servicio?.trim() || '—'}\nDirección: ${row.direccion || '—'}${operadorActor ? `\nRegistrada por: ${operadorActor.name}` : ''}`,
+      })
+      .catch((err) => console.error('[order] mail create', err))
+
+    const { notifyAdmins } = await import('./pushNotify.service.js')
+    void notifyAdmins({
+      title: `Nueva OT ${row.id}`,
+      body: `${clienteNombre} · ${row.servicio?.trim() || 'Sin servicio'}`,
+      link: `/ordenes?order=${encodeURIComponent(row.id)}`,
+      orderId: row.id,
+      notifType: 'order',
+      excludeUserId: userId,
+    }).catch((err) => console.error('[order] push create', err))
+
     return toOrderDto(row)
   },
 
@@ -281,6 +453,9 @@ export const orderService = {
         progreso: input.progress,
         ordenVisual: input.sortOrder,
         idCliente,
+        ...(input.client !== undefined
+          ? { nombreCliente: input.client.trim() }
+          : null),
         ...(idOperador !== undefined ? { idOperador } : null),
         ...(input.latitude !== undefined ? { latitud: input.latitude } : null),
         ...(input.longitude !== undefined ? { longitud: input.longitude } : null),
@@ -328,6 +503,11 @@ export const orderService = {
       })
     }
 
+    const { notifyAdmins } = await import('./pushNotify.service.js')
+    const operadorActor = await resolveFieldOperatorActor(userId)
+    const clienteNombre = clientLabel(row)
+    const servicio = row.servicio?.trim() || 'Sin servicio'
+
     // RF29 CU-97: registrar el cambio de estado en la bitácora (Kanban / terreno)
     if (before && row.estado !== before.estado) {
       await auditService.log({
@@ -338,15 +518,32 @@ export const orderService = {
         idUsuario: userId,
       })
       // RF29 CU-98: notificar el cambio de estado (FCM a administradores)
-      const { notifyAdmins } = await import('./pushNotify.service.js')
-      const clienteNombre =
-        row.cliente?.nombre?.trim() ||
-        row.cliente?.empresa?.trim() ||
-        'Cliente'
-      const servicio = row.servicio?.trim() || 'Sin servicio'
+      const byOp = operadorActor ? ` Operario: ${operadorActor.name}.` : ''
       await notifyAdmins({
         title: `OT ${id}: ${before.estado} → ${row.estado}`,
-        body: `${clienteNombre} · ${servicio}. Estado cambió de "${before.estado}" a "${row.estado}".`,
+        body: `${clienteNombre} · ${servicio}. Estado cambió de "${before.estado}" a "${row.estado}".${byOp}`,
+        link: `/ordenes?order=${encodeURIComponent(id)}`,
+        orderId: id,
+        notifType: 'order',
+        excludeUserId: userId,
+      })
+
+      void mailService
+        .send({
+          to: mailOpsRecipient(),
+          subject: `Camus LDA · Cambio de estado ${id}`,
+          body: `Se actualizó el estado de una orden de trabajo.\n\nOrden: ${id}\nCliente: ${clienteNombre}\nServicio: ${servicio}\nEstado anterior: ${before.estado}\nEstado actual: ${row.estado}${operadorActor ? `\nActualizado por: ${operadorActor.name}` : ''}`,
+        })
+        .catch((err) => console.error('[order] mail status', err))
+    } else if (
+      operadorActor &&
+      before &&
+      hasBusinessFieldChange(before, row)
+    ) {
+      // Edición de OT por operario (campos distintos del solo cambio de estado)
+      await notifyAdmins({
+        title: `OT ${id} editada por operario`,
+        body: `${operadorActor.name} modificó la orden de ${clienteNombre} · ${servicio}.`,
         link: `/ordenes?order=${encodeURIComponent(id)}`,
         orderId: id,
         notifType: 'order',
@@ -357,7 +554,10 @@ export const orderService = {
   },
 
   async remove(id: string, userId?: number) {
-    const before = await prisma.ordenTrabajo.findUnique({ where: { id } })
+    const before = await prisma.ordenTrabajo.findUnique({
+      where: { id },
+      include: { cliente: true },
+    })
     await prisma.ordenTrabajo.delete({ where: { id } })
     await auditService.log({
       modulo: 'ordenes',
@@ -365,5 +565,20 @@ export const orderService = {
       valorAnterior: before,
       idUsuario: userId,
     })
+
+    const operadorActor = await resolveFieldOperatorActor(userId)
+    if (operadorActor && before) {
+      const { notifyAdmins } = await import('./pushNotify.service.js')
+      const clienteNombre = clientLabel(before)
+      const servicio = before.servicio?.trim() || 'Sin servicio'
+      await notifyAdmins({
+        title: `OT ${id} eliminada por operario`,
+        body: `${operadorActor.name} eliminó la orden de ${clienteNombre} · ${servicio}.`,
+        link: `/ordenes`,
+        orderId: id,
+        notifType: 'order',
+        excludeUserId: userId,
+      })
+    }
   },
 }

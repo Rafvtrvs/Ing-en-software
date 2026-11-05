@@ -96,17 +96,18 @@ export const modificationController = {
       let changedById = String(req.body?.changedById ?? req.user?.sub ?? 'sistema')
       let changedByName = String(req.body?.changedByName ?? '').trim()
 
-      // Si el cliente no mandó nombre real, resolverlo desde el JWT / BD
-      if (
-        !changedByName ||
-        changedByName === 'Sistema' ||
-        changedByName === 'session'
-      ) {
-        const sub = req.user?.sub
-        if (typeof sub === 'number' && Number.isFinite(sub)) {
-          const user = await prisma.usuario.findUnique({ where: { id: sub } })
-          if (user) {
-            changedById = String(user.id)
+      // Priorizar siempre el usuario autenticado del JWT (nombre real en BD)
+      const sub = req.user?.sub
+      if (typeof sub === 'number' && Number.isFinite(sub)) {
+        const user = await prisma.usuario.findUnique({ where: { id: sub } })
+        if (user) {
+          changedById = String(user.id)
+          if (
+            !changedByName ||
+            changedByName === 'Sistema' ||
+            changedByName === 'session' ||
+            changedByName === 'sistema'
+          ) {
             changedByName = user.nombre
           }
         }
@@ -123,7 +124,7 @@ export const modificationController = {
           changedById,
           changedByName,
         },
-        req.user?.sub as number | undefined,
+        typeof sub === 'number' ? sub : undefined,
       )
       res.status(201).json(created)
     } catch (err) {

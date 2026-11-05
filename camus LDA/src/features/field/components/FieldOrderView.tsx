@@ -137,7 +137,7 @@ export function FieldOrderView({
       {/* CU-117: detalles técnicos */}
       <form onSubmit={submitNote} className="space-y-2 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
         <label htmlFor="field-note" className="text-sm font-semibold text-slate-900">
-          Registrar avance
+          Comentario / avance
         </label>
         <textarea
           id="field-note"
@@ -149,7 +149,9 @@ export function FieldOrderView({
           className="w-full rounded-lg border border-slate-200 p-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">La fecha y hora se registran automáticamente</span>
+          <span className="text-xs text-slate-400">
+            Queda en el detalle de la OT · fecha y hora automáticas
+          </span>
           <Button type="submit" size="sm" disabled={busy || !note.trim()}>
             Enviar
           </Button>

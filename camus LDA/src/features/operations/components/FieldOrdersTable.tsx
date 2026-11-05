@@ -50,8 +50,13 @@ const columns: Column<WorkOrder>[] = [
 ]
 
 /** Órdenes en ejecución = estado En Curso desde la API / store del sistema. */
-export function FieldOrdersTable() {
-  const orders = useOrdersStore((s) => s.orders)
+export function FieldOrdersTable({
+  ordersOverride,
+}: {
+  ordersOverride?: WorkOrder[]
+}) {
+  const storeOrders = useOrdersStore((s) => s.orders)
+  const orders = ordersOverride ?? storeOrders
   const syncFromApi = useOrdersStore((s) => s.syncFromApi)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
 

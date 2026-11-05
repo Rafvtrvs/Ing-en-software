@@ -68,6 +68,23 @@ export function loadQueue(): FieldAction[] {
   }
 }
 
+/** IDs de OT con alta pendiente en cola (no deben borrarse al syncFromApi). */
+export function pendingCreateOrderIds(): Set<string> {
+  return new Set(
+    loadQueue()
+      .filter((a): a is Extract<FieldAction, { kind: 'create-order' }> => a.kind === 'create-order')
+      .map((a) => a.orderId || a.order.id)
+      .filter(Boolean),
+  )
+}
+
+/** Rehidrata OT locales desde la cola (tras refresh / sync). */
+export function pendingCreateOrders(): WorkOrder[] {
+  return loadQueue()
+    .filter((a): a is Extract<FieldAction, { kind: 'create-order' }> => a.kind === 'create-order')
+    .map((a) => ({ ...a.order, id: a.orderId || a.order.id, pendingSync: true }))
+}
+
 function saveQueue(queue: FieldAction[]): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(queue))
@@ -105,7 +122,7 @@ export function describeFieldAction(action: FieldAction): { module: string; summ
       }
     case 'note':
       return {
-        module: 'Intervenciones',
+        module: 'Comentarios',
         summary: `${action.orderId}: ${action.detail.slice(0, 80)}${action.detail.length > 80 ? '…' : ''}`,
       }
     case 'photo':
@@ -144,6 +161,22 @@ export function enqueue(action: NewFieldAction): { ok: boolean; queued?: FieldAc
   if (action.kind === 'start-service' || action.kind === 'finish-service') {
     return { ok: false }
   }
+  const queue = loadQueue()
+  // Evitar encolar dos veces la misma OT
+  if (action.kind === 'create-order') {
+    const orderId = action.order.id
+    if (
+      orderId &&
+      queue.some(
+        (a) => a.kind === 'create-order' && (a.orderId === orderId || a.order.id === orderId),
+      )
+    ) {
+      const existing = queue.find(
+        (a) => a.kind === 'create-order' && (a.orderId === orderId || a.order.id === orderId),
+      )
+      return { ok: true, queued: existing }
+    }
+  }
   const queued = {
     ...action,
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -152,9 +185,33 @@ export function enqueue(action: NewFieldAction): { ok: boolean; queued?: FieldAc
       ? { orderId: action.order.id }
       : {}),
   } as FieldAction
-  const queue = loadQueue()
   queue.push(queued)
   return saveQueue(queue) ? { ok: true, queued } : { ok: false }
+}
+
+function isAlreadyExistsError(err: unknown): boolean {
+  const status = statusOf(err)
+  const msg = messageOf(err).toLowerCase()
+  return (
+    status === 409 ||
+    msg.includes('unique') ||
+    msg.includes('duplic') ||
+    msg.includes('ya existe') ||
+    msg.includes('p2002')
+  )
+}
+
+async function clearLocalPendingSync(orderId: string) {
+  try {
+    const { useOrdersStore } = await import('@/store/useOrdersStore')
+    useOrdersStore.setState((state) => ({
+      orders: state.orders.map((o) =>
+        o.id === orderId ? { ...o, pendingSync: false } : o,
+      ),
+    }))
+  } catch {
+    /* store aún no disponible */
+  }
 }
 
 export function formatStamp(iso: string): string {
@@ -182,12 +239,22 @@ async function send(action: FieldAction) {
         ...(action.progress !== undefined ? { progress: action.progress } : {}),
       })
       break
-    case 'note':
-      await ordersService.createIntervention(
-        action.orderId,
-        `[${formatStamp(action.at)}] ${action.detail}`.slice(0, 255),
-      )
+    case 'note': {
+      // Persiste como comentario de OT (mismo panel del detalle / OrderCommentsPanel)
+      let authorName: string | undefined
+      try {
+        const raw = localStorage.getItem('auth_user')
+        if (raw) {
+          const u = JSON.parse(raw) as { name?: string }
+          authorName = u.name?.trim() || undefined
+        }
+      } catch {
+        /* ignore */
+      }
+      const content = action.detail.trim().slice(0, 2000)
+      await ordersService.createComment(action.orderId, content, authorName)
       break
+    }
     case 'photo':
       await ordersService.uploadEvidenceData(action.orderId, {
         fileName: action.fileName,
@@ -196,13 +263,20 @@ async function send(action: FieldAction) {
       })
       break
     case 'create-order': {
-      const payload = { ...action.order }
+      const { pendingSync: _pending, ...rest } = action.order
+      const payload = { ...rest }
       if (action.notes?.trim()) {
         payload.service = payload.service
           ? `${payload.service} — ${action.notes.trim()}`
           : action.notes.trim()
       }
-      await ordersService.create(payload)
+      try {
+        await ordersService.create(payload)
+      } catch (err) {
+        // Ya está en Postgres con ese ID → éxito idempotente (NO crear otra OT)
+        if (isAlreadyExistsError(err)) break
+        throw err
+      }
       break
     }
   }
@@ -226,9 +300,24 @@ async function runFlush(): Promise<SyncResult> {
         createdAt: action.at,
         syncedAt: new Date().toISOString(),
       })
+      if (action.kind === 'create-order') {
+        await clearLocalPendingSync(action.orderId || action.order.id)
+      }
+      if (action.kind === 'note') {
+        try {
+          const { useOrdersStore } = await import('@/store/useOrdersStore')
+          await useOrdersStore.getState().fetchOrderComments(action.orderId)
+        } catch {
+          /* el comentario ya está en servidor */
+        }
+      }
+      // Sacar de la cola solo tras éxito confirmado
+      queue = queue.slice(1)
+      saveQueue(queue)
     } catch (err) {
       const status = statusOf(err)
-      if (status === undefined || status >= 500) {
+      // Sin respuesta, 5xx o 401/403: conservar en cola para reintentar
+      if (status === undefined || status >= 500 || status === 401 || status === 403) {
         result.offline = true
         break
       }
@@ -242,9 +331,10 @@ async function runFlush(): Promise<SyncResult> {
         createdAt: action.at,
         errorMessage: message,
       })
+      // Error de negocio: sacar de cola para no reintentar en bucle
+      queue = queue.slice(1)
+      saveQueue(queue)
     }
-    queue = queue.slice(1)
-    saveQueue(queue)
   }
   return result
 }

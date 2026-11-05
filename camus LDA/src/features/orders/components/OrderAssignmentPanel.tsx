@@ -3,6 +3,7 @@ import { Users } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useUsersStore } from '@/store/useUsersStore'
+import { isFieldTechRoleName } from '@/features/operations/utils/fieldTechnicians'
 import type { OrderOperator, WorkOrder } from '@/types'
 import { cn } from '@/utils/cn'
 
@@ -22,17 +23,7 @@ export function OrderAssignmentPanel({
 
   const technicians = useMemo(() => {
     const techRoleIds = new Set(
-      roles
-        .filter((r) => {
-          const n = r.name.toLowerCase()
-          return (
-            n.includes('técnico') ||
-            n.includes('tecnico') ||
-            n.includes('operador') ||
-            n.includes('campo')
-          )
-        })
-        .map((r) => r.id),
+      roles.filter((r) => isFieldTechRoleName(r.name)).map((r) => r.id),
     )
     return users.filter(
       (u) => u.status === 'Activo' && techRoleIds.has(u.roleId),
@@ -43,10 +34,9 @@ export function OrderAssignmentPanel({
     order.operatorIds ?? [],
   )
 
-  const toggle = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    )
+  /** Un solo operador a cargo (persistido como id_operador). */
+  const selectOne = (id: string) => {
+    setSelected((prev) => (prev.length === 1 && prev[0] === id ? [] : [id]))
   }
 
   const toOperators = (): OrderOperator[] =>
@@ -63,7 +53,7 @@ export function OrderAssignmentPanel({
       return
     }
     if (selected.length === 0) {
-      addToast('Selecciona al menos un técnico/operador', 'error')
+      addToast('Selecciona el técnico/operador a cargo', 'error')
       return
     }
     // Validar rol operador (CU-164)
@@ -88,10 +78,10 @@ export function OrderAssignmentPanel({
         <Users className="h-4 w-4 text-slate-400" />
         <div>
           <p className="text-sm font-semibold text-slate-900">
-            Asignación de técnicos / cuadrilla
+            Asignación de técnico / operador
           </p>
           <p className="text-xs text-slate-500">
-            Asigna o reasigna operadores (revoca permisos previos)
+            Asigna o reasigna el responsable (revoca permisos previos)
           </p>
         </div>
       </div>
@@ -112,11 +102,12 @@ export function OrderAssignmentPanel({
                   )}
                 >
                   <input
-                    type="checkbox"
+                    type="radio"
+                    name={`assign-op-${order.id}`}
                     checked={checked}
                     disabled={!canEdit}
-                    onChange={() => toggle(t.id)}
-                    className="rounded border-slate-300 text-primary focus:ring-primary"
+                    onChange={() => selectOne(t.id)}
+                    className="border-slate-300 text-primary focus:ring-primary"
                   />
                   {t.name}
                 </label>

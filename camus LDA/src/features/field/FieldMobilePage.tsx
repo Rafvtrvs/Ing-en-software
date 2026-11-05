@@ -46,6 +46,7 @@ import {
   flushQueue,
   formatStamp,
   loadQueue,
+  subscribeFieldQueue,
   type NewFieldAction,
 } from '@/features/field/utils/fieldQueue'
 import { ROUTES } from '@/constants/routes'
@@ -84,7 +85,18 @@ export function FieldMobilePage() {
   )
 
   const allowed = isFieldOperator(user)
-  const assigned = useMemo(() => listAssignedOrders(orders, user), [orders, user])
+  const assigned = useMemo(() => {
+    const mine = listAssignedOrders(orders, user)
+    // Incluir OT locales pendientes aunque el sync aún no las haya reflejado
+    const pendingExtra = orders.filter(
+      (o) =>
+        o.pendingSync &&
+        !mine.some((m) => m.id === o.id) &&
+        (o.technician?.trim().toLowerCase() === (user.name ?? '').trim().toLowerCase() ||
+          (user.id && o.operatorIds?.includes(user.id))),
+    )
+    return [...pendingExtra, ...mine]
+  }, [orders, user])
   const selected = assigned.find((o) => o.id === selectedId) ?? null
   const visibleAssignedOrders = assigned.slice(0, visibleAssigned)
   const hasMoreAssigned = visibleAssigned < assigned.length
@@ -94,7 +106,6 @@ export function FieldMobilePage() {
     setSyncing(true)
     try {
       const res = await flushQueue()
-      setPending(loadQueue().length)
       if (res.offline) {
         setSyncMessage('Sin conexión con el servidor. Los datos quedan pendientes.')
       } else if (res.failed.length > 0) {
@@ -108,6 +119,7 @@ export function FieldMobilePage() {
       }
       if (!res.offline) await syncFromApi()
     } finally {
+      setPending(loadQueue().length)
       setSyncing(false)
     }
   }, [syncFromApi])
@@ -122,9 +134,11 @@ export function FieldMobilePage() {
     const goOffline = () => setOnline(false)
     window.addEventListener('online', goOnline)
     window.addEventListener('offline', goOffline)
+    const unsubQueue = subscribeFieldQueue(() => setPending(loadQueue().length))
     return () => {
       window.removeEventListener('online', goOnline)
       window.removeEventListener('offline', goOffline)
+      unsubQueue()
     }
   }, [allowed, sync, syncFromApi])
 
@@ -159,6 +173,46 @@ export function FieldMobilePage() {
         ? `Servicio finalizado. Tiempo transcurrido: ${hours} h`
         : 'Servicio finalizado'
     }
+    // Comentario / avance: reflejar al instante en el detalle (commentsByOrderId)
+    if (action.kind === 'note') {
+      const detail = action.detail.trim()
+      if (!detail) return 'El comentario no puede estar vacío'
+      const queued = enqueue(action)
+      if (!queued.ok) return 'Memoria del dispositivo llena. Sincroniza y vuelve a intentar.'
+      const authorName = user.name?.trim() || 'Operador'
+      const localId = queued.queued?.id ?? `local-${Date.now()}`
+      useOrdersStore.setState((state) => ({
+        commentsByOrderId: {
+          ...state.commentsByOrderId,
+          [action.orderId]: [
+            {
+              id: localId,
+              orderId: action.orderId,
+              content: detail,
+              authorId: user.id ?? '',
+              authorName,
+              createdAt: queued.queued?.at ?? new Date().toISOString(),
+            },
+            ...(state.commentsByOrderId[action.orderId] ?? []),
+          ],
+        },
+      }))
+      setPending(loadQueue().length)
+      if (!navigator.onLine) {
+        return 'Comentario guardado en el dispositivo. Se enviará al sincronizar.'
+      }
+      const res = await flushQueue()
+      setPending(loadQueue().length)
+      if (res.offline) {
+        return 'Comentario guardado en el dispositivo. Se enviará al sincronizar.'
+      }
+      if (res.failed.length > 0) {
+        return `No se pudo registrar el comentario: ${res.failed[0].message}`
+      }
+      await useOrdersStore.getState().fetchOrderComments(action.orderId)
+      return 'Comentario registrado en la orden.'
+    }
+
     const saved = enqueue(action)
     if (!saved.ok) return 'Memoria del dispositivo llena. Sincroniza y vuelve a intentar.'
     setPending(loadQueue().length)

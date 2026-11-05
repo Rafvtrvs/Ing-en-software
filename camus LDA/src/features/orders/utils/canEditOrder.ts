@@ -14,15 +14,31 @@ const FULL_ACCESS_ROLE_HINTS = [
   'gerente',
 ]
 
+/** Sin acentos: tecnico | operador | operario | campo */
 const RESTRICTED_ROLE_HINTS = [
   'tecnico',
-  'técnico',
   'operador',
+  'operario',
   'campo',
 ]
 
 function normalizeRole(role?: string): string {
-  return (role ?? '').trim().toLowerCase()
+  return (role ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+}
+
+function sameActorId(a?: string | number | null, b?: string | number | null): boolean {
+  if (a == null || b == null) return false
+  const sa = String(a).trim()
+  const sb = String(b).trim()
+  if (!sa || !sb) return false
+  if (sa === sb) return true
+  const na = Number(sa)
+  const nb = Number(sb)
+  return Number.isFinite(na) && Number.isFinite(nb) && na === nb
 }
 
 /** Roles con acceso total a editar cualquier OT */
@@ -32,7 +48,7 @@ export function hasFullOrderAccess(user?: OrderPermissionUser | null): boolean {
   return FULL_ACCESS_ROLE_HINTS.some((h) => role.includes(h))
 }
 
-/** Técnico / operador: solo OT asignadas (CU-183–187) */
+/** Técnico / operador / operario: solo OT asignadas (CU-183–187) */
 export function isRestrictedOrderEditor(
   user?: OrderPermissionUser | null,
 ): boolean {
@@ -49,7 +65,7 @@ export function isAssignedToOrder(
 ): boolean {
   if (!user) return false
   const ids = order.operatorIds ?? []
-  if (user.id && ids.includes(user.id)) return true
+  if (user.id && ids.some((id) => sameActorId(id, user.id))) return true
 
   const name = (user.name ?? '').trim().toLowerCase()
 
@@ -59,11 +75,19 @@ export function isAssignedToOrder(
       order.operators?.some(
         (o) =>
           o.name.trim().toLowerCase() === name ||
-          o.id === user.id,
+          sameActorId(o.id, user.id),
       )
     ) {
       return true
     }
+  }
+
+  // OT creada por el técnico aún no sincronizada: visible en «Mis órdenes»
+  if (order.pendingSync && name && order.technician?.trim().toLowerCase() === name) {
+    return true
+  }
+  if (order.pendingSync && user.id && ids.some((id) => sameActorId(id, user.id))) {
+    return true
   }
 
   return false

@@ -200,6 +200,7 @@ CREATE TABLE orden_trabajo (
     duracion_horas  DOUBLE PRECISION,
     codigo_camion   VARCHAR(50),
     id_maquinaria   INT,
+    nombre_cliente  VARCHAR(150) DEFAULT '',
     progreso        INT DEFAULT 0,
     orden_visual    INT DEFAULT 0,
     id_cliente      INT,
