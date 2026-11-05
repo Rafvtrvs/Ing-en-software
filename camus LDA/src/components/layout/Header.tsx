@@ -43,11 +43,11 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-4 dark:border-slate-700 dark:bg-slate-900 lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-slate-200 bg-white px-3 dark:border-slate-700 dark:bg-slate-900 sm:gap-3 sm:px-4 lg:px-6">
       <button
         type="button"
         onClick={toggleSidebar}
-        className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
         aria-label="Alternar menú"
       >
         <Menu className="h-5 w-5" />
@@ -62,11 +62,11 @@ export function Header() {
         </p>
       </div>
 
-      <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
         <GlobalSearch />
         <NotificationsPanel />
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <UserAvatar />
           <div className="hidden text-left sm:block">
             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -81,7 +81,7 @@ export function Header() {
         <button
           type="button"
           onClick={handleLogout}
-          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
           aria-label="Cerrar sesión"
           title="Cerrar sesión"
         >

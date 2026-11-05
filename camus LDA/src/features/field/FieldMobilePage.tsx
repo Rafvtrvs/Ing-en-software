@@ -237,7 +237,8 @@ export function FieldMobilePage() {
   return (
     <>
     <div
-      className="mx-auto flex min-h-dvh w-full flex-col bg-surface"
+      data-mobile-shell
+      className="relative mx-auto flex min-h-dvh w-full flex-col overflow-x-clip bg-surface"
       style={{ maxWidth: IPHONE_16_WIDTH }}
     >
       <header className="sticky top-0 z-20 bg-primary px-3 py-3 text-white">
@@ -249,15 +250,13 @@ export function FieldMobilePage() {
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center gap-0.5">
+          <div className="flex shrink-0 items-center gap-1">
             <span
-              className="mr-0.5 inline-flex h-9 items-center gap-1 rounded-lg bg-white/10 px-2 text-[11px] font-medium text-white/90"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white/90"
               title={online ? 'En línea' : 'Sin conexión'}
+              aria-label={online ? 'En línea' : 'Sin conexión'}
             >
-              {online ? <Wifi className="h-3.5 w-3.5 shrink-0" /> : <CloudOff className="h-3.5 w-3.5 shrink-0" />}
-              <span className="max-w-[4.5rem] truncate">
-                {online ? 'En línea' : 'Offline'}
-              </span>
+              {online ? <Wifi className="h-4 w-4" /> : <CloudOff className="h-4 w-4" />}
             </span>
 
             <NotificationsPanel variant="onPrimary" />
@@ -267,7 +266,7 @@ export function FieldMobilePage() {
               aria-label="Personalización"
               aria-pressed={settingsOpen}
               className={cn(
-                'flex h-9 w-9 items-center justify-center rounded-lg text-white hover:bg-white/15',
+                'inline-flex h-9 w-9 items-center justify-center rounded-lg text-white hover:bg-white/15',
                 settingsOpen && 'bg-white/20',
               )}
               onClick={() => {
@@ -279,7 +278,7 @@ export function FieldMobilePage() {
             </button>
 
             <UserAvatar
-              size="sm"
+              size="md"
               className="ring-2 ring-white/30"
               alt={user.name ?? 'Perfil'}
             />
@@ -287,7 +286,7 @@ export function FieldMobilePage() {
             <button
               type="button"
               aria-label="Cerrar sesión"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-white hover:bg-white/15"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-white hover:bg-white/15"
               onClick={() => {
                 void (async () => {
                   const { unregisterPushOnLogout } = await import('@/lib/pushNotifications')

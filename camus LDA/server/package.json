@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Backend Node.js + TypeScript para Alcantarillados Camus Ltda. (capa Controladores del diagrama de despliegue)",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "node scripts/free-port.mjs && tsx watch src/index.ts",
+    "free-port": "node scripts/free-port.mjs",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/src/index.js",
     "prisma:generate": "prisma generate",
