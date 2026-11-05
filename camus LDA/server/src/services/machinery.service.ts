@@ -368,13 +368,7 @@ export const machineryService = {
       }
     }
 
-    await auditService.log({
-      modulo: 'inventario',
-      accion: 'sincronizar-ubicaciones-maquinaria',
-      valorNuevo: { count: updated.length, assignments: assignments.length },
-      idUsuario: userId,
-    })
-
+    // No auditar sincronizaciones masivas de ubicación (ruido en historial)
     return this.list()
   },
 

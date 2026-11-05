@@ -56,12 +56,14 @@ export function toOrderDto(
     priority: o.prioridad,
     progress: o.progreso,
     sortOrder: o.ordenVisual,
-    // Coordenadas (si existen en la BD)
-    latitude: (o as any).latitud ?? undefined,
-    longitude: (o as any).longitud ?? undefined,
-    // Fecha límite (RF28): base para detectar retrasos
-    dueDate: (o as any).fechaLimite?.toISOString().slice(0, 10) ?? undefined,
-    // Extras mapeables desde Prisma cuando existen (resto vive en store frontend)
+    latitude: o.latitud ?? undefined,
+    longitude: o.longitud ?? undefined,
+    dueDate: dateOnly(o.fechaLimite) || undefined,
+    startDate: dateOnly(o.fechaInicio) || undefined,
+    endDate: dateOnly(o.fechaTermino) || undefined,
+    durationHours: o.duracionHoras ?? undefined,
+    truckCode: o.codigoCamion ?? undefined,
+    equipmentId: o.idMaquinaria != null ? String(o.idMaquinaria) : undefined,
     technician: o.operador?.nombre ?? undefined,
     operatorIds: o.operador ? [String(o.operador.id)] : undefined,
     operators: o.operador

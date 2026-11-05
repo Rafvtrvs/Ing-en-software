@@ -1,6 +1,7 @@
 import { FileEdit } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useOrdersStore } from '@/store/useOrdersStore'
+import { formatDate, formatTime } from '@/utils/formatters'
 import type { OrderModificationHistoryEntry } from '@/types'
 
 const EMPTY_HISTORY: OrderModificationHistoryEntry[] = []
@@ -47,10 +48,10 @@ export function OrderModificationHistoryPanel({ orderId }: { orderId: string }) 
               {history.map((e) => (
                 <tr key={e.id}>
                   <td className="px-2 py-2 text-slate-600">
-                    {e.changedAt.slice(0, 10).split('-').reverse().join('/')}
+                    {formatDate(e.changedAt)}
                   </td>
                   <td className="px-2 py-2 text-slate-600">
-                    {e.changedAt.includes('T') ? e.changedAt.slice(11, 16) : '—'}
+                    {formatTime(e.changedAt).slice(0, 5)}
                   </td>
                   <td className="px-2 py-2">
                     <span className="font-medium text-slate-900">{e.fieldLabel}</span>

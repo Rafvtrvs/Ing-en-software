@@ -23,10 +23,68 @@ interface OrderInput {
   technician?: string
   operatorIds?: string[]
   idOperador?: number | null
-  // Nuevos: coordenadas (opcionales)
   latitude?: number
   longitude?: number
   dueDate?: string
+  startDate?: string | null
+  endDate?: string | null
+  durationHours?: number | null
+  truckCode?: string | null
+  equipmentId?: string | null
+}
+
+/** Parsea yyyy-mm-dd / ISO → Date; ''/null limpia; undefined = no tocar. */
+function parseOptionalDate(
+  value: string | null | undefined,
+): Date | null | undefined {
+  if (value === undefined) return undefined
+  if (value === null || String(value).trim() === '') return null
+  const raw = String(value).trim()
+  const isoDay = /^\d{4}-\d{2}-\d{2}/.test(raw) ? raw.slice(0, 10) : raw
+  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(isoDay) ? `${isoDay}T12:00:00` : raw)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+async function resolveMaquinaria(input: {
+  equipmentId?: string | null
+  truckCode?: string | null
+}): Promise<{ idMaquinaria: number | null; codigoCamion: string | null } | undefined> {
+  // Si ninguno viene en el payload, no tocar asignación de camión
+  if (input.equipmentId === undefined && input.truckCode === undefined) {
+    return undefined
+  }
+
+  const code = input.truckCode?.trim() || ''
+  const eqRaw = input.equipmentId?.trim() || ''
+
+  if (!code && !eqRaw) {
+    return { idMaquinaria: null, codigoCamion: null }
+  }
+
+  if (eqRaw) {
+    const asNum = Number(eqRaw)
+    if (Number.isFinite(asNum) && String(asNum) === eqRaw) {
+      const byId = await prisma.maquinaria.findUnique({ where: { id: asNum } })
+      if (byId) {
+        return {
+          idMaquinaria: byId.id,
+          codigoCamion: byId.codigo?.trim() || code || null,
+        }
+      }
+    }
+  }
+
+  if (code) {
+    const byCode = await prisma.maquinaria.findFirst({
+      where: { codigo: { equals: code, mode: 'insensitive' } },
+    })
+    if (byCode) {
+      return { idMaquinaria: byCode.id, codigoCamion: byCode.codigo || code }
+    }
+    return { idMaquinaria: null, codigoCamion: code }
+  }
+
+  return { idMaquinaria: null, codigoCamion: null }
 }
 
 function validateCoordinates(lat?: number, lon?: number) {
@@ -129,6 +187,10 @@ export const orderService = {
   async create(input: OrderInput, userId?: number) {
     const idCliente = input.idCliente ?? (await resolveCliente(input.client))
     const idOperador = await resolveOperador(input)
+    const maquinaria = await resolveMaquinaria(input)
+    const fechaInicio = parseOptionalDate(input.startDate)
+    const fechaTermino = parseOptionalDate(input.endDate)
+    const fechaLimite = parseOptionalDate(input.dueDate)
     // Validar que exista dirección o coordenadas y que tengan formato válido
     requireAddressOrCoordinates(input.address, input.latitude, input.longitude)
     validateCoordinates(input.latitude, input.longitude)
@@ -145,6 +207,15 @@ export const orderService = {
         ordenVisual: input.sortOrder ?? 0,
         latitud: input.latitude ?? null,
         longitud: input.longitude ?? null,
+        fechaLimite: fechaLimite === undefined ? null : fechaLimite,
+        fechaInicio: fechaInicio === undefined ? null : fechaInicio,
+        fechaTermino: fechaTermino === undefined ? null : fechaTermino,
+        duracionHoras:
+          input.durationHours === undefined || input.durationHours === null
+            ? null
+            : Number(input.durationHours),
+        codigoCamion: maquinaria?.codigoCamion ?? null,
+        idMaquinaria: maquinaria?.idMaquinaria ?? null,
         idCliente,
         idOperador: idOperador ?? null,
       },
@@ -189,6 +260,10 @@ export const orderService = {
         ? await resolveCliente(input.client)
         : undefined)
     const idOperador = await resolveOperador(input)
+    const maquinaria = await resolveMaquinaria(input)
+    const fechaInicio = parseOptionalDate(input.startDate)
+    const fechaTermino = parseOptionalDate(input.endDate)
+    const fechaLimite = parseOptionalDate(input.dueDate)
     // Validar ubicación solo si la actualización la toca (p. ej. un cambio de estado no la envía)
     if (input.address !== undefined || input.latitude !== undefined || input.longitude !== undefined) {
       requireAddressOrCoordinates(input.address, input.latitude, input.longitude)
@@ -209,6 +284,21 @@ export const orderService = {
         ...(idOperador !== undefined ? { idOperador } : null),
         ...(input.latitude !== undefined ? { latitud: input.latitude } : null),
         ...(input.longitude !== undefined ? { longitud: input.longitude } : null),
+        ...(fechaLimite !== undefined ? { fechaLimite } : null),
+        ...(fechaInicio !== undefined ? { fechaInicio } : null),
+        ...(fechaTermino !== undefined ? { fechaTermino } : null),
+        ...(input.durationHours !== undefined
+          ? {
+              duracionHoras:
+                input.durationHours === null ? null : Number(input.durationHours),
+            }
+          : null),
+        ...(maquinaria !== undefined
+          ? {
+              codigoCamion: maquinaria.codigoCamion,
+              idMaquinaria: maquinaria.idMaquinaria,
+            }
+          : null),
       },
       include: { cliente: true, operador: true },
     })

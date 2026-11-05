@@ -53,7 +53,7 @@ export function MostUsedProductsChart() {
                 tickLine={false}
               />
               <Tooltip
-                formatter={(value, _name, props) => [
+                formatter={(_value, _name, props) => [
                   (props.payload as { label: string }).label,
                   'Uso',
                 ]}

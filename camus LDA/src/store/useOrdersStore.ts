@@ -20,6 +20,16 @@ import type {
   WorkOrder,
 } from '@/types'
 import { ordersService } from '@/services/ordersService'
+import { authService } from '@/services/authService'
+
+/** Usuario autenticado para trazabilidad de cambios en OT. */
+function currentHistoryActor(): { id: string; name: string } {
+  const user = authService.getUser()
+  return {
+    id: user?.id?.trim() || 'sistema',
+    name: user?.name?.trim() || user?.email?.trim() || 'Sistema',
+  }
+}
 import {
   applySortOrderToColumn,
   getColumnOrders,
@@ -329,10 +339,12 @@ function mergeApiOrders(
     if (!local) return api
     return {
       ...api,
-      // Campos locales de terreno / UI que aún no viven en columnas de OT
-      startDate: local.startDate ?? api.startDate,
-      endDate: local.endDate ?? api.endDate,
-      durationHours: local.durationHours ?? api.durationHours,
+      // Postgres manda en fechas/camión; el resto aún puede ser local (terreno)
+      startDate: api.startDate ?? local.startDate,
+      endDate: api.endDate ?? local.endDate,
+      durationHours: api.durationHours ?? local.durationHours,
+      truckCode: api.truckCode ?? local.truckCode,
+      equipmentId: api.equipmentId ?? local.equipmentId,
       serviceStartedAt: local.serviceStartedAt ?? api.serviceStartedAt,
       serviceEndedAt: local.serviceEndedAt ?? api.serviceEndedAt,
       clientSignature: local.clientSignature ?? api.clientSignature,
@@ -342,8 +354,6 @@ function mergeApiOrders(
       photoUrls: local.photoUrls ?? api.photoUrls,
       thirdParties: local.thirdParties ?? api.thirdParties,
       documents: local.documents ?? api.documents,
-      truckCode: local.truckCode ?? api.truckCode,
-      equipmentId: local.equipmentId ?? api.equipmentId,
       pdfGeneratedAt: local.pdfGeneratedAt ?? api.pdfGeneratedAt,
       queueOrder: local.queueOrder ?? api.queueOrder,
       executionDate: local.executionDate ?? api.executionDate,
@@ -516,16 +526,15 @@ export const useOrdersStore = create<OrdersState>()(
                 client: merged.client,
                 changes,
               })
-              const userId = 'session'
-              const userName = 'Sistema'
+              const actor = currentHistoryActor()
               for (const change of changes) {
                 get().addModificationHistory(existing.id, {
                   field: change.field,
                   fieldLabel: change.label,
                   previousValue: change.from,
                   newValue: change.to,
-                  changedById: userId,
-                  changedByName: userName,
+                  changedById: actor.id,
+                  changedByName: actor.name,
                 })
               }
             }
@@ -537,13 +546,14 @@ export const useOrdersStore = create<OrdersState>()(
               newStatus: data.status,
             })
             // RF-8 — registrar cambio de estado en historial de la OT
+            const actor = currentHistoryActor()
             get().addModificationHistory(existing.id, {
               field: 'status',
               fieldLabel: 'Estado',
               previousValue: existing.status,
               newValue: data.status,
-              changedById: 'session',
-              changedByName: 'Sistema',
+              changedById: actor.id,
+              changedByName: actor.name,
             })
           }
         }
@@ -558,23 +568,26 @@ export const useOrdersStore = create<OrdersState>()(
         ordersService
           .update(id, enriched)
           .then((updated) => {
-            if (updated && typeof updated.progress === 'number') {
-              set((state) => ({
-                apiAvailable: true,
-                orders: state.orders.map((o) =>
-                  o.id === id ? { ...o, progress: clampProgress(updated.progress) } : o,
-                ),
-                selectedOrder:
-                  state.selectedOrder?.id === id
-                    ? {
-                        ...state.selectedOrder,
-                        progress: clampProgress(updated.progress),
-                      }
-                    : state.selectedOrder,
-              }))
-            } else {
+            if (!updated) {
               set({ apiAvailable: true })
+              return
             }
+            const patched = {
+              ...updated,
+              ...(typeof updated.progress === 'number'
+                ? { progress: clampProgress(updated.progress) }
+                : null),
+            }
+            set((state) => ({
+              apiAvailable: true,
+              orders: state.orders.map((o) =>
+                o.id === id ? { ...o, ...patched } : o,
+              ),
+              selectedOrder:
+                state.selectedOrder?.id === id
+                  ? { ...state.selectedOrder, ...patched }
+                  : state.selectedOrder,
+            }))
           })
           .catch(() => set({ apiAvailable: false }))
           .finally(() => {
@@ -1238,13 +1251,14 @@ export const useOrdersStore = create<OrdersState>()(
             previousStatus: active.status,
             newStatus: targetStatus,
           })
+          const actor = currentHistoryActor()
           get().addModificationHistory(active.id, {
             field: 'status',
             fieldLabel: 'Estado',
             previousValue: active.status,
             newValue: targetStatus,
-            changedById: 'session',
-            changedByName: 'Sistema',
+            changedById: actor.id,
+            changedByName: actor.name,
           })
         }
 

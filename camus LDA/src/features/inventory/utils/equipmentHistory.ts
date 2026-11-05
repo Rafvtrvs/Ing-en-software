@@ -99,8 +99,17 @@ function actionLabel(accion: string): string {
   const a = accion.toLowerCase()
   if (a.includes('crear')) return 'Alta de equipo'
   if (a.includes('eliminar')) return 'Eliminación'
-  if (a.includes('actualizar') || a.includes('sync')) return 'Modificación'
+  if (a.includes('actualizar')) return 'Modificación'
   return accion
+}
+
+function isNoiseMachineryAction(accion: string): boolean {
+  const a = accion.toLowerCase()
+  return (
+    a.includes('sincronizar-ubicaciones-maquinaria') ||
+    a.includes('sincronizar ubicaciones') ||
+    (a.includes('sincronizar') && a.includes('maquinaria'))
+  )
 }
 
 export function mapAuditToEquipmentHistory(logs: AuditLogEntry[]): EquipmentHistoryItem[] {
@@ -108,6 +117,7 @@ export function mapAuditToEquipmentHistory(logs: AuditLogEntry[]): EquipmentHist
     .filter((log) => {
       const modulo = log.moduloAfectado.toLowerCase()
       const accion = log.accion.toLowerCase()
+      if (isNoiseMachineryAction(accion)) return false
       return (
         modulo.includes('inventario') &&
         (accion.includes('maquinaria') || accion.includes('equipo'))

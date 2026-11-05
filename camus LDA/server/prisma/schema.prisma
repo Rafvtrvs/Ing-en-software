@@ -112,6 +112,7 @@ model Maquinaria {
   proximaMantencion DateTime? @map("proxima_mantencion") @db.Date
   asignadoA         String?   @map("asignado_a") @db.VarChar(100)
   usos              Utiliza[]
+  ordenesAsignadas  OrdenTrabajo[]
 
   @@map("maquinaria")
 }
@@ -211,12 +212,21 @@ model OrdenTrabajo {
   latitud      Float?   @map("latitud")
   longitud     Float?   @map("longitud")
   fechaLimite  DateTime? @map("fecha_limite") @db.Date
+  /// Fecha de inicio de trabajo (formulario OT)
+  fechaInicio  DateTime? @map("fecha_inicio") @db.Date
+  /// Fecha de término de trabajo (formulario OT)
+  fechaTermino DateTime? @map("fecha_termino") @db.Date
+  duracionHoras Float?  @map("duracion_horas")
+  /// Código del camión/equipo asignado (p. ej. CAM-012)
+  codigoCamion String?  @map("codigo_camion") @db.VarChar(50)
+  idMaquinaria Int?     @map("id_maquinaria")
   progreso     Int      @default(0)
   ordenVisual  Int      @default(0) @map("orden_visual")
   idCliente    Int?     @map("id_cliente")
   idOperador   Int?     @map("id_operador")
   cliente      Cliente? @relation(fields: [idCliente], references: [id])
   operador     Usuario? @relation(fields: [idOperador], references: [id])
+  maquinaria   Maquinaria? @relation(fields: [idMaquinaria], references: [id])
   intervenciones Intervencion[]
   evidencias   EvidenciaMultimedia[]
   documentos   DocumentoOrden[]

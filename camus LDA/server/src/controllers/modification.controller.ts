@@ -92,6 +92,27 @@ export const modificationController = {
 
   async addHistory(req: Request, res: Response, next: NextFunction) {
     try {
+      const { prisma } = await import('../db/prisma.js')
+      let changedById = String(req.body?.changedById ?? req.user?.sub ?? 'sistema')
+      let changedByName = String(req.body?.changedByName ?? '').trim()
+
+      // Si el cliente no mandó nombre real, resolverlo desde el JWT / BD
+      if (
+        !changedByName ||
+        changedByName === 'Sistema' ||
+        changedByName === 'session'
+      ) {
+        const sub = req.user?.sub
+        if (typeof sub === 'number' && Number.isFinite(sub)) {
+          const user = await prisma.usuario.findUnique({ where: { id: sub } })
+          if (user) {
+            changedById = String(user.id)
+            changedByName = user.nombre
+          }
+        }
+      }
+      if (!changedByName) changedByName = 'Sistema'
+
       const created = await modificationService.addHistory(
         req.params.id,
         {
@@ -99,8 +120,8 @@ export const modificationController = {
           fieldLabel: String(req.body?.fieldLabel ?? req.body?.field ?? ''),
           previousValue: String(req.body?.previousValue ?? ''),
           newValue: String(req.body?.newValue ?? ''),
-          changedById: String(req.body?.changedById ?? req.user?.sub ?? 'sistema'),
-          changedByName: String(req.body?.changedByName ?? 'Sistema'),
+          changedById,
+          changedByName,
         },
         req.user?.sub as number | undefined,
       )

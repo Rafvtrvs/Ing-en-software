@@ -247,23 +247,26 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         '',
       operatorIds: data.operatorIds,
       operators,
-      truckCode: data.truckCode || undefined,
+      // En edición se envían strings vacíos para poder limpiar en Postgres
+      truckCode: data.truckCode.trim() || (mode === 'edit' ? '' : undefined),
       ...(typeof latitude === 'number' ? { latitude } : null),
       ...(typeof longitude === 'number' ? { longitude } : null),
       progress: Number.isFinite(data.progress)
         ? Math.min(100, Math.max(0, Math.round(Number(data.progress))))
         : 0,
-      startDate: data.startDate || undefined,
-      endDate: data.endDate || undefined,
-      durationHours:
-        data.durationHours != null && Number.isFinite(data.durationHours)
-          ? Number(data.durationHours)
-          : undefined,
+      startDate: data.startDate || (mode === 'edit' ? '' : undefined),
+      endDate: data.endDate || (mode === 'edit' ? '' : undefined),
+      durationHours: (() => {
+        const hours = Number(data.durationHours)
+        return Number.isFinite(hours) ? hours : undefined
+      })(),
       photoUrls: order?.photoUrls,
       thirdParties: order?.thirdParties,
-      equipmentId: data.truckCode
+      equipmentId: data.truckCode.trim()
         ? assignableEquipment.find((e) => e.code === data.truckCode)?.id
-        : undefined,
+        : mode === 'edit'
+          ? ''
+          : undefined,
     }
 
     if (mode === 'create') {

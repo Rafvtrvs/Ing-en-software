@@ -192,12 +192,21 @@ CREATE TABLE orden_trabajo (
     servicio        VARCHAR(150) DEFAULT '',
     categoria       VARCHAR(100) DEFAULT '',
     direccion       VARCHAR(255) DEFAULT '',
+    latitud         DOUBLE PRECISION,
+    longitud        DOUBLE PRECISION,
+    fecha_limite    DATE,
+    fecha_inicio    DATE,
+    fecha_termino   DATE,
+    duracion_horas  DOUBLE PRECISION,
+    codigo_camion   VARCHAR(50),
+    id_maquinaria   INT,
     progreso        INT DEFAULT 0,
     orden_visual    INT DEFAULT 0,
     id_cliente      INT,
     id_operador     INT,
     FOREIGN KEY (id_cliente)  REFERENCES cliente(id_cliente),
-    FOREIGN KEY (id_operador) REFERENCES usuario(id_usuario)
+    FOREIGN KEY (id_operador) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_maquinaria) REFERENCES maquinaria(id_maquinaria)
 );
 
 CREATE TABLE intervencion (
