@@ -9,15 +9,40 @@ import { Drawer } from '@/components/ui/Drawer'
 import type { AuditLogEntry } from '@/data/mock/audit'
 import { reportsService } from '@/services/reportsService'
 import { useOrdersStore } from '@/store/useOrdersStore'
+import { useUsersStore } from '@/store/useUsersStore'
+import { getActiveFieldOperators } from '@/features/operations/utils/fieldTechnicians'
 import { formatDateTime } from '@/utils/formatters'
 import { AuditLogDetailPanel } from '@/features/reports/components/AuditLogDetailPanel'
 import { ClientTraceabilitySection } from '@/features/reports/components/ClientTraceabilitySection'
 
 type TraceabilityFilter = 'por_ot' | 'por_cliente'
 
-function includesOrderId(text: string | null | undefined, orderId: string): boolean {
-  if (!text) return false
-  return text.toLowerCase().includes(orderId.toLowerCase())
+function extractOrderIdFromText(text: string | null | undefined): string | null {
+  if (!text) return null
+  try {
+    const parsed = JSON.parse(text) as Record<string, unknown>
+    for (const key of ['orderId', 'idOt', 'id']) {
+      const v = parsed?.[key]
+      if (typeof v === 'string' && v.trim()) return v.trim()
+    }
+  } catch {
+    // texto plano
+  }
+  const m = text.match(/\bOT-[A-Za-z0-9_-]+\b/i)
+  return m?.[0] ?? null
+}
+
+function logMatchesOrder(log: AuditLogEntry, orderId: string): boolean {
+  if (log.orderId && log.orderId === orderId) return true
+  const fromNew = extractOrderIdFromText(log.valorNuevo)
+  if (fromNew === orderId) return true
+  const fromOld = extractOrderIdFromText(log.valorAnterior)
+  if (fromOld === orderId) return true
+  const needle = orderId.toLowerCase()
+  return (
+    (log.valorNuevo ?? '').toLowerCase().includes(needle) ||
+    (log.valorAnterior ?? '').toLowerCase().includes(needle)
+  )
 }
 
 function inRange(iso: string, from: string, to: string): boolean {
@@ -30,6 +55,10 @@ function inRange(iso: string, from: string, to: string): boolean {
 
 export function TraceabilityReportPanel() {
   const orders = useOrdersStore((s) => s.orders)
+  const syncOrders = useOrdersStore((s) => s.syncFromApi)
+  const users = useUsersStore((s) => s.users)
+  const roles = useUsersStore((s) => s.roles)
+  const syncUsers = useUsersStore((s) => s.syncFromApi)
 
   const [reportFilter, setReportFilter] = useState<TraceabilityFilter>('por_ot')
   const [logs, setLogs] = useState<AuditLogEntry[]>([])
@@ -37,12 +66,17 @@ export function TraceabilityReportPanel() {
 
   const [showFilters, setShowFilters] = useState(true)
   const [orderId, setOrderId] = useState('')
-  const [operario, setOperario] = useState('')
+  const [operarioId, setOperarioId] = useState('')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
 
   const [executed, setExecuted] = useState(false)
   const [selectedLog, setSelectedLog] = useState<AuditLogEntry | null>(null)
+
+  useEffect(() => {
+    void syncUsers()
+    void syncOrders()
+  }, [syncUsers, syncOrders])
 
   useEffect(() => {
     let active = true
@@ -61,40 +95,48 @@ export function TraceabilityReportPanel() {
   }, [])
 
   useEffect(() => {
-    // valores por defecto
-    const today = new Date().toISOString().slice(0, 10)
-    if (!from) setFrom(today)
-    if (!to) setTo(today)
+    const today = new Date()
+    const toDate = today.toISOString().slice(0, 10)
+    const fromDate = new Date(today)
+    fromDate.setDate(fromDate.getDate() - 90)
+    if (!from) setFrom(fromDate.toISOString().slice(0, 10))
+    if (!to) setTo(toDate)
     if (!orderId && orders.length > 0) setOrderId(orders[0].id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orders])
 
-  const operarios = useMemo(() => {
-    const set = new Set<string>()
-    logs.forEach((l) => {
-      if (l.usuario) set.add(l.usuario)
-    })
-    return Array.from(set.values()).sort((a, b) => a.localeCompare(b))
-  }, [logs])
+  /** Solo operarios/técnicos activos del sistema (Postgres). */
+  const operarios = useMemo(
+    () => getActiveFieldOperators(users, roles),
+    [users, roles],
+  )
+
+  useEffect(() => {
+    if (!operarioId) return
+    const stillValid = operarios.some((op) => op.id === operarioId)
+    if (!stillValid) setOperarioId('')
+  }, [operarios, operarioId])
 
   const timeline = useMemo(() => {
     if (!executed || !orderId || !from || !to) return []
-    const op = operario.trim().toLowerCase()
+    const selectedOp = operarios.find((op) => op.id === operarioId)
 
     return logs
       .filter((l) => {
-        // 4) Busca historial en BD: viene desde /reports/audit o mock
-        const matchesOrder =
-          includesOrderId(l.valorNuevo, orderId) ||
-          includesOrderId(l.valorAnterior, orderId) ||
-          includesOrderId(l.accion, orderId)
-
-        const matchesOperario = !op || l.usuario.toLowerCase().includes(op)
-        const matchesDate = inRange(l.fechaHora, from, to)
-        return matchesOrder && matchesOperario && matchesDate
+        if (!logMatchesOrder(l, orderId)) return false
+        if (!inRange(l.fechaHora, from, to)) return false
+        if (!operarioId) return true
+        if (l.idUsuario != null && String(l.idUsuario) === operarioId) return true
+        if (
+          selectedOp?.name &&
+          l.usuario.toLowerCase() === selectedOp.name.toLowerCase()
+        ) {
+          return true
+        }
+        return false
       })
       .sort((a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime())
-  }, [executed, logs, orderId, operario, from, to])
+  }, [executed, logs, orderId, operarioId, operarios, from, to])
 
   const selectedOrder = orders.find((o) => o.id === orderId) ?? null
 
@@ -167,7 +209,7 @@ export function TraceabilityReportPanel() {
       <Card>
         <CardHeader
           title="Reportes de Trazabilidad"
-          subtitle="Selecciona una OT, filtra por fecha y operario, y genera la línea de tiempo del historial."
+          subtitle="Historial real desde Postgres: estados Kanban, intervenciones, comentarios, evidencia y documentos."
           action={
             <Button
               variant="outline"
@@ -203,17 +245,22 @@ export function TraceabilityReportPanel() {
             <div className="lg:col-span-2">
               <label className="mb-1.5 block text-xs font-medium text-slate-600">Operario</label>
               <Select
-                value={operario}
-                onChange={(e) => setOperario(e.target.value)}
+                value={operarioId}
+                onChange={(e) => setOperarioId(e.target.value)}
                 disabled={operarios.length === 0}
               >
                 <option value="">Todos</option>
-                {operarios.map((u) => (
-                  <option key={u} value={u}>
-                    {u}
+                {operarios.map((op) => (
+                  <option key={op.id} value={op.id}>
+                    {op.name}
                   </option>
                 ))}
               </Select>
+              {operarios.length === 0 ? (
+                <p className="mt-1 text-xs text-slate-500">
+                  No hay operarios activos registrados en el sistema.
+                </p>
+              ) : null}
             </div>
           </div>
         )}
@@ -301,4 +348,3 @@ export function TraceabilityReportPanel() {
     </div>
   )
 }
-

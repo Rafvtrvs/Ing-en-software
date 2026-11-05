@@ -109,7 +109,7 @@ export function ThirdPartyInterventionsReportPanel() {
       <Card>
         <CardHeader
           title="Intervenciones de terceros"
-          subtitle="CU-158: generar reporte · CU-159: filtrar intervenciones"
+          subtitle="Genera y filtra el reporte de intervenciones de terceros"
           action={
             <div className="flex flex-wrap gap-2">
               <Button leftIcon={<FileText className="h-4 w-4" />} onClick={handleGenerate}>

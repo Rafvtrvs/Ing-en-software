@@ -35,16 +35,18 @@ export function InvoicesTable({ onCreateClick }: InvoicesTableProps) {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
-    return invoices.filter((inv) => {
-      const matchesSearch =
-        !q ||
-        inv.number.toLowerCase().includes(q) ||
-        inv.client.toLowerCase().includes(q) ||
-        inv.clientRut.includes(q) ||
-        (inv.orderId?.toLowerCase().includes(q) ?? false)
-      const matchesStatus = statusFilter === 'all' || inv.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
+    return invoices
+      .filter((inv) => {
+        const matchesSearch =
+          !q ||
+          inv.number.toLowerCase().includes(q) ||
+          inv.client.toLowerCase().includes(q) ||
+          inv.clientRut.includes(q) ||
+          (inv.orderId?.toLowerCase().includes(q) ?? false)
+        const matchesStatus = statusFilter === 'all' || inv.status === statusFilter
+        return matchesSearch && matchesStatus
+      })
+      .sort((a, b) => b.number.localeCompare(a.number, 'es', { numeric: true }))
   }, [invoices, search, statusFilter])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))

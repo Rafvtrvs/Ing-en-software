@@ -52,7 +52,6 @@ export function isAssignedToOrder(
   if (user.id && ids.includes(user.id)) return true
 
   const name = (user.name ?? '').trim().toLowerCase()
-  const email = (user.email ?? '').trim().toLowerCase()
 
   if (name) {
     if (order.technician?.trim().toLowerCase() === name) return true
@@ -63,15 +62,6 @@ export function isAssignedToOrder(
           o.id === user.id,
       )
     ) {
-      return true
-    }
-  }
-
-  // Fallback: usuario mock Luis Torres (u3) ↔ login operador@camus.cl
-  if (email === 'operador@camus.cl' || name === 'luis torres') {
-    if (ids.includes('u3')) return true
-    if (order.technician?.toLowerCase().includes('luis torres')) return true
-    if (order.operators?.some((o) => o.id === 'u3' || o.name.toLowerCase().includes('luis'))) {
       return true
     }
   }

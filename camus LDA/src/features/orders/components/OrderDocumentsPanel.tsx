@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { FileStack, History, Paperclip, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -8,14 +8,30 @@ import { FormGrid } from '@/components/ui/FormGrid'
 import { Badge } from '@/components/ui/Badge'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
-import {
-  validateDocumentUrlOrPath,
-  validateOrderDocumentFile,
-} from '@/features/orders/utils/validateDocument'
+import { ordersService } from '@/services/ordersService'
+import { validateOrderDocumentFile } from '@/features/orders/utils/validateDocument'
+import { isDemoMode, isOfflineApiError } from '@/utils/demoMode'
 import type { OrderDocument, OrderDocumentKind, WorkOrder } from '@/types'
 
+const MAX_PDF_BYTES = 10 * 1024 * 1024
+
+function isPdfFile(file: File): boolean {
+  const type = file.type.toLowerCase()
+  const name = file.name.toLowerCase()
+  return type === 'application/pdf' || name.endsWith('.pdf')
+}
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
+}
+
 /**
- * RF-40..42: adjuntar / validar / consultar documentos,
+ * RF-40..42: adjuntar / validar / consultar documentos PDF,
  * contratos y reportes, con versionado.
  */
 export function OrderDocumentsPanel({
@@ -33,85 +49,181 @@ export function OrderDocumentsPanel({
   const docs = order.documents ?? []
   const [kind, setKind] = useState<OrderDocumentKind>('general')
   const [title, setTitle] = useState('')
-  const [url, setUrl] = useState('')
-  const [fileName, setFileName] = useState('')
-  const [mimeType, setMimeType] = useState('application/pdf')
-  const [sizeBytes, setSizeBytes] = useState(100_000)
+  const [file, setFile] = useState<File | null>(null)
   const [historyDocId, setHistoryDocId] = useState<string | null>(null)
   const [versionTargetId, setVersionTargetId] = useState('')
+  const [versionFile, setVersionFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const versionInputRef = useRef<HTMLInputElement>(null)
 
   const historyDoc = useMemo(
     () => docs.find((d) => d.id === historyDocId) ?? null,
     [docs, historyDocId],
   )
 
-  const handleAttach = () => {
-    const name = fileName.trim() || `${title.trim() || 'documento'}.pdf`
-    const validation = validateOrderDocumentFile({
-      name,
-      type: mimeType,
-      size: sizeBytes,
-    })
-    if (!validation.ok) {
-      addToast(validation.errors.join(' · '), 'error')
+  const handlePickFile = (picked?: File | null) => {
+    if (!picked) {
+      setFile(null)
       return
     }
+    if (!isPdfFile(picked)) {
+      addToast('Solo se permiten archivos PDF', 'error')
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      setFile(null)
+      return
+    }
+    if (picked.size > MAX_PDF_BYTES) {
+      addToast('El PDF supera el máximo de 10 MB', 'error')
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      setFile(null)
+      return
+    }
+    setFile(picked)
+  }
+
+  const handleAttach = async () => {
     if (!title.trim()) {
       addToast('Indica un título para el documento', 'error')
       return
     }
-    const urlCheck = validateDocumentUrlOrPath(url)
-    if (!urlCheck.ok) {
-      addToast(urlCheck.errors.join(' · '), 'error')
+    if (!file) {
+      addToast('Selecciona un archivo PDF', 'error')
+      return
+    }
+    const validation = validateOrderDocumentFile({
+      name: file.name,
+      type: file.type || 'application/pdf',
+      size: file.size,
+    })
+    if (!validation.ok) {
+      addToast(validation.errors.join(' · '), 'error')
       return
     }
 
     setSaving(true)
     try {
+      let url = ''
+      let docId = ''
+      try {
+        const created = await ordersService.uploadOrderDocument(order.id, {
+          title: title.trim(),
+          kind,
+          file,
+          uploadedBy: user.name ?? 'Usuario',
+        })
+        url = created.urlArchivo
+        docId = String(created.id)
+      } catch (err) {
+        if (!(isDemoMode() || isOfflineApiError(err))) {
+          throw err
+        }
+        // Fallback local: data URL para poder abrir el PDF en esta sesión
+        url = await fileToDataUrl(file)
+      }
+
       addOrderDocument(order.id, {
+        id: docId || undefined,
         kind,
         title: title.trim(),
-        fileName: name,
-        url: url.trim(),
-        mimeType,
-        sizeBytes,
+        fileName: file.name,
+        url,
+        mimeType: 'application/pdf',
+        sizeBytes: file.size,
         uploadedBy: user.name ?? 'Usuario',
       })
       setTitle('')
-      setUrl('')
-      setFileName('')
+      setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? 'No se pudo adjuntar el PDF'
+      addToast(msg, 'error')
     } finally {
       setSaving(false)
     }
   }
 
-  const handleNewVersion = (doc: OrderDocument) => {
-    const name = fileName.trim() || doc.versions[0]?.fileName || 'documento.pdf'
-    const validation = validateOrderDocumentFile({
-      name,
-      type: mimeType,
-      size: sizeBytes,
-    })
-    if (!validation.ok) {
-      addToast(validation.errors.join(' · '), 'error')
+  const handleNewVersion = async (doc: OrderDocument) => {
+    if (!versionFile) {
+      addToast('Selecciona un PDF para la nueva versión', 'error')
       return
     }
-    const urlCheck = validateDocumentUrlOrPath(url)
-    if (!urlCheck.ok) {
-      addToast(urlCheck.errors.join(' · '), 'error')
+    if (!isPdfFile(versionFile)) {
+      addToast('Solo se permiten archivos PDF', 'error')
       return
     }
-    addDocumentVersion(order.id, doc.id, {
-      fileName: name,
-      url: url.trim(),
-      mimeType,
-      sizeBytes,
-      uploadedBy: user.name ?? 'Usuario',
-      note: 'Nueva versión',
-    })
-    setUrl('')
-    setVersionTargetId('')
+    if (versionFile.size > MAX_PDF_BYTES) {
+      addToast('El PDF supera el máximo de 10 MB', 'error')
+      return
+    }
+
+    setSaving(true)
+    try {
+      let url = ''
+      const apiId = /^\d+$/.test(doc.id) ? doc.id : null
+
+      try {
+        if (apiId) {
+          const updated = await ordersService.uploadDocumentVersion(apiId, {
+            file: versionFile,
+            uploadedBy: user.name ?? 'Usuario',
+            note: 'Nueva versión',
+          })
+          url = updated.urlArchivo
+        } else {
+          throw new Error('offline')
+        }
+      } catch (err) {
+        if (!(isDemoMode() || isOfflineApiError(err) || (err as Error).message === 'offline')) {
+          throw err
+        }
+        url = await fileToDataUrl(versionFile)
+      }
+
+      addDocumentVersion(order.id, doc.id, {
+        fileName: versionFile.name,
+        url,
+        mimeType: 'application/pdf',
+        sizeBytes: versionFile.size,
+        uploadedBy: user.name ?? 'Usuario',
+        note: 'Nueva versión',
+      })
+      setVersionFile(null)
+      setVersionTargetId('')
+      if (versionInputRef.current) versionInputRef.current.value = ''
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? 'No se pudo guardar la versión'
+      addToast(msg, 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const openDocument = async (doc: OrderDocument, versionUrl: string) => {
+    if (
+      versionUrl.startsWith('data:') ||
+      versionUrl.startsWith('blob:') ||
+      versionUrl.startsWith('http')
+    ) {
+      window.open(versionUrl, '_blank', 'noopener,noreferrer')
+      return
+    }
+    if (!/^\d+$/.test(doc.id)) {
+      addToast('No se pudo abrir el archivo', 'error')
+      return
+    }
+    try {
+      const blob = await ordersService.fetchOrderDocumentFile(order.id, doc.id)
+      const objectUrl = URL.createObjectURL(blob)
+      window.open(objectUrl, '_blank', 'noopener,noreferrer')
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+    } catch {
+      addToast('No se pudo abrir el PDF', 'error')
+    }
   }
 
   return (
@@ -119,11 +231,9 @@ export function OrderDocumentsPanel({
       <div className="mb-3 flex items-center gap-2">
         <Paperclip className="h-4 w-4 text-slate-400" />
         <div>
-          <p className="text-sm font-semibold text-slate-900">
-            Documentos de la orden
-          </p>
+          <p className="text-sm font-semibold text-slate-900">Documentos de la orden</p>
           <p className="text-xs text-slate-500">
-            Adjuntos, contratos, reportes y versiones
+            Adjuntos PDF, contratos, reportes y versiones
           </p>
         </div>
       </div>
@@ -148,40 +258,19 @@ export function OrderDocumentsPanel({
                 placeholder="Ej. Contrato firmado"
               />
             </FormField>
-            <FormField label="Nombre de archivo">
-              <Input
-                value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
-                placeholder="contrato.pdf"
-              />
-            </FormField>
-            <FormField label="MIME">
-              <Select value={mimeType} onChange={(e) => setMimeType(e.target.value)}>
-                <option value="application/pdf">PDF</option>
-                <option value="image/jpeg">JPEG</option>
-                <option value="image/png">PNG</option>
-                <option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-                  DOCX
-                </option>
-              </Select>
-            </FormField>
-            <FormField label="URL / ruta del archivo" className="sm:col-span-2">
-              <Input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://ejemplo.com/docs/contrato.pdf o /uploads/contrato.pdf"
+            <FormField label="Archivo PDF" className="sm:col-span-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-primary/90"
+                onChange={(e) => handlePickFile(e.target.files?.[0] ?? null)}
               />
               <p className="mt-1 text-xs text-slate-500">
-                Debe ser URL o ruta a un archivo (.pdf, .png, .jpg, .docx, .xlsx…)
+                {file
+                  ? `${file.name} · ${(file.size / 1024).toFixed(1)} KB`
+                  : 'Selecciona un PDF (máx. 10 MB)'}
               </p>
-            </FormField>
-            <FormField label="Tamaño (bytes)">
-              <Input
-                type="number"
-                min={1}
-                value={sizeBytes}
-                onChange={(e) => setSizeBytes(Number(e.target.value) || 0)}
-              />
             </FormField>
           </FormGrid>
           <div className="flex flex-wrap gap-2">
@@ -189,9 +278,9 @@ export function OrderDocumentsPanel({
               type="button"
               leftIcon={<Upload className="h-4 w-4" />}
               disabled={saving}
-              onClick={handleAttach}
+              onClick={() => void handleAttach()}
             >
-              {saving ? 'Validando…' : 'Adjuntar documento'}
+              {saving ? 'Subiendo…' : 'Adjuntar PDF'}
             </Button>
           </div>
         </div>
@@ -206,10 +295,7 @@ export function OrderDocumentsPanel({
           {docs.map((doc) => {
             const current = doc.versions.find((v) => v.version === doc.currentVersion)
             return (
-              <li
-                key={doc.id}
-                className="rounded-lg border border-slate-100 px-3 py-2"
-              >
+              <li key={doc.id} className="rounded-lg border border-slate-100 px-3 py-2">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -223,9 +309,7 @@ export function OrderDocumentsPanel({
                               : 'General'
                         }
                       />
-                      <span className="text-xs text-slate-500">
-                        v{doc.currentVersion}
-                      </span>
+                      <span className="text-xs text-slate-500">v{doc.currentVersion}</span>
                     </div>
                     <p className="mt-0.5 truncate text-xs text-slate-500">
                       {current?.fileName} · {current?.uploadedBy} ·{' '}
@@ -234,14 +318,13 @@ export function OrderDocumentsPanel({
                         : '—'}
                     </p>
                     {current?.url && (
-                      <a
-                        href={current.url}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
                         className="text-xs font-medium text-primary hover:underline"
+                        onClick={() => void openDocument(doc, current.url)}
                       >
-                        Abrir archivo
-                      </a>
+                        Abrir PDF
+                      </button>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-1">
@@ -266,6 +349,7 @@ export function OrderDocumentsPanel({
                           setVersionTargetId(doc.id)
                           setKind(doc.kind)
                           setTitle(doc.title)
+                          setVersionFile(null)
                         }}
                       >
                         Nueva versión
@@ -275,25 +359,49 @@ export function OrderDocumentsPanel({
                 </div>
 
                 {versionTargetId === doc.id && canEdit && (
-                  <div className="mt-2 flex flex-wrap items-end gap-2 rounded-md bg-slate-50 p-2">
-                    <FormField label="URL nueva versión" className="min-w-[200px] flex-1">
-                      <Input
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        placeholder="https://…"
+                  <div className="mt-2 space-y-2 rounded-md bg-slate-50 p-2">
+                    <FormField label="Nueva versión (PDF)">
+                      <input
+                        ref={versionInputRef}
+                        type="file"
+                        accept="application/pdf,.pdf"
+                        className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white"
+                        onChange={(e) => {
+                          const picked = e.target.files?.[0] ?? null
+                          if (picked && !isPdfFile(picked)) {
+                            addToast('Solo se permiten archivos PDF', 'error')
+                            e.target.value = ''
+                            setVersionFile(null)
+                            return
+                          }
+                          setVersionFile(picked)
+                        }}
                       />
+                      {versionFile ? (
+                        <p className="mt-1 text-xs text-slate-500">{versionFile.name}</p>
+                      ) : null}
                     </FormField>
-                    <Button type="button" size="sm" onClick={() => handleNewVersion(doc)}>
-                      Guardar versión
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setVersionTargetId('')}
-                    >
-                      Cancelar
-                    </Button>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={saving}
+                        onClick={() => void handleNewVersion(doc)}
+                      >
+                        Guardar versión
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setVersionTargetId('')
+                          setVersionFile(null)
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
                   </div>
                 )}
 
@@ -304,18 +412,16 @@ export function OrderDocumentsPanel({
                       .map((v) => (
                         <li key={v.version} className="flex flex-wrap gap-x-2">
                           <span className="font-semibold">v{v.version}</span>
-                          <a
-                            href={v.url}
-                            target="_blank"
-                            rel="noreferrer"
+                          <button
+                            type="button"
                             className="text-primary hover:underline"
+                            onClick={() => void openDocument(doc, v.url)}
                           >
                             {v.fileName}
-                          </a>
+                          </button>
                           <span>
                             {new Date(v.uploadedAt).toLocaleString('es-CL')} · {v.uploadedBy}
                           </span>
-                          {v.note && <span className="text-slate-400">({v.note})</span>}
                         </li>
                       ))}
                   </ol>

@@ -17,6 +17,7 @@
 -- ============================================================
 
 -- Limpieza idempotente (orden inverso por dependencias)
+DROP TABLE IF EXISTS movimiento_stock CASCADE;
 DROP TABLE IF EXISTS consume CASCADE;
 DROP TABLE IF EXISTS utiliza CASCADE;
 DROP TABLE IF EXISTS pago CASCADE;
@@ -99,10 +100,20 @@ CREATE TABLE cliente (
 -- 3. Activos: maquinaria, insumos, proveedores, categorías, kits
 -- ============================================================
 CREATE TABLE maquinaria (
-    id_maquinaria   SERIAL PRIMARY KEY,
-    patente         VARCHAR(10),
-    marca           VARCHAR(50),
-    estado          VARCHAR(50) DEFAULT 'Operativa'
+    id_maquinaria       SERIAL PRIMARY KEY,
+    patente             VARCHAR(20),
+    marca               VARCHAR(50),
+    estado              VARCHAR(50) DEFAULT 'Operativo',
+    codigo              VARCHAR(50) DEFAULT '',
+    nombre              VARCHAR(150) DEFAULT '',
+    numero_serie        VARCHAR(50) DEFAULT '',
+    ubicacion           VARCHAR(150) DEFAULT '',
+    ubicacion_base      VARCHAR(150) DEFAULT '',
+    categoria           VARCHAR(100) DEFAULT '',
+    fecha_compra        DATE,
+    ultima_mantencion   DATE,
+    proxima_mantencion  DATE,
+    asignado_a          VARCHAR(100)
 );
 
 CREATE TABLE proveedor (
@@ -131,6 +142,7 @@ CREATE TABLE insumo (
     stock_actual    INT DEFAULT 0,
     stock_minimo    INT DEFAULT 0,
     unidad          VARCHAR(30) DEFAULT 'unidad',
+    costo_unitario  NUMERIC(12, 2) DEFAULT 0,
     estado          VARCHAR(20) DEFAULT 'Ok',
     id_categoria    INT,
     id_proveedor    INT,
@@ -153,6 +165,21 @@ CREATE TABLE kit_item (
     FOREIGN KEY (id_kit)    REFERENCES kit(id_kit) ON DELETE CASCADE,
     FOREIGN KEY (id_insumo) REFERENCES insumo(id_insumo)
 );
+
+CREATE TABLE movimiento_stock (
+    id_movimiento   SERIAL PRIMARY KEY,
+    id_insumo       INT NOT NULL,
+    tipo            VARCHAR(20) NOT NULL,
+    cantidad        INT NOT NULL,
+    detalle         VARCHAR(255) DEFAULT '',
+    usuario         VARCHAR(120) DEFAULT 'Sistema',
+    id_ot           VARCHAR(30),
+    fecha           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_insumo) REFERENCES insumo(id_insumo) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_movimiento_stock_fecha ON movimiento_stock (fecha DESC);
+CREATE INDEX idx_movimiento_stock_insumo ON movimiento_stock (id_insumo);
 
 -- ============================================================
 -- 4. Órdenes de trabajo e intervenciones
@@ -268,9 +295,55 @@ CREATE TABLE consume (
     FOREIGN KEY (id_insumo) REFERENCES insumo(id_insumo)
 );
 
+-- RF68: solicitudes e historial de modificación de OT
+CREATE TABLE solicitud_modificacion (
+    id_solicitud        SERIAL PRIMARY KEY,
+    id_ot               VARCHAR(30) NOT NULL,
+    id_operador         VARCHAR(80) NOT NULL,
+    nombre_operador     VARCHAR(150) NOT NULL,
+    campos_modificar    VARCHAR(255) NOT NULL,
+    motivo              VARCHAR(500) NOT NULL,
+    estado              VARCHAR(20) DEFAULT 'Pendiente',
+    solicitado_en       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_revisor          VARCHAR(80),
+    nombre_revisor      VARCHAR(150),
+    revisado_en         TIMESTAMP,
+    motivo_rechazo      VARCHAR(500),
+    FOREIGN KEY (id_ot) REFERENCES orden_trabajo(id_ot) ON DELETE CASCADE
+);
+
+CREATE TABLE historial_modificacion_ot (
+    id_historial        SERIAL PRIMARY KEY,
+    id_ot               VARCHAR(30) NOT NULL,
+    campo               VARCHAR(80) NOT NULL,
+    etiqueta            VARCHAR(120) NOT NULL,
+    valor_anterior      VARCHAR(500) NOT NULL,
+    valor_nuevo         VARCHAR(500) NOT NULL,
+    id_usuario          VARCHAR(80) NOT NULL,
+    nombre_usuario      VARCHAR(150) NOT NULL,
+    cambiado_en         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_ot) REFERENCES orden_trabajo(id_ot) ON DELETE CASCADE
+);
+
+CREATE TABLE historial_reprogramacion_ot (
+    id_reprogramacion   SERIAL PRIMARY KEY,
+    id_ot               VARCHAR(30) NOT NULL,
+    fecha_anterior      VARCHAR(40) NOT NULL,
+    fecha_nueva         VARCHAR(40) NOT NULL,
+    id_usuario          VARCHAR(80) NOT NULL,
+    nombre_usuario      VARCHAR(150) NOT NULL,
+    cambiado_en         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_ot) REFERENCES orden_trabajo(id_ot) ON DELETE CASCADE
+);
+
 -- Índices de apoyo
 CREATE INDEX idx_ot_cliente   ON orden_trabajo(id_cliente);
 CREATE INDEX idx_ot_estado    ON orden_trabajo(estado);
 CREATE INDEX idx_insumo_cat   ON insumo(id_categoria);
 CREATE INDEX idx_factura_cli  ON factura(id_cliente);
 CREATE INDEX idx_audit_fecha  ON bitacora_auditoria(fecha_hora);
+CREATE INDEX idx_solicitud_ot ON solicitud_modificacion(id_ot);
+CREATE INDEX idx_solicitud_estado ON solicitud_modificacion(estado);
+CREATE INDEX idx_hist_mod_ot ON historial_modificacion_ot(id_ot);
+CREATE INDEX idx_hist_reprog_ot ON historial_reprogramacion_ot(id_ot);
+CREATE INDEX idx_hist_reprog_fecha ON historial_reprogramacion_ot(cambiado_en);

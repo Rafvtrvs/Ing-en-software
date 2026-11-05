@@ -8,8 +8,9 @@ import { DataTable, type Column } from '@/components/ui/DataTable'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useUsersStore } from '@/store/useUsersStore'
 import { getOperatorAssignments } from '@/features/operations/utils/operatorAvailability'
+import { getActiveFieldOperators } from '@/features/operations/utils/fieldTechnicians'
 import { formatDisplayDate } from '@/features/orders/utils/orderDates'
-import type { OrderOperator, WorkOrder } from '@/types'
+import type { WorkOrder } from '@/types'
 
 const PAGE_SIZE = 5
 
@@ -18,29 +19,22 @@ const PAGE_SIZE = 5
  */
 export function OperatorAssignmentsPanel() {
   const orders = useOrdersStore((s) => s.orders)
+  const syncOrders = useOrdersStore((s) => s.syncFromApi)
   const users = useUsersStore((s) => s.users)
   const roles = useUsersStore((s) => s.roles)
+  const syncUsers = useUsersStore((s) => s.syncFromApi)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
-  const operators: OrderOperator[] = useMemo(() => {
-    const techRoleIds = new Set(
-      roles
-        .filter((r) => {
-          const n = r.name.toLowerCase()
-          return (
-            n.includes('técnico') ||
-            n.includes('tecnico') ||
-            n.includes('operador') ||
-            n.includes('campo')
-          )
-        })
-        .map((r) => r.id),
-    )
-    return users
-      .filter((u) => techRoleIds.has(u.roleId))
-      .map((u) => ({ id: u.id, name: u.name }))
-  }, [users, roles])
+  useEffect(() => {
+    void syncUsers()
+    void syncOrders()
+  }, [syncUsers, syncOrders])
+
+  const operators = useMemo(
+    () => getActiveFieldOperators(users, roles),
+    [users, roles],
+  )
 
   const [selectedOperatorId, setSelectedOperatorId] = useState('')
 

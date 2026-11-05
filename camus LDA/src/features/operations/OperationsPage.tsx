@@ -1,35 +1,48 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Calendar, ClipboardList, Plus } from 'lucide-react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { ToastContainerView } from '@/components/ui/ToastContainer'
-import { getOperationsKpis } from '@/data/mock/operations'
 import { useOperationsStore } from '@/store/useOperationsStore'
 import { formatDate } from '@/utils/formatters'
 import { OperationsMap } from './components/OperationsMap'
-import { TechniciansList } from './components/TechniciansList'
 import { FieldAlerts } from './components/FieldAlerts'
 import { DaySchedule } from './components/DaySchedule'
 import { FieldOrdersTable } from './components/FieldOrdersTable'
 import { OperatorAvailabilityPanel } from './components/OperatorAvailabilityPanel'
 import { OperatorAssignmentsPanel } from './components/OperatorAssignmentsPanel'
-import { MobileAppCard } from './components/MobileAppCard'
 import { FieldOrderRegisterModal } from './components/FieldOrderRegisterModal'
+import { AssignOperationModal } from './components/AssignOperationModal'
 import { OfflineSyncPanel } from './components/OfflineSyncPanel'
 import { OrderDetailDrawer } from '@/features/orders/components/OrderDetailDrawer'
 import { useOrdersStore } from '@/store/useOrdersStore'
+import { useUsersStore } from '@/store/useUsersStore'
+import { getOperationsKpisFromData } from '@/features/operations/utils/operationsKpis'
 
 export function OperationsPage() {
   const [fieldRegisterOpen, setFieldRegisterOpen] = useState(false)
+  const [assignOpen, setAssignOpen] = useState(false)
   const toasts = useOperationsStore((s) => s.toasts)
   const removeToast = useOperationsStore((s) => s.removeToast)
-  const addToast = useOperationsStore((s) => s.addToast)
+  const orders = useOrdersStore((s) => s.orders)
   const modalMode = useOrdersStore((s) => s.modalMode)
   const selectedOrder = useOrdersStore((s) => s.selectedOrder)
   const closeModal = useOrdersStore((s) => s.closeModal)
-  const kpis = getOperationsKpis()
+  const syncOrders = useOrdersStore((s) => s.syncFromApi)
+  const users = useUsersStore((s) => s.users)
+  const roles = useUsersStore((s) => s.roles)
+  const syncUsers = useUsersStore((s) => s.syncFromApi)
+  const kpis = useMemo(
+    () => getOperationsKpisFromData(orders, users, roles),
+    [orders, users, roles],
+  )
   const today = formatDate(new Date())
+
+  useEffect(() => {
+    void syncUsers()
+    void syncOrders()
+  }, [syncUsers, syncOrders])
 
   return (
     <>
@@ -46,7 +59,7 @@ export function OperationsPage() {
               <Button
                 variant="outline"
                 leftIcon={<Plus className="h-4 w-4" />}
-                onClick={() => addToast('Asignación de operación — próximamente', 'info')}
+                onClick={() => setAssignOpen(true)}
               >
                 Asignar Operación
               </Button>
@@ -67,8 +80,9 @@ export function OperationsPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <OperationsMap />
-          <TechniciansList />
+          <div className="lg:col-span-2">
+            <OperationsMap />
+          </div>
           <FieldAlerts />
         </div>
 
@@ -85,12 +99,16 @@ export function OperationsPage() {
         </div>
 
         <OfflineSyncPanel />
-        <MobileAppCard />
       </div>
 
       <FieldOrderRegisterModal
         open={fieldRegisterOpen}
         onClose={() => setFieldRegisterOpen(false)}
+      />
+
+      <AssignOperationModal
+        open={assignOpen}
+        onClose={() => setAssignOpen(false)}
       />
 
       <OrderDetailDrawer

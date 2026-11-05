@@ -66,7 +66,12 @@ export const interventionService = {
     await auditService.log({
       modulo: 'intervenciones',
       accion: 'crear',
-      valorNuevo: row,
+      valorNuevo: {
+        orderId,
+        idOt: orderId,
+        interventionId: row.id,
+        detail: row.detalle,
+      },
       idUsuario: userId,
     })
 
@@ -102,8 +107,18 @@ export const interventionService = {
     await auditService.log({
       modulo: 'intervenciones',
       accion: 'actualizar',
-      valorAnterior: existing,
-      valorNuevo: row,
+      valorAnterior: {
+        orderId,
+        idOt: orderId,
+        interventionId: existing.id,
+        detail: existing.detalle,
+      },
+      valorNuevo: {
+        orderId,
+        idOt: orderId,
+        interventionId: row.id,
+        detail: row.detalle,
+      },
       idUsuario: userId,
     })
 

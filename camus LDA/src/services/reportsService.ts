@@ -1,5 +1,5 @@
 import api from './api'
-import { mockAuditLogs, type AuditLogEntry } from '@/data/mock/audit'
+import type { AuditLogEntry } from '@/data/mock/audit'
 
 export interface ApiAuditLogRow {
   id: string
@@ -8,6 +8,9 @@ export interface ApiAuditLogRow {
   valorAnterior: string | null
   valorNuevo: string | null
   idUsuario: number | null
+  usuarioNombre?: string | null
+  usuarioEmail?: string | null
+  orderId?: string | null
   fechaHora: string
 }
 
@@ -22,11 +25,21 @@ function inferUbicacion(modulo: string, accion: string): string {
     'clientes|crear': 'Clientes › Formulario nuevo cliente',
     'clientes|actualizar': 'Clientes › Formulario edición cliente',
     'clientes|eliminar': 'Clientes › Listado de clientes',
+    'ordenes|cambio_estado': 'Órdenes › Tablero Kanban / Terreno',
     'ordenes|actualización estado': 'Órdenes › Tablero Kanban',
+    'ordenes|asignar_operador': 'Órdenes › Asignación de operario',
+    'ordenes|comentario': 'Órdenes › Comentarios',
     'ordenes|creación': 'Órdenes › Formulario nueva orden',
     'ordenes|crear': 'Órdenes › Formulario nueva orden',
-    'ordenes|actualizar': 'Órdenes › Formulario edición orden',
+    'ordenes|actualizar': 'Órdenes › Edición / Kanban',
     'ordenes|eliminar': 'Órdenes › Listado de órdenes',
+    'ordenes|reprogramar': 'Órdenes › Reprogramación',
+    'intervenciones|crear': 'Órdenes › Intervenciones',
+    'intervenciones|actualizar': 'Órdenes › Intervenciones',
+    'evidencia|cargar_imagen': 'Terreno › Evidencia fotográfica',
+    'evidencia|eliminar_imagen': 'Terreno › Evidencia fotográfica',
+    'documentos|cargar': 'Órdenes › Documentos PDF',
+    'documentos|nueva_version': 'Órdenes › Documentos PDF',
     'inventario|ajuste de stock': 'Inventario › Detalle de producto',
     'inventario|crear': 'Inventario › Nuevo producto',
     'inventario|actualizar': 'Inventario › Edición de producto',
@@ -43,6 +56,9 @@ function inferUbicacion(modulo: string, accion: string): string {
     auth: 'Autenticación',
     clientes: 'Clientes',
     ordenes: 'Órdenes',
+    intervenciones: 'Intervenciones',
+    evidencia: 'Evidencia',
+    documentos: 'Documentos',
     inventario: 'Inventario',
     facturacion: 'Facturación',
     usuarios: 'Usuarios',
@@ -56,28 +72,46 @@ function inferUbicacion(modulo: string, accion: string): string {
 function mapApiRow(row: ApiAuditLogRow): AuditLogEntry {
   const modulo = row.moduloAfectado ?? 'General'
   const accion = row.accion ?? 'Acción'
+  const usuario =
+    row.usuarioNombre?.trim() ||
+    (row.idUsuario != null ? `Usuario #${row.idUsuario}` : 'Sistema')
   return {
     id: row.id,
     moduloAfectado: modulo,
     accion,
     valorAnterior: row.valorAnterior,
     valorNuevo: row.valorNuevo,
-    usuario: row.idUsuario ? `Usuario #${row.idUsuario}` : 'Sistema',
+    usuario,
+    idUsuario: row.idUsuario ?? null,
+    orderId: row.orderId ?? null,
     fechaHora: row.fechaHora,
     ubicacion: inferUbicacion(modulo, accion),
   }
 }
 
 export const reportsService = {
-  async fetchAuditLogs(): Promise<AuditLogEntry[]> {
+  async fetchAuditLogs(params?: {
+    orderId?: string
+    userId?: string | number
+    from?: string
+    to?: string
+  }): Promise<AuditLogEntry[]> {
     try {
-      const { data } = await api.get<ApiAuditLogRow[]>('/reports/audit')
-      if (Array.isArray(data) && data.length > 0) {
+      const { data } = await api.get<ApiAuditLogRow[]>('/reports/audit', {
+        params: {
+          orderId: params?.orderId || undefined,
+          userId: params?.userId || undefined,
+          from: params?.from || undefined,
+          to: params?.to || undefined,
+          limit: 2000,
+        },
+      })
+      if (Array.isArray(data)) {
         return data.map(mapApiRow)
       }
     } catch {
-      // Backend no disponible: se usa mock para demo y capturas.
+      // Sin backend: lista vacía (no reinyectar mocks de demostración)
     }
-    return mockAuditLogs
+    return []
   },
 }

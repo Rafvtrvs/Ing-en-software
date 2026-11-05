@@ -2,13 +2,12 @@ import { AlertTriangle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { mockEquipment } from '@/data/mock/equipment'
 import { ROUTES } from '@/constants/routes'
 import type { Equipment } from '@/types'
 
 /** RF-30 — alerta de maquinaria no disponible en el panel principal */
 export function UnavailableEquipmentAlert({
-  equipment = mockEquipment,
+  equipment = [],
 }: {
   equipment?: Equipment[]
 }) {

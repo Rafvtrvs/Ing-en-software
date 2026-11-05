@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Download, FileSpreadsheet, FileText } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -7,8 +8,9 @@ import { useOrdersStore } from '@/store/useOrdersStore'
 import { useBillingStore } from '@/store/useBillingStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { useClientsStore } from '@/store/useClientsStore'
-import { technicianPerformance } from '@/data/mock/reports'
-import { mockEquipment } from '@/data/mock/equipment'
+import { useUsersStore } from '@/store/useUsersStore'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
+import { buildTechnicianPerformance } from '@/features/reports/utils/technicianPerformance'
 import {
   exportAssetsPdf,
   exportClientsReport,
@@ -19,6 +21,7 @@ import {
   exportOrdersReport,
   exportTechniciansReport,
 } from '@/features/reports/utils/exportReports'
+import { getCriticalProductsCount } from '@/features/reports/utils/reportStats'
 import type { ReportTab } from '@/types'
 import { cn } from '@/utils/cn'
 
@@ -32,6 +35,14 @@ export function ReportExportCatalog({ filterTab }: ReportExportCatalogProps) {
   const invoices = useBillingStore((s) => s.invoices)
   const products = useInventoryStore((s) => s.products)
   const clients = useClientsStore((s) => s.clients)
+  const equipment = useEquipmentStore((s) => s.equipment)
+  const users = useUsersStore((s) => s.users)
+  const roles = useUsersStore((s) => s.roles)
+
+  const technicians = useMemo(
+    () => buildTechnicianPerformance(users, roles, orders),
+    [users, roles, orders],
+  )
 
   const items = filterTab
     ? reportExportCatalog.filter((item) => item.category === filterTab)
@@ -55,7 +66,7 @@ export function ReportExportCatalog({ filterTab }: ReportExportCatalogProps) {
         break
       case 'exp-4':
       case 'exp-4x':
-        exportTechniciansReport(technicianPerformance, asExcel ? 'XLSX' : 'CSV')
+        exportTechniciansReport(technicians, asExcel ? 'XLSX' : 'CSV')
         break
       case 'exp-6':
       case 'exp-6x':
@@ -67,7 +78,7 @@ export function ReportExportCatalog({ filterTab }: ReportExportCatalogProps) {
           totalOrders: orders.length,
           completedOrders: completed,
           totalRevenue: invoices.reduce((sum, inv) => sum + inv.amount, 0),
-          criticalProducts: products.filter((p) => p.status === 'Crítico').length,
+          criticalProducts: getCriticalProductsCount(products),
           activeClients: clients.filter((c) => c.status === 'Activo').length,
         })
         break
@@ -86,11 +97,13 @@ export function ReportExportCatalog({ filterTab }: ReportExportCatalogProps) {
         break
       }
       case 'exp-8': {
-        const lines = mockEquipment.map((eq) => {
+        const lines = equipment.map((eq) => {
           const linked = orders.filter((o) => o.equipmentId === eq.id || o.truckCode === eq.code)
           return `${eq.code} — ${eq.name}: ${linked.length} OT · estado ${eq.status}`
         })
-        exportAssetsPdf(lines)
+        exportAssetsPdf(
+          lines.length > 0 ? lines : ['Sin maquinaria registrada en el sistema.'],
+        )
         break
       }
       default:

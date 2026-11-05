@@ -1,10 +1,13 @@
 import { Star } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
-import { technicianPerformance } from '@/data/mock/reports'
 import type { TechnicianPerformance } from '@/types'
 
-export function TechniciansPerformanceTable() {
+export function TechniciansPerformanceTable({
+  technicians,
+}: {
+  technicians: TechnicianPerformance[]
+}) {
   const columns: Column<TechnicianPerformance>[] = [
     {
       key: 'name',
@@ -22,11 +25,12 @@ export function TechniciansPerformanceTable() {
     {
       key: 'avgCompletionDays',
       header: 'Días promedio',
-      render: (row) => `${row.avgCompletionDays} días`,
+      render: (row) =>
+        row.avgCompletionDays > 0 ? `${row.avgCompletionDays} días` : '—',
     },
     {
       key: 'rating',
-      header: 'Calificación',
+      header: 'Índice de cierre',
       render: (row) => (
         <span className="inline-flex items-center gap-1 font-medium text-amber-600">
           <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -38,10 +42,13 @@ export function TechniciansPerformanceTable() {
 
   return (
     <Card>
-      <CardHeader title="Rendimiento por Técnico" />
+      <CardHeader
+        title="Rendimiento por Técnico"
+        subtitle="Calculado desde OT asignadas en Postgres"
+      />
       <DataTable
         columns={columns}
-        data={technicianPerformance}
+        data={technicians}
         keyExtractor={(row) => row.id}
       />
     </Card>

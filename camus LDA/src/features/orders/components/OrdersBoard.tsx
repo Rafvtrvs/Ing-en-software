@@ -3,6 +3,7 @@ import { cn } from '@/utils/cn'
 import { Badge } from '@/components/ui/Badge'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { getColumnOrders, ORDER_STATUSES } from '@/features/orders/utils/orderSort'
+import { progressForStatus } from '@/features/orders/utils/orderProgress'
 import {
   DndContext,
   DragOverlay,
@@ -110,7 +111,11 @@ function OrderCard({
             onClick={(e) => {
               e.stopPropagation()
               const next = nextStatus[order.status]
-              if (next) updateOrder(order.id, { status: next })
+              if (!next) return
+              updateOrder(order.id, {
+                status: next,
+                progress: progressForStatus(next, order.progress),
+              })
             }}
             className="w-full shrink-0 rounded-lg bg-slate-100 px-2.5 py-1.5 text-center text-xs font-semibold text-slate-700 hover:bg-slate-200"
           >

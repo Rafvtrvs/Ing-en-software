@@ -1,28 +1,64 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useBillingStore } from '@/store/useBillingStore'
+import { useInventoryStore } from '@/store/useInventoryStore'
 import { Button } from '@/components/ui/Button'
 import { formatInvoiceAmount } from '@/features/billing/utils/exportBilling'
+import { isConsumableStockCategory } from '@/features/inventory/utils/stockCategories'
 
-/** RF-19 — utilidad = ingresos − costos (vista local con datos del sistema) */
+/** RF-19 — utilidad = ingresos − costos de materiales (costo unitario × salidas) */
 export function UtilityReportPanel() {
   const invoices = useBillingStore((s) => s.invoices)
   const payments = useBillingStore((s) => s.payments)
+  const syncBilling = useBillingStore((s) => s.syncFromApi)
+  const products = useInventoryStore((s) => s.products)
+  const movements = useInventoryStore((s) => s.movements)
+  const syncProducts = useInventoryStore((s) => s.syncProductsFromApi)
+  const syncMovements = useInventoryStore((s) => s.syncMovementsFromApi)
+
+  useEffect(() => {
+    void Promise.all([syncBilling(), syncProducts(), syncMovements()])
+  }, [syncBilling, syncProducts, syncMovements])
 
   const summary = useMemo(() => {
     const income = payments.reduce((sum, payment) => sum + payment.amount, 0)
-    const billed = invoices.reduce((sum, invoice) => sum + invoice.amount, 0)
-    // Costos operativos estimados: 55 % de lo facturado (demo local sin API externa)
-    const costs = Math.round(billed * 0.55)
-    const utility = income - costs
-    return { income, billed, costs, utility }
-  }, [invoices, payments])
+    const billed = invoices
+      .filter((i) => i.status !== 'Anulada' && i.status !== 'Borrador')
+      .reduce((sum, invoice) => sum + invoice.amount, 0)
+
+    const costByProductId = new Map(
+      products.map((p) => [p.id, Math.max(0, p.unitCost ?? 0)]),
+    )
+
+    // COGS: salidas de stock × costo unitario del material
+    let materialCosts = 0
+    for (const mov of movements) {
+      if (mov.type !== 'Salida' || mov.quantity <= 0) continue
+      const unitCost = costByProductId.get(mov.productId) ?? 0
+      materialCosts += mov.quantity * unitCost
+    }
+    materialCosts = Math.round(materialCosts)
+
+    // Valor de inventario actual (referencia, no resta de utilidad del periodo)
+    const inventoryValue = Math.round(
+      products
+        .filter((p) => isConsumableStockCategory(p.category))
+        .reduce(
+          (sum, p) => sum + Math.max(0, p.currentStock) * Math.max(0, p.unitCost ?? 0),
+          0,
+        ),
+    )
+
+    const utility = income - materialCosts
+    return { income, billed, materialCosts, inventoryValue, utility }
+  }, [invoices, payments, products, movements])
 
   const exportCsv = () => {
     const rows = [
       'Concepto;Monto',
       `Ingresos por pagos;${summary.income}`,
       `Facturado;${summary.billed}`,
-      `Costos operacionales estimados;${summary.costs}`,
+      `Costo materiales (salidas);${summary.materialCosts}`,
+      `Valor inventario actual;${summary.inventoryValue}`,
       `Utilidad;${summary.utility}`,
     ]
     const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' })
@@ -40,7 +76,8 @@ export function UtilityReportPanel() {
         <div>
           <h2 className="text-base font-semibold text-slate-900">Utilidad del periodo</h2>
           <p className="mt-1 text-sm text-slate-500">
-            Ingresos por pagos menos costos operacionales estimados (RF-19).
+            Ingresos por pagos menos costo de materiales consumidos (salidas × costo
+            unitario registrado en inventario).
           </p>
         </div>
         <Button type="button" variant="outline" onClick={exportCsv}>
@@ -48,7 +85,7 @@ export function UtilityReportPanel() {
         </Button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
           <p className="text-xs font-medium uppercase text-slate-500">Ingresos</p>
           <p className="mt-1 text-lg font-bold text-slate-900">
@@ -62,9 +99,15 @@ export function UtilityReportPanel() {
           </p>
         </div>
         <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
-          <p className="text-xs font-medium uppercase text-slate-500">Costos</p>
+          <p className="text-xs font-medium uppercase text-slate-500">Costo materiales</p>
           <p className="mt-1 text-lg font-bold text-slate-900">
-            {formatInvoiceAmount(summary.costs)}
+            {formatInvoiceAmount(summary.materialCosts)}
+          </p>
+        </div>
+        <div className="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
+          <p className="text-xs font-medium uppercase text-slate-500">Valor inventario</p>
+          <p className="mt-1 text-lg font-bold text-slate-900">
+            {formatInvoiceAmount(summary.inventoryValue)}
           </p>
         </div>
         <div className="rounded-lg border border-emerald-100 bg-emerald-50/70 p-3">

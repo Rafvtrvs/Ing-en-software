@@ -1,17 +1,18 @@
-import { mockEquipment } from '@/data/mock/equipment'
 import type { Equipment, Product, WorkOrder } from '@/types'
+import { isConsumableStockCategory } from '@/features/inventory/utils/stockCategories'
 
 export interface RescheduleValidationResult {
   available: boolean
   reasons: string[]
 }
 
-/** RF66 CDS 228 — validación mock de insumos y maquinaria */
+/** RF66 CDS 228 — validación de insumos y maquinaria (datos reales) */
 export function validateRescheduleDate(
   order: WorkOrder,
   newDate: string,
   orders: WorkOrder[],
   products: Product[],
+  equipmentList: Equipment[] = [],
 ): RescheduleValidationResult {
   const reasons: string[] = []
 
@@ -19,7 +20,7 @@ export function validateRescheduleDate(
     return { available: false, reasons: ['Debe seleccionar una fecha válida.'] }
   }
 
-  const equipment = resolveOrderEquipment(order)
+  const equipment = resolveOrderEquipment(order, equipmentList)
   if (equipment) {
     if (equipment.status === 'Mantenimiento') {
       reasons.push(`Maquinaria ${equipment.code} en mantenimiento.`)
@@ -39,7 +40,9 @@ export function validateRescheduleDate(
     }
   }
 
-  const criticalProducts = products.filter((p) => p.status === 'Crítico')
+  const criticalProducts = products.filter(
+    (p) => isConsumableStockCategory(p.category) && p.status === 'Crítico',
+  )
   if (order.suppliesUsed?.length) {
     const usedCritical = order.suppliesUsed.some((s) =>
       criticalProducts.some((p) => p.id === s.productId),
@@ -60,10 +63,12 @@ export function getExecutionDate(order: WorkOrder): string {
   return ''
 }
 
-function resolveOrderEquipment(order: WorkOrder): Equipment | undefined {
+function resolveOrderEquipment(
+  order: WorkOrder,
+  equipmentList: Equipment[],
+): Equipment | undefined {
   if (!order.equipmentId) {
-    const byOrder = mockEquipment.find((e) => e.assignedOrderId === order.id)
-    return byOrder
+    return equipmentList.find((e) => e.assignedOrderId === order.id)
   }
-  return mockEquipment.find((e) => e.id === order.equipmentId)
+  return equipmentList.find((e) => e.id === order.equipmentId)
 }

@@ -9,15 +9,16 @@ import type {
   StockMovement,
   Supplier,
 } from '@/types'
-import { initialMovements, initialProducts } from '@/data/mock/inventory'
 import {
   initialCategories,
   initialSuppliers,
 } from '@/data/mock/categories-suppliers'
-import { initialKits } from '@/data/mock/kits'
 import { computeStockStatus } from '@/features/inventory/utils/inventoryStatus'
 import { findDuplicateProductCode } from '@/features/inventory/utils/productDuplicates'
+import { allocateProductCode } from '@/features/inventory/utils/productCode'
 import { assetsService } from '@/services/assetsService'
+import { kitsService } from '@/services/kitsService'
+import { stockMovementsService } from '@/services/stockMovementsService'
 import { useNotificationsStore } from '@/store/useNotificationsStore'
 import axios from 'axios'
 import { isDemoMode, isOfflineApiError } from '@/utils/demoMode'
@@ -51,6 +52,8 @@ interface InventoryState {
   toasts: ToastMessage[]
   setActiveTab: (tab: InventoryTab) => void
   syncProductsFromApi: () => Promise<void>
+  syncKitsFromApi: () => Promise<void>
+  syncMovementsFromApi: () => Promise<void>
   addProduct: (
     product: Omit<Product, 'id' | 'status'>,
   ) => Promise<{ ok: boolean; field?: 'code'; message?: string }>
@@ -58,16 +61,21 @@ interface InventoryState {
     id: string,
     data: Partial<Omit<Product, 'id'>>,
   ) => Promise<{ ok: boolean; field?: 'code'; message?: string }>
-  deleteProduct: (id: string) => void
+  deleteProduct: (id: string) => Promise<{ ok: boolean; message?: string }>
   addCategory: (category: Omit<ProductCategory, 'id'>) => void
   updateCategory: (id: string, data: Partial<Omit<ProductCategory, 'id'>>) => void
   deleteCategory: (id: string) => boolean
   addSupplier: (supplier: Omit<Supplier, 'id'>) => void
   updateSupplier: (id: string, data: Partial<Omit<Supplier, 'id'>>) => void
   deleteSupplier: (id: string) => void
-  addKit: (kit: Omit<ProductKit, 'id'>) => void
-  updateKit: (id: string, data: Partial<Omit<ProductKit, 'id'>>) => void
-  deleteKit: (id: string) => void
+  addKit: (
+    kit: Omit<ProductKit, 'id'>,
+  ) => Promise<{ ok: boolean; message?: string }>
+  updateKit: (
+    id: string,
+    data: Partial<Omit<ProductKit, 'id'>>,
+  ) => Promise<{ ok: boolean; message?: string }>
+  deleteKit: (id: string) => Promise<{ ok: boolean; message?: string }>
   openKitModal: (mode: Exclude<InventoryModalMode, null>, kit?: ProductKit | null) => void
   openProductModal: (mode: Exclude<InventoryModalMode, null>, product?: Product | null) => void
   openCategoryModal: (mode: Exclude<InventoryModalMode, null>, category?: ProductCategory | null) => void
@@ -81,7 +89,16 @@ interface InventoryState {
   setCategoryFilter: (category: string) => void
   toggleFilters: () => void
   getActiveCategoryNames: () => string[]
-  deductStock: (productId: string, quantity: number, orderId?: string) => void
+  deductStock: (
+    productId: string,
+    quantity: number,
+    orderId?: string,
+  ) => Promise<{ ok: boolean; message?: string }>
+  restoreStock: (
+    productId: string,
+    quantity: number,
+    orderId?: string,
+  ) => Promise<{ ok: boolean; message?: string }>
   addToast: (message: string, type?: ToastMessage['type']) => void
   removeToast: (id: number) => void
 }
@@ -96,10 +113,14 @@ function safeId(prefix = '') {
 }
 
 function withStatus(
-  data: Partial<Product> & { currentStock: number; minStock: number },
+  data: Partial<Product> & {
+    currentStock: number
+    minStock: number
+    category?: string
+  },
 ): Pick<Product, 'status'> {
   return {
-    status: computeStockStatus(data.currentStock, data.minStock),
+    status: computeStockStatus(data.currentStock, data.minStock, data.category),
   }
 }
 
@@ -119,12 +140,13 @@ function apiErrorMessage(
 export const useInventoryStore = create<InventoryState>()(
   persist(
     (set, get) => ({
-      products: initialProducts,
+      // Vacío al inicio: la fuente de verdad es PostgreSQL vía syncProductsFromApi
+      products: [],
       apiAvailable: false,
       categories: initialCategories,
       suppliers: initialSuppliers,
-      kits: initialKits,
-      movements: initialMovements,
+      kits: [],
+      movements: [],
       activeTab: 'inventario',
       modalEntity: null,
       modalMode: null,
@@ -143,8 +165,29 @@ export const useInventoryStore = create<InventoryState>()(
       // Si no responde, se conservan los datos locales.
       syncProductsFromApi: async () => {
         try {
-          const products = await assetsService.list()
+          const products = (await assetsService.list()).map((prod) => ({
+            ...prod,
+            ...withStatus(prod),
+          }))
           set({ products, apiAvailable: true })
+        } catch {
+          set({ apiAvailable: false })
+        }
+      },
+
+      syncKitsFromApi: async () => {
+        try {
+          const kits = await kitsService.list()
+          set({ kits, apiAvailable: true })
+        } catch {
+          set({ apiAvailable: false })
+        }
+      },
+
+      syncMovementsFromApi: async () => {
+        try {
+          const movements = await stockMovementsService.list()
+          set({ movements, apiAvailable: true })
         } catch {
           set({ apiAvailable: false })
         }
@@ -157,7 +200,13 @@ export const useInventoryStore = create<InventoryState>()(
 
       addProduct: async (product) => {
         const state = useInventoryStore.getState()
-        const duplicate = findDuplicateProductCode(state.products, product.code)
+        const code = allocateProductCode(
+          state.products,
+          product.category,
+          product.code,
+        )
+        const toCreate = { ...product, code }
+        const duplicate = findDuplicateProductCode(state.products, toCreate.code)
         if (duplicate) {
           state.addToast(duplicate.message, 'error')
           return { ok: false, field: duplicate.field, message: duplicate.message }
@@ -166,17 +215,29 @@ export const useInventoryStore = create<InventoryState>()(
         const tempId = safeId()
         set((s) => ({
           products: [
-            { ...product, id: tempId, ...withStatus(product) },
+            { ...toCreate, id: tempId, ...withStatus(toCreate) },
             ...s.products,
           ],
         }))
 
         try {
-          const created = await assetsService.create(product)
-          set((s) => ({
-            products: s.products.map((p) => (p.id === tempId ? created : p)),
-            apiAvailable: true,
-          }))
+          const created = await assetsService.create(toCreate)
+          const normalized = { ...created, ...withStatus(created) }
+          set((s) => {
+            const withoutTemp = s.products.filter((p) => p.id !== tempId)
+            const idx = withoutTemp.findIndex(
+              (p) => p.id === normalized.id || p.code === normalized.code,
+            )
+            const products =
+              idx >= 0
+                ? withoutTemp.map((p, i) => (i === idx ? normalized : p))
+                : [normalized, ...withoutTemp]
+            return { products, apiAvailable: true }
+          })
+          await Promise.all([
+            get().syncProductsFromApi(),
+            get().syncMovementsFromApi(),
+          ])
           useNotificationsStore.getState().pushProductCreated({
             code: created.code,
             name: created.name,
@@ -184,6 +245,14 @@ export const useInventoryStore = create<InventoryState>()(
           })
           return { ok: true }
         } catch (err) {
+          if (isDemoMode() || isOfflineApiError(err)) {
+            set({ apiAvailable: false })
+            useInventoryStore.getState().addToast(
+              'Producto guardado en modo local (API no disponible)',
+              'info',
+            )
+            return { ok: true }
+          }
           set((s) => ({
             products: s.products.filter((p) => p.id !== tempId),
           }))
@@ -228,13 +297,25 @@ export const useInventoryStore = create<InventoryState>()(
         }
 
         try {
-          await assetsService.update(id, data)
-          set({ apiAvailable: true })
+          const updated = await assetsService.update(id, data)
+          const normalized = { ...updated, ...withStatus(updated) }
+          set((s) => ({
+            apiAvailable: true,
+            products: s.products.map((p) => (p.id === id ? normalized : p)),
+            selectedProduct:
+              s.selectedProduct?.id === id ? normalized : s.selectedProduct,
+          }))
+          await Promise.all([
+            get().syncProductsFromApi(),
+            get().syncMovementsFromApi(),
+          ])
           useInventoryStore.getState().addToast('Producto actualizado correctamente')
           return { ok: true }
         } catch (err) {
           if (isOfflineApiError(err)) {
-            useInventoryStore.getState().addToast('Producto actualizado correctamente (modo demo)')
+            useInventoryStore.getState().addToast(
+              'Producto actualizado correctamente (modo demo)',
+            )
             return { ok: true }
           }
           set((s) => ({
@@ -246,17 +327,34 @@ export const useInventoryStore = create<InventoryState>()(
         }
       },
 
-      deleteProduct: (id) => {
+      deleteProduct: async (id) => {
+        const previous = get().products
         set((state) => ({
           products: state.products.filter((p) => p.id !== id),
           ...(state.selectedProduct?.id === id
             ? { selectedProduct: null, modalMode: null, modalEntity: null }
             : null),
         }))
-        assetsService
-          .remove(id)
-          .then(() => set({ apiAvailable: true }))
-          .catch(() => set({ apiAvailable: false }))
+
+        if (isDemoMode()) {
+          return { ok: true }
+        }
+
+        try {
+          await assetsService.remove(id)
+          set({ apiAvailable: true })
+          await get().syncProductsFromApi()
+          return { ok: true }
+        } catch (err) {
+          if (isOfflineApiError(err)) {
+            set({ apiAvailable: false })
+            return { ok: true }
+          }
+          set({ products: previous, apiAvailable: false })
+          const apiErr = apiErrorMessage(err, 'No se pudo eliminar el producto')
+          useInventoryStore.getState().addToast(apiErr.message, 'error')
+          return { ok: false, message: apiErr.message }
+        }
       },
 
       addCategory: (category) =>
@@ -323,28 +421,97 @@ export const useInventoryStore = create<InventoryState>()(
             : null),
         })),
 
-      addKit: (kit) =>
-        set((state) => ({
-          kits: [{ ...kit, id: safeId('kit-') }, ...state.kits],
-        })),
+      addKit: async (kit) => {
+        try {
+          const created = await kitsService.create({
+            name: kit.name,
+            description: kit.description,
+            status: kit.status,
+            items: kit.items.map((i) => ({
+              productId: i.productId,
+              quantity: i.quantity,
+            })),
+          })
+          set((s) => ({
+            kits: [created, ...s.kits.filter((k) => k.id !== created.id)],
+            apiAvailable: true,
+          }))
+          return { ok: true }
+        } catch (err) {
+          if (isDemoMode() || isOfflineApiError(err)) {
+            const local: ProductKit = { ...kit, id: safeId('kit-') }
+            set((s) => ({ kits: [local, ...s.kits], apiAvailable: false }))
+            return { ok: true }
+          }
+          const apiErr = apiErrorMessage(err, 'No se pudo crear el kit')
+          return { ok: false, message: apiErr.message }
+        }
+      },
 
-      updateKit: (id, data) =>
-        set((state) => {
-          const kits = state.kits.map((k) => (k.id === id ? { ...k, ...data } : k))
-          const selectedKit =
-            state.selectedKit?.id === id
-              ? kits.find((k) => k.id === id) ?? null
-              : state.selectedKit
-          return { kits, selectedKit }
-        }),
+      updateKit: async (id, data) => {
+        const current = get().kits.find((k) => k.id === id)
+        if (!current) return { ok: false, message: 'Kit no encontrado' }
+        const previous = { ...current }
+        const optimistic: ProductKit = { ...current, ...data }
+        set((s) => ({
+          kits: s.kits.map((k) => (k.id === id ? optimistic : k)),
+          selectedKit:
+            s.selectedKit?.id === id ? optimistic : s.selectedKit,
+        }))
 
-      deleteKit: (id) =>
+        try {
+          const updated = await kitsService.update(id, {
+            name: data.name,
+            description: data.description,
+            status: data.status,
+            items: data.items?.map((i) => ({
+              productId: i.productId,
+              quantity: i.quantity,
+            })),
+          })
+          set((s) => ({
+            kits: s.kits.map((k) => (k.id === id ? updated : k)),
+            selectedKit: s.selectedKit?.id === id ? updated : s.selectedKit,
+            apiAvailable: true,
+          }))
+          return { ok: true }
+        } catch (err) {
+          if (isDemoMode() || isOfflineApiError(err)) {
+            set({ apiAvailable: false })
+            return { ok: true }
+          }
+          set((s) => ({
+            kits: s.kits.map((k) => (k.id === id ? previous : k)),
+            selectedKit: s.selectedKit?.id === id ? previous : s.selectedKit,
+            apiAvailable: false,
+          }))
+          const apiErr = apiErrorMessage(err, 'No se pudo actualizar el kit')
+          return { ok: false, message: apiErr.message }
+        }
+      },
+
+      deleteKit: async (id) => {
+        const previous = get().kits
         set((state) => ({
           kits: state.kits.filter((k) => k.id !== id),
           ...(state.selectedKit?.id === id
             ? { selectedKit: null, modalMode: null, modalEntity: null }
             : null),
-        })),
+        }))
+        try {
+          await kitsService.remove(id)
+          set({ apiAvailable: true })
+          return { ok: true }
+        } catch (err) {
+          if (isDemoMode() || isOfflineApiError(err)) {
+            set({ apiAvailable: false })
+            return { ok: true }
+          }
+          set({ kits: previous, apiAvailable: false })
+          const apiErr = apiErrorMessage(err, 'No se pudo eliminar el kit')
+          return { ok: false, message: apiErr.message }
+        }
+      },
 
       openKitModal: (mode, kit = null) =>
         set({
@@ -405,29 +572,144 @@ export const useInventoryStore = create<InventoryState>()(
       setCategoryFilter: (category) => set({ categoryFilter: category }),
       toggleFilters: () => set((state) => ({ showFilters: !state.showFilters })),
 
-      /** RF62 CDS 214 — descuenta stock al registrar insumos en OT */
-      deductStock: (productId, quantity, orderId) => {
-        const now = new Date().toLocaleString('es-CL')
-        set((state) => {
-          const products = state.products.map((p) => {
-            if (p.id !== productId) return p
-            const currentStock = Math.max(0, p.currentStock - quantity)
-            const updated = { ...p, currentStock }
-            return { ...updated, ...withStatus(updated) }
-          })
-          const product = state.products.find((p) => p.id === productId)
-          const movement: StockMovement = {
-            id: safeId('mov-'),
-            productId,
-            product: product?.name ?? 'Insumo',
-            type: 'Salida',
-            quantity,
-            date: now,
-            detail: orderId ? `Uso en OT ${orderId}` : 'Uso en orden de trabajo',
-            user: 'Sistema',
+      /** RF62 CDS 214 — descuenta stock y registra movimiento en PostgreSQL */
+      deductStock: async (productId, quantity, orderId) => {
+        const product = get().products.find((p) => p.id === productId)
+        if (!product) {
+          return { ok: false, message: 'Producto no encontrado en inventario' }
+        }
+        if (quantity <= 0) {
+          return { ok: false, message: 'La cantidad debe ser mayor a cero' }
+        }
+        if (product.currentStock < quantity) {
+          return {
+            ok: false,
+            message: `Stock insuficiente para "${product.name}"`,
           }
-          return { products, movements: [movement, ...state.movements] }
-        })
+        }
+
+        const detail = orderId ? `Uso en OT ${orderId}` : 'Uso en orden de trabajo'
+
+        try {
+          const { movement, product: updatedProduct } =
+            await stockMovementsService.create({
+              productId,
+              type: 'Salida',
+              quantity,
+              detail,
+              orderId,
+            })
+          set((state) => ({
+            apiAvailable: true,
+            products: state.products.map((p) =>
+              p.id === productId
+                ? { ...updatedProduct, ...withStatus(updatedProduct) }
+                : p,
+            ),
+            movements: [
+              movement,
+              ...state.movements.filter((m) => m.id !== movement.id),
+            ],
+          }))
+          return { ok: true }
+        } catch (err) {
+          if (isDemoMode() || isOfflineApiError(err)) {
+            const now = new Date().toLocaleString('es-CL')
+            const currentStock = Math.max(0, product.currentStock - quantity)
+            const movement: StockMovement = {
+              id: safeId('mov-'),
+              productId,
+              product: product.name,
+              type: 'Salida',
+              quantity,
+              date: now,
+              detail,
+              user: 'Sistema',
+              orderId,
+              createdAt: new Date().toISOString(),
+            }
+            set((state) => ({
+              apiAvailable: false,
+              products: state.products.map((p) => {
+                if (p.id !== productId) return p
+                const updated = { ...p, currentStock }
+                return { ...updated, ...withStatus(updated) }
+              }),
+              movements: [movement, ...state.movements],
+            }))
+            return { ok: true }
+          }
+          const apiErr = apiErrorMessage(err, 'No se pudo actualizar el stock')
+          return { ok: false, message: apiErr.message }
+        }
+      },
+
+      /** Devuelve stock a bodega y registra movimiento en PostgreSQL */
+      restoreStock: async (productId, quantity, orderId) => {
+        const product = get().products.find((p) => p.id === productId)
+        if (!product) {
+          return { ok: false, message: 'Producto no encontrado en inventario' }
+        }
+        if (quantity <= 0) {
+          return { ok: false, message: 'La cantidad debe ser mayor a cero' }
+        }
+
+        const detail = orderId
+          ? `Devolución por baja de insumo en OT ${orderId}`
+          : 'Devolución por baja de insumo en OT'
+
+        try {
+          const { movement, product: updatedProduct } =
+            await stockMovementsService.create({
+              productId,
+              type: 'Entrada',
+              quantity,
+              detail,
+              orderId,
+            })
+          set((state) => ({
+            apiAvailable: true,
+            products: state.products.map((p) =>
+              p.id === productId
+                ? { ...updatedProduct, ...withStatus(updatedProduct) }
+                : p,
+            ),
+            movements: [
+              movement,
+              ...state.movements.filter((m) => m.id !== movement.id),
+            ],
+          }))
+          return { ok: true }
+        } catch (err) {
+          if (isDemoMode() || isOfflineApiError(err)) {
+            const now = new Date().toLocaleString('es-CL')
+            const currentStock = product.currentStock + quantity
+            const movement: StockMovement = {
+              id: safeId('mov-'),
+              productId,
+              product: product.name,
+              type: 'Entrada',
+              quantity,
+              date: now,
+              detail,
+              user: 'Sistema',
+              orderId,
+              createdAt: new Date().toISOString(),
+            }
+            set((state) => ({
+              apiAvailable: false,
+              products: state.products.map((p) => {
+                if (p.id !== productId) return p
+                const updated = { ...p, currentStock }
+                return { ...updated, ...withStatus(updated) }
+              }),
+              movements: [movement, ...state.movements],
+            }))
+            return { ok: true }
+          }
+          const apiErr = apiErrorMessage(err, 'No se pudo devolver el stock')
+          return { ok: false, message: apiErr.message }
+        }
       },
 
       addToast: (message, type = 'success') => {
@@ -442,27 +724,29 @@ export const useInventoryStore = create<InventoryState>()(
         set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
     }),
     {
-      name: 'camus_inventory_store_v2',
+      // v4: productos y movimientos ya no se cachean en localStorage (evita tapar Postgres)
+      name: 'camus_inventory_store_v4',
       partialize: (state) => ({
-        products: state.products,
         categories: state.categories,
         suppliers: state.suppliers,
-        kits: state.kits,
-        movements: state.movements,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<InventoryState> | undefined
+        const savedCategories = p?.categories ?? current.categories
+        const knownNames = new Set(
+          savedCategories.map((c) => c.name.trim().toLowerCase()),
+        )
+        const missingMachineryCats = initialCategories.filter(
+          (c) => !knownNames.has(c.name.trim().toLowerCase()),
+        )
         return {
           ...current,
           ...p,
-          products: (p?.products ?? current.products).map((prod) => ({
-            ...prod,
-            ...withStatus(prod),
-          })),
-          categories: p?.categories ?? current.categories,
+          products: current.products,
+          categories: [...savedCategories, ...missingMachineryCats],
           suppliers: p?.suppliers ?? current.suppliers,
-          kits: p?.kits ?? current.kits,
-          movements: p?.movements ?? current.movements,
+          kits: current.kits,
+          movements: current.movements,
         }
       },
     },

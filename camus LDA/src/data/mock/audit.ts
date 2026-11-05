@@ -5,6 +5,10 @@ export interface AuditLogEntry {
   valorAnterior: string | null
   valorNuevo: string | null
   usuario: string
+  /** Id numérico del usuario en Postgres (si aplica) */
+  idUsuario?: number | null
+  /** OT asociada cuando el payload la declara */
+  orderId?: string | null
   fechaHora: string
   /** Pantalla o sección donde se registró el cambio */
   ubicacion: string

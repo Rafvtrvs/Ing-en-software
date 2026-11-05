@@ -1,7 +1,10 @@
 import { useEffect } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { authService } from '@/services/authService'
-import { registerAdminPushIfNeeded } from '@/lib/pushNotifications'
+import {
+  ensureCampanitaPushListeners,
+  registerAdminPushIfNeeded,
+} from '@/lib/pushNotifications'
 
 // Guard de rutas: equivale al middleware de autenticación del diagrama
 // en el lado de la Vista. Si no hay sesión, redirige al login.
@@ -11,6 +14,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!authenticated) return
+    ensureCampanitaPushListeners()
     const user = authService.getUser()
     if (user?.role) void registerAdminPushIfNeeded(user.role)
   }, [authenticated])

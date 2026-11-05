@@ -3,7 +3,10 @@ import { KpiCard } from '@/components/ui/KpiCard'
 import type { KpiData } from '@/types'
 import { useBillingStore } from '@/store/useBillingStore'
 import { formatCurrency } from '@/utils/formatters'
-import { getBillingRevenueStats } from '@/features/reports/utils/reportStats'
+import {
+  getBillingRevenueStats,
+  getRevenueByMonth,
+} from '@/features/reports/utils/reportStats'
 import { getInvoicesByStatus } from '@/features/billing/utils/billingStats'
 import { RevenueTrendChart } from './RevenueTrendChart'
 import { ReportDonutChart } from './ReportDonutChart'
@@ -20,6 +23,7 @@ export function BillingReportPanel() {
   const payments = useBillingStore((s) => s.payments)
   const stats = getBillingRevenueStats(invoices)
   const statusChart = getInvoicesByStatus(invoices)
+  const revenueSeries = useMemo(() => getRevenueByMonth(invoices), [invoices])
 
   const [showFilters, setShowFilters] = useState(true)
   const [from, setFrom] = useState('')
@@ -183,7 +187,7 @@ export function BillingReportPanel() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <RevenueTrendChart />
+        <RevenueTrendChart data={revenueSeries} />
         <ReportDonutChart title="Facturas por Estado" data={statusChart} />
       </div>
 

@@ -19,13 +19,6 @@ import type {
   ThirdPartyIntervention,
   WorkOrder,
 } from '@/types'
-import { initialOrders } from '@/data/mock/orders'
-import { initialOrderComments } from '@/data/mock/orderComments'
-import { initialRescheduleHistory } from '@/data/mock/orderReschedules'
-import {
-  initialModificationHistory,
-  initialModificationRequests,
-} from '@/data/mock/orderModifications'
 import { ordersService } from '@/services/ordersService'
 import {
   applySortOrderToColumn,
@@ -33,17 +26,17 @@ import {
   normalizeOrdersSort,
   ORDER_STATUSES,
 } from '@/features/orders/utils/orderSort'
+import {
+  clampProgress,
+  progressForStatus,
+} from '@/features/orders/utils/orderProgress'
 import { useNotificationsStore } from '@/store/useNotificationsStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
-import { authService } from '@/services/authService'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
 
-function sessionIsAdmin(): boolean {
-  const role = authService.getUser()?.role ?? ''
-  return role
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .includes('administrador')
+function syncEquipmentLocations() {
+  const orders = useOrdersStore.getState().orders
+  void useEquipmentStore.getState().syncLocationsFromOrders(orders)
 }
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
 import { calcDurationHours, validateServiceTimeSequence } from '@/features/orders/utils/orderDates'
@@ -54,6 +47,7 @@ import {
 import {
   resolveOrderPriority,
 } from '@/features/orders/utils/priorityRules'
+import { allocateOrderId } from '@/features/orders/utils/nextOrderId'
 
 export type OrderModalMode =
   | 'create'
@@ -135,7 +129,7 @@ interface OrdersState {
   showFilters: boolean
   toasts: ToastMessage[]
   syncFromApi: () => Promise<void>
-  addOrder: (order: WorkOrder) => void
+  addOrder: (order: WorkOrder) => string
   updateOrder: (id: string, data: Partial<WorkOrder>, options?: { fromForm?: boolean }) => void
   deleteOrder: (id: string) => void
   addIntervention: (orderId: string, detail: string) => Promise<OrderIntervention>
@@ -200,6 +194,7 @@ interface OrdersState {
   addOrderDocument: (
     orderId: string,
     data: {
+      id?: string
       kind: OrderDocumentKind
       title: string
       fileName: string
@@ -249,7 +244,11 @@ interface OrdersState {
   registerSupplies: (
     orderId: string,
     supplies: Omit<OrderSupplyUsage, 'registeredAt'>[],
-  ) => { ok: boolean; message?: string }
+  ) => Promise<{ ok: boolean; message?: string }>
+  removeRegisteredSupply: (
+    orderId: string,
+    supplyIndex: number,
+  ) => Promise<{ ok: boolean; message?: string }>
   approveOrder: (
     orderId: string,
     approval: Omit<OrderApprovalRecord, 'approvedAt'> & { approvedAt?: string },
@@ -258,7 +257,8 @@ interface OrdersState {
     orderId: string,
     content: string,
     author: { id: string; name: string },
-  ) => { ok: boolean; message?: string }
+  ) => Promise<{ ok: boolean; message?: string }>
+  fetchOrderComments: (orderId: string) => Promise<OrderComment[]>
   getOrderComments: (orderId: string) => OrderComment[]
   openRescheduleModal: (order: WorkOrder) => void
   openModificationRequestModal: (order: WorkOrder) => void
@@ -266,26 +266,29 @@ interface OrdersState {
     orderId: string,
     newDate: string,
     user: { id: string; name: string },
-  ) => { ok: boolean; message?: string }
+  ) => Promise<{ ok: boolean; message?: string }>
   validateReschedule: (orderId: string, newDate: string) => {
     available: boolean
     reasons: string[]
   }
   getRescheduleHistory: (orderId: string) => OrderRescheduleEvent[]
+  fetchRescheduleHistory: (orderId: string) => Promise<OrderRescheduleEvent[]>
+  syncModificationRequests: () => Promise<void>
+  fetchModificationHistory: (orderId: string) => Promise<OrderModificationHistoryEntry[]>
   submitModificationRequest: (
     orderId: string,
     data: { fieldsToModify: string; reason: string },
     operator: { id: string; name: string },
-  ) => { ok: boolean; message?: string }
+  ) => Promise<{ ok: boolean; message?: string }>
   approveModificationRequest: (
     requestId: string,
     reviewer: { id: string; name: string },
-  ) => { ok: boolean; message?: string }
+  ) => Promise<{ ok: boolean; message?: string }>
   rejectModificationRequest: (
     requestId: string,
     reason: string,
     reviewer: { id: string; name: string },
-  ) => { ok: boolean; message?: string }
+  ) => Promise<{ ok: boolean; message?: string }>
   getModificationHistory: (orderId: string) => OrderModificationHistoryEntry[]
   addModificationHistory: (
     orderId: string,
@@ -301,14 +304,6 @@ interface OrdersState {
 
 let toastId = 0
 
-function safeId(prefix = 'OT') {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    const short = crypto.randomUUID().split('-')[0].toUpperCase()
-    return `${prefix}-${short}`
-  }
-  return `${prefix}-${Date.now()}`
-}
-
 function thirdPartyId() {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return `tp-${crypto.randomUUID().split('-')[0]}`
@@ -323,62 +318,18 @@ function eventId(prefix: string) {
   return `${prefix}-${Date.now()}`
 }
 
-function groupCommentsByOrder(comments: OrderComment[]): Record<string, OrderComment[]> {
-  return comments.reduce<Record<string, OrderComment[]>>((acc, c) => {
-    if (!acc[c.orderId]) acc[c.orderId] = []
-    acc[c.orderId].push(c)
-    return acc
-  }, {})
-}
-
-function groupRescheduleByOrder(
-  events: OrderRescheduleEvent[],
-): Record<string, OrderRescheduleEvent[]> {
-  return events.reduce<Record<string, OrderRescheduleEvent[]>>((acc, e) => {
-    if (!acc[e.orderId]) acc[e.orderId] = []
-    acc[e.orderId].push(e)
-    return acc
-  }, {})
-}
-
-function groupModificationHistoryByOrder(
-  entries: OrderModificationHistoryEntry[],
-): Record<string, OrderModificationHistoryEntry[]> {
-  return entries.reduce<Record<string, OrderModificationHistoryEntry[]>>((acc, e) => {
-    if (!acc[e.orderId]) acc[e.orderId] = []
-    acc[e.orderId].push(e)
-    return acc
-  }, {})
-}
-
-const seededOrders = normalizeOrdersSort(
-  initialOrders.map((o, i) => ({ ...o, sortOrder: o.sortOrder ?? i })),
-)
-
-function progressForStatus(
-  status: OrderStatus,
-  current?: number,
-): number | undefined {
-  if (status === 'Completada') return 100
-  if (status === 'En Curso') return Math.max(current ?? 0, 10)
-  if (status === 'Pendiente') return current ?? 0
-  return current
-}
-
-/** Conserva extras frontend-only al sincronizar desde API */
+/** Conserva solo extras frontend-only; Postgres manda en estado/asignación. */
 function mergeApiOrders(
   apiOrders: WorkOrder[],
   localOrders: WorkOrder[],
 ): WorkOrder[] {
   const localById = new Map(localOrders.map((o) => [o.id, o]))
-  const merged = apiOrders.map((api) => {
+  return apiOrders.map((api) => {
     const local = localById.get(api.id)
     if (!local) return api
     return {
       ...api,
-      technician: api.technician || local.technician,
-      operatorIds: api.operatorIds?.length ? api.operatorIds : local.operatorIds,
-      operators: api.operators?.length ? api.operators : local.operators,
+      // Campos locales de terreno / UI que aún no viven en columnas de OT
       startDate: local.startDate ?? api.startDate,
       endDate: local.endDate ?? api.endDate,
       durationHours: local.durationHours ?? api.durationHours,
@@ -386,8 +337,6 @@ function mergeApiOrders(
       serviceEndedAt: local.serviceEndedAt ?? api.serviceEndedAt,
       clientSignature: local.clientSignature ?? api.clientSignature,
       timeCorrectionNote: local.timeCorrectionNote ?? api.timeCorrectionNote,
-      status:
-        local.serviceStartedAt && api.status === 'Pendiente' ? local.status : api.status,
       incidentType: local.incidentType ?? api.incidentType,
       priorityManual: local.priorityManual ?? api.priorityManual,
       photoUrls: local.photoUrls ?? api.photoUrls,
@@ -407,13 +356,6 @@ function mergeApiOrders(
         : (api.priority ?? local.priority),
     }
   })
-  const apiIds = new Set(apiOrders.map((o) => o.id))
-  // Conserva OT creadas solo en local (offline), pero descarta residuos de
-  // datasets de carga (OT-LOAD-*) que ya no están en Postgres.
-  const localOnly = localOrders.filter(
-    (o) => !apiIds.has(o.id) && !o.id.startsWith('OT-LOAD-'),
-  )
-  return [...merged, ...localOnly]
 }
 
 function withDerivedDuration(data: Partial<WorkOrder>, existing?: WorkOrder): Partial<WorkOrder> {
@@ -428,16 +370,14 @@ function withDerivedDuration(data: Partial<WorkOrder>, existing?: WorkOrder): Pa
 export const useOrdersStore = create<OrdersState>()(
   persist(
     (set, get) => ({
-      orders: seededOrders,
+      orders: [],
       serviceClocks: {},
       apiAvailable: false,
       interventionsByOrderId: {},
-      commentsByOrderId: groupCommentsByOrder(initialOrderComments),
-      rescheduleHistoryByOrderId: groupRescheduleByOrder(initialRescheduleHistory),
-      modificationRequests: initialModificationRequests,
-      modificationHistoryByOrderId: groupModificationHistoryByOrder(
-        initialModificationHistory,
-      ),
+      commentsByOrderId: {},
+      rescheduleHistoryByOrderId: {},
+      modificationRequests: [],
+      modificationHistoryByOrderId: {},
       photoAnnotationsByOrderId: {},
       modalMode: null,
       selectedOrder: null,
@@ -448,19 +388,48 @@ export const useOrdersStore = create<OrdersState>()(
 
       syncFromApi: async () => {
         try {
-          const orders = await ordersService.list()
+          const [orders, modificationRequests] = await Promise.all([
+            ordersService.list(),
+            ordersService.listModificationRequests().catch(() => [] as OrderModificationRequest[]),
+          ])
           const merged = applyServiceClocks(
             mergeApiOrders(orders, get().orders),
             get().serviceClocks,
           )
-          set({ orders: normalizeOrdersSort(merged), apiAvailable: true })
+          const nextOrders = normalizeOrdersSort(merged)
+          const selectedId = get().selectedOrder?.id
+          set({
+            orders: nextOrders,
+            apiAvailable: true,
+            modificationRequests,
+            ...(selectedId
+              ? {
+                  selectedOrder:
+                    nextOrders.find((o) => o.id === selectedId) ??
+                    get().selectedOrder,
+                }
+              : null),
+          })
+        } catch {
+          set({ apiAvailable: false })
+        }
+      },
+
+      syncModificationRequests: async () => {
+        try {
+          const modificationRequests =
+            await ordersService.listModificationRequests()
+          set({ modificationRequests, apiAvailable: true })
         } catch {
           set({ apiAvailable: false })
         }
       },
 
       addOrder: (order) => {
-        const newId = order.id || safeId()
+        const newId = allocateOrderId(
+          get().orders.map((o) => o.id),
+          order.id,
+        )
         const priority = resolveOrderPriority({
           priority: order.priority,
           priorityManual: order.priorityManual,
@@ -497,11 +466,21 @@ export const useOrdersStore = create<OrdersState>()(
           .create({ ...newOrder })
           .then(() => set({ apiAvailable: true }))
           .catch(() => set({ apiAvailable: false }))
+          .finally(() => syncEquipmentLocations())
+
+        if (newOrder.truckCode || newOrder.equipmentId) {
+          syncEquipmentLocations()
+        }
+
+        return newId
       },
 
       updateOrder: (id, data, options) => {
         const existing = get().orders.find((o) => o.id === id)
         const enriched = withDerivedDuration(data, existing)
+        if (enriched.progress !== undefined) {
+          enriched.progress = clampProgress(enriched.progress)
+        }
         if (
           enriched.incidentType &&
           !enriched.priorityManual &&
@@ -531,14 +510,12 @@ export const useOrdersStore = create<OrdersState>()(
           if (options?.fromForm) {
             const changes = getOrderFieldChanges(existing, merged)
             if (changes.length > 0) {
-              // Campanita local solo para admin; operadores avisan vía FCM al admin
-              if (sessionIsAdmin()) {
-                useNotificationsStore.getState().pushOrderFieldChanges({
-                  orderId: existing.id,
-                  client: merged.client,
-                  changes,
-                })
-              }
+              // Campanita local siempre; admins en otros dispositivos reciben FCM
+              useNotificationsStore.getState().pushOrderFieldChanges({
+                orderId: existing.id,
+                client: merged.client,
+                changes,
+              })
               const userId = 'session'
               const userName = 'Sistema'
               for (const change of changes) {
@@ -553,14 +530,12 @@ export const useOrdersStore = create<OrdersState>()(
               }
             }
           } else if (data.status && data.status !== existing.status) {
-            if (sessionIsAdmin()) {
-              useNotificationsStore.getState().pushOrderStatusChange({
-                orderId: existing.id,
-                client: existing.client,
-                previousStatus: existing.status,
-                newStatus: data.status,
-              })
-            }
+            useNotificationsStore.getState().pushOrderStatusChange({
+              orderId: existing.id,
+              client: existing.client,
+              previousStatus: existing.status,
+              newStatus: data.status,
+            })
             // RF-8 — registrar cambio de estado en historial de la OT
             get().addModificationHistory(existing.id, {
               field: 'status',
@@ -573,10 +548,40 @@ export const useOrdersStore = create<OrdersState>()(
           }
         }
 
+        const shouldSyncLocation =
+          Boolean(existing) &&
+          ('truckCode' in data ||
+            'equipmentId' in data ||
+            'address' in data ||
+            'status' in data)
+
         ordersService
           .update(id, enriched)
-          .then(() => set({ apiAvailable: true }))
+          .then((updated) => {
+            if (updated && typeof updated.progress === 'number') {
+              set((state) => ({
+                apiAvailable: true,
+                orders: state.orders.map((o) =>
+                  o.id === id ? { ...o, progress: clampProgress(updated.progress) } : o,
+                ),
+                selectedOrder:
+                  state.selectedOrder?.id === id
+                    ? {
+                        ...state.selectedOrder,
+                        progress: clampProgress(updated.progress),
+                      }
+                    : state.selectedOrder,
+              }))
+            } else {
+              set({ apiAvailable: true })
+            }
+          })
           .catch(() => set({ apiAvailable: false }))
+          .finally(() => {
+            if (shouldSyncLocation) syncEquipmentLocations()
+          })
+
+        if (shouldSyncLocation) syncEquipmentLocations()
       },
 
       deleteOrder: (id) => {
@@ -600,6 +605,8 @@ export const useOrdersStore = create<OrdersState>()(
           .remove(id)
           .then(() => set({ apiAvailable: true }))
           .catch(() => set({ apiAvailable: false }))
+          .finally(() => syncEquipmentLocations())
+        syncEquipmentLocations()
       },
 
       addIntervention: async (orderId, detail) => {
@@ -632,6 +639,11 @@ export const useOrdersStore = create<OrdersState>()(
             },
           }))
           get().addToast('Intervención registrada exitosamente')
+          useNotificationsStore.getState().pushOrderActivity({
+            orderId,
+            title: `Orden ${orderId}: intervención`,
+            message: `Se registró una intervención en la OT de ${order.client}: "${trimmed.slice(0, 100)}${trimmed.length > 100 ? '…' : ''}"`,
+          })
           return withMeta
         } catch {
           const local: OrderIntervention = {
@@ -652,6 +664,11 @@ export const useOrdersStore = create<OrdersState>()(
             },
           }))
           get().addToast('Intervención registrada exitosamente')
+          useNotificationsStore.getState().pushOrderActivity({
+            orderId,
+            title: `Orden ${orderId}: intervención`,
+            message: `Se registró una intervención en la OT de ${order.client}: "${trimmed.slice(0, 100)}${trimmed.length > 100 ? '…' : ''}"`,
+          })
           return local
         }
       },
@@ -743,6 +760,7 @@ export const useOrdersStore = create<OrdersState>()(
         get().interventionsByOrderId[orderId] ?? [],
 
       assignOperators: (orderId, operators) => {
+        const order = get().orders.find((o) => o.id === orderId)
         const technician = operators[0]?.name ?? ''
         get().updateOrder(orderId, {
           operatorIds: operators.map((o) => o.id),
@@ -755,10 +773,18 @@ export const useOrdersStore = create<OrdersState>()(
             : 'Asignación limpiada',
           'info',
         )
+        if (order && operators.length > 0) {
+          useNotificationsStore.getState().pushOrderActivity({
+            orderId,
+            title: `Orden ${orderId}: cuadrilla asignada`,
+            message: `${operators.map((o) => o.name).join(', ')} asignado(s) a la OT de ${order.client}.`,
+          })
+        }
       },
 
       /** Reasignar: revoca permisos previos al reemplazar operatorIds (CU-161 / CU-187) */
       reassignOperators: (orderId, operators) => {
+        const order = get().orders.find((o) => o.id === orderId)
         const technician = operators[0]?.name ?? ''
         get().updateOrder(orderId, {
           operatorIds: operators.map((o) => o.id),
@@ -766,6 +792,15 @@ export const useOrdersStore = create<OrdersState>()(
           technician,
         })
         get().addToast('Operadores reasignados — permisos previos revocados', 'info')
+        if (order) {
+          useNotificationsStore.getState().pushOrderActivity({
+            orderId,
+            title: `Orden ${orderId}: operadores reasignados`,
+            message: operators.length
+              ? `Nueva cuadrilla: ${operators.map((o) => o.name).join(', ')} (${order.client}).`
+              : `Se limpió la asignación de la OT de ${order.client}.`,
+          })
+        }
       },
 
       setOrderDates: (orderId, dates) => {
@@ -1006,7 +1041,7 @@ export const useOrdersStore = create<OrdersState>()(
         if (!order) throw new Error('Orden no encontrada')
         const now = new Date().toISOString()
         const doc: OrderDocument = {
-          id: eventId('doc'),
+          id: data.id?.trim() || eventId('doc'),
           orderId,
           kind: data.kind,
           title: data.title.trim(),
@@ -1035,6 +1070,11 @@ export const useOrdersStore = create<OrdersState>()(
               ? 'Reporte'
               : 'Documento'
         get().addToast(`${kindLabel} adjunto correctamente`)
+        useNotificationsStore.getState().pushOrderActivity({
+          orderId,
+          title: `Orden ${orderId}: ${kindLabel.toLowerCase()} agregado`,
+          message: `Se adjuntó "${data.title.trim()}" a la OT de ${order.client}.`,
+        })
         return doc
       },
 
@@ -1070,6 +1110,11 @@ export const useOrdersStore = create<OrdersState>()(
           documents: docs.map((d) => (d.id === documentId ? updated : d)),
         })
         get().addToast(`Versión ${nextVersion} guardada`)
+        useNotificationsStore.getState().pushOrderActivity({
+          orderId,
+          title: `Orden ${orderId}: documento actualizado`,
+          message: `Nueva versión (v${nextVersion}) de "${target.title}" en la OT de ${order.client}.`,
+        })
       },
 
       createFieldOrder: (data) => {
@@ -1186,12 +1231,20 @@ export const useOrdersStore = create<OrdersState>()(
 
         set({ orders, selectedOrder })
 
-        if (targetStatus !== active.status && sessionIsAdmin()) {
+        if (targetStatus !== active.status) {
           useNotificationsStore.getState().pushOrderStatusChange({
             orderId: active.id,
             client: active.client,
             previousStatus: active.status,
             newStatus: targetStatus,
+          })
+          get().addModificationHistory(active.id, {
+            field: 'status',
+            fieldLabel: 'Estado',
+            previousValue: active.status,
+            newValue: targetStatus,
+            changedById: 'session',
+            changedByName: 'Sistema',
           })
         }
 
@@ -1266,7 +1319,7 @@ export const useOrdersStore = create<OrdersState>()(
         set({ modalMode: null, selectedOrder: null })
       },
 
-      registerSupplies: (orderId, supplies) => {
+      registerSupplies: async (orderId, supplies) => {
         const order = get().orders.find((o) => o.id === orderId)
         if (!order) {
           return { ok: false, message: 'Orden de trabajo no encontrada' }
@@ -1300,12 +1353,53 @@ export const useOrdersStore = create<OrdersState>()(
         }))
 
         for (const item of supplies) {
-          inventory.deductStock(item.productId, item.quantity, orderId)
+          const result = await useInventoryStore
+            .getState()
+            .deductStock(item.productId, item.quantity, orderId)
+          if (!result.ok) {
+            return {
+              ok: false,
+              message:
+                result.message ??
+                `No se pudo descontar stock de "${item.productName}"`,
+            }
+          }
         }
 
         const existing = order.suppliesUsed ?? []
         get().updateOrder(orderId, { suppliesUsed: [...entries, ...existing] })
-        get().addToast('Insumos registrados correctamente en la orden de trabajo')
+        get().addToast('Insumos registrados y stock de inventario actualizado')
+        return { ok: true }
+      },
+
+      removeRegisteredSupply: async (orderId, supplyIndex) => {
+        const order = get().orders.find((o) => o.id === orderId)
+        if (!order) {
+          return { ok: false, message: 'Orden de trabajo no encontrada' }
+        }
+        const supplies = order.suppliesUsed ?? []
+        if (supplyIndex < 0 || supplyIndex >= supplies.length) {
+          return { ok: false, message: 'Registro de insumo no encontrado' }
+        }
+
+        const entry = supplies[supplyIndex]
+        const restore = await useInventoryStore
+          .getState()
+          .restoreStock(entry.productId, entry.quantity, orderId)
+        if (!restore.ok) {
+          return {
+            ok: false,
+            message:
+              restore.message ??
+              `No se pudo devolver stock de "${entry.productName}"`,
+          }
+        }
+
+        const next = supplies.filter((_, i) => i !== supplyIndex)
+        get().updateOrder(orderId, { suppliesUsed: next })
+        get().addToast(
+          `Insumo "${entry.productName}" eliminado y stock devuelto a bodega`,
+        )
         return { ok: true }
       },
 
@@ -1348,7 +1442,7 @@ export const useOrdersStore = create<OrdersState>()(
         return { ok: true }
       },
 
-      addOrderComment: (orderId, content, author) => {
+      addOrderComment: async (orderId, content, author) => {
         const trimmed = content.trim()
         if (!trimmed) {
           return { ok: false, message: 'El comentario no puede estar vacío' }
@@ -1357,21 +1451,47 @@ export const useOrdersStore = create<OrdersState>()(
         if (!order) {
           return { ok: false, message: 'Orden de trabajo no encontrada' }
         }
-        const comment: OrderComment = {
-          id: eventId('cmt'),
-          orderId,
-          content: trimmed,
-          authorId: author.id,
-          authorName: author.name,
-          createdAt: new Date().toISOString(),
+        try {
+          const comment = await ordersService.createComment(
+            orderId,
+            trimmed,
+            author.name,
+          )
+          set((state) => ({
+            commentsByOrderId: {
+              ...state.commentsByOrderId,
+              [orderId]: [comment, ...(state.commentsByOrderId[orderId] ?? [])],
+            },
+            apiAvailable: true,
+          }))
+          useNotificationsStore.getState().pushOrderActivity({
+            orderId,
+            title: `Orden ${orderId}: nuevo comentario`,
+            message: `${author.name} comentó en la OT de ${order.client}: "${trimmed.slice(0, 120)}${trimmed.length > 120 ? '…' : ''}"`,
+          })
+          return { ok: true }
+        } catch (err) {
+          const message =
+            err instanceof Error ? err.message : 'No se pudo guardar el comentario'
+          return { ok: false, message }
         }
-        set((state) => ({
-          commentsByOrderId: {
-            ...state.commentsByOrderId,
-            [orderId]: [comment, ...(state.commentsByOrderId[orderId] ?? [])],
-          },
-        }))
-        return { ok: true }
+      },
+
+      fetchOrderComments: async (orderId) => {
+        try {
+          const comments = await ordersService.listComments(orderId)
+          set((state) => ({
+            commentsByOrderId: {
+              ...state.commentsByOrderId,
+              [orderId]: comments,
+            },
+            apiAvailable: true,
+          }))
+          return comments
+        } catch {
+          set({ apiAvailable: false })
+          return get().commentsByOrderId[orderId] ?? []
+        }
       },
 
       getOrderComments: (orderId) => {
@@ -1385,10 +1505,11 @@ export const useOrdersStore = create<OrdersState>()(
         const order = get().orders.find((o) => o.id === orderId)
         if (!order) return { available: false, reasons: ['Orden no encontrada'] }
         const products = useInventoryStore.getState().products
-        return validateRescheduleDate(order, newDate, get().orders, products)
+        const equipment = useEquipmentStore.getState().equipment
+        return validateRescheduleDate(order, newDate, get().orders, products, equipment)
       },
 
-      rescheduleOrder: (orderId, newDate, user) => {
+      rescheduleOrder: async (orderId, newDate, user) => {
         const order = get().orders.find((o) => o.id === orderId)
         if (!order) return { ok: false, message: 'Orden de trabajo no encontrada' }
         const validation = get().validateReschedule(orderId, newDate)
@@ -1399,7 +1520,8 @@ export const useOrdersStore = create<OrdersState>()(
           }
         }
         const previousDate = getExecutionDate(order) || order.createdAt
-        const event: OrderRescheduleEvent = {
+
+        let event: OrderRescheduleEvent = {
           id: eventId('rs'),
           orderId,
           previousDate,
@@ -1408,22 +1530,47 @@ export const useOrdersStore = create<OrdersState>()(
           changedByName: user.name,
           changedAt: new Date().toISOString(),
         }
+
+        try {
+          event = await ordersService.createReschedule(orderId, {
+            previousDate,
+            newDate,
+            changedById: user.id,
+            changedByName: user.name,
+          })
+          set({ apiAvailable: true })
+        } catch {
+          set({ apiAvailable: false })
+          return {
+            ok: false,
+            message: 'No se pudo guardar la reprogramación en el servidor',
+          }
+        }
+
         get().updateOrder(orderId, {
           executionDate: newDate,
           startDate: newDate,
+          dueDate: newDate,
         })
         set((state) => ({
           rescheduleHistoryByOrderId: {
             ...state.rescheduleHistoryByOrderId,
             [orderId]: [
               event,
-              ...(state.rescheduleHistoryByOrderId[orderId] ?? []),
+              ...(state.rescheduleHistoryByOrderId[orderId] ?? []).filter(
+                (e) => e.id !== event.id,
+              ),
             ],
           },
           modalMode: null,
           selectedOrder: null,
         }))
         get().addToast('Fecha de ejecución reprogramada correctamente')
+        useNotificationsStore.getState().pushOrderActivity({
+          orderId,
+          title: `Orden ${orderId}: reprogramada`,
+          message: `${user.name} movió la OT de ${order.client} de ${previousDate} a ${newDate}.`,
+        })
         return { ok: true }
       },
 
@@ -1434,13 +1581,31 @@ export const useOrdersStore = create<OrdersState>()(
         )
       },
 
-      submitModificationRequest: (orderId, data, operator) => {
+      fetchRescheduleHistory: async (orderId) => {
+        try {
+          const list = await ordersService.listReschedules(orderId)
+          set((state) => ({
+            rescheduleHistoryByOrderId: {
+              ...state.rescheduleHistoryByOrderId,
+              [orderId]: list,
+            },
+            apiAvailable: true,
+          }))
+          return list
+        } catch {
+          set({ apiAvailable: false })
+          return get().getRescheduleHistory(orderId)
+        }
+      },
+
+      submitModificationRequest: async (orderId, data, operator) => {
         const order = get().orders.find((o) => o.id === orderId)
         if (!order) return { ok: false, message: 'Orden no encontrada' }
         if (!data.fieldsToModify.trim() || !data.reason.trim()) {
           return { ok: false, message: 'Complete campos y motivo de la solicitud' }
         }
-        const request: OrderModificationRequest = {
+
+        const localRequest: OrderModificationRequest = {
           id: eventId('mr'),
           orderId,
           operatorId: operator.id,
@@ -1450,39 +1615,86 @@ export const useOrdersStore = create<OrdersState>()(
           status: 'Pendiente',
           requestedAt: new Date().toISOString(),
         }
-        set((state) => ({
-          modificationRequests: [request, ...state.modificationRequests],
-          modalMode: null,
-          selectedOrder: null,
-        }))
+
+        try {
+          const created = await ordersService.createModificationRequest(orderId, {
+            fieldsToModify: localRequest.fieldsToModify,
+            reason: localRequest.reason,
+            operatorId: operator.id,
+            operatorName: operator.name,
+          })
+          set((state) => ({
+            modificationRequests: [created, ...state.modificationRequests],
+            modalMode: null,
+            selectedOrder: null,
+            apiAvailable: true,
+          }))
+        } catch {
+          set((state) => ({
+            modificationRequests: [localRequest, ...state.modificationRequests],
+            modalMode: null,
+            selectedOrder: null,
+            apiAvailable: false,
+          }))
+        }
+
         get().addToast('Solicitud de modificación enviada — pendiente de aprobación')
         return { ok: true }
       },
 
-      approveModificationRequest: (requestId, reviewer) => {
+      approveModificationRequest: async (requestId, reviewer) => {
         const request = get().modificationRequests.find((r) => r.id === requestId)
         if (!request) return { ok: false, message: 'Solicitud no encontrada' }
         if (request.status !== 'Pendiente') {
           return { ok: false, message: 'La solicitud ya fue revisada' }
         }
-        set((state) => ({
-          modificationRequests: state.modificationRequests.map((r) =>
-            r.id === requestId
-              ? {
-                  ...r,
-                  status: 'Aprobada' as const,
-                  reviewedById: reviewer.id,
-                  reviewedByName: reviewer.name,
-                  reviewedAt: new Date().toISOString(),
-                }
-              : r,
-          ),
-        }))
+
+        const applyLocal = (status: 'Aprobada', extra?: Partial<OrderModificationRequest>) => {
+          set((state) => ({
+            modificationRequests: state.modificationRequests.map((r) =>
+              r.id === requestId
+                ? {
+                    ...r,
+                    status,
+                    reviewedById: reviewer.id,
+                    reviewedByName: reviewer.name,
+                    reviewedAt: new Date().toISOString(),
+                    ...extra,
+                  }
+                : r,
+            ),
+          }))
+        }
+
+        try {
+          const updated = await ordersService.approveModificationRequest(requestId, {
+            reviewerId: reviewer.id,
+            reviewerName: reviewer.name,
+          })
+          set((state) => ({
+            modificationRequests: state.modificationRequests.map((r) =>
+              r.id === requestId ? updated : r,
+            ),
+            apiAvailable: true,
+          }))
+        } catch (err) {
+          const message =
+            err && typeof err === 'object' && 'response' in err
+              ? String(
+                  (err as { response?: { data?: { error?: string } } }).response?.data
+                    ?.error ?? '',
+                )
+              : ''
+          if (message) return { ok: false, message }
+          applyLocal('Aprobada')
+          set({ apiAvailable: false })
+        }
+
         get().addToast('Solicitud aprobada — el operador puede editar la orden')
         return { ok: true }
       },
 
-      rejectModificationRequest: (requestId, reason, reviewer) => {
+      rejectModificationRequest: async (requestId, reason, reviewer) => {
         const trimmed = reason.trim()
         if (!trimmed) return { ok: false, message: 'Indique el motivo del rechazo' }
         const request = get().modificationRequests.find((r) => r.id === requestId)
@@ -1490,20 +1702,45 @@ export const useOrdersStore = create<OrdersState>()(
         if (request.status !== 'Pendiente') {
           return { ok: false, message: 'La solicitud ya fue revisada' }
         }
-        set((state) => ({
-          modificationRequests: state.modificationRequests.map((r) =>
-            r.id === requestId
-              ? {
-                  ...r,
-                  status: 'Rechazada' as const,
-                  rejectionReason: trimmed,
-                  reviewedById: reviewer.id,
-                  reviewedByName: reviewer.name,
-                  reviewedAt: new Date().toISOString(),
-                }
-              : r,
-          ),
-        }))
+
+        try {
+          const updated = await ordersService.rejectModificationRequest(requestId, {
+            reason: trimmed,
+            reviewerId: reviewer.id,
+            reviewerName: reviewer.name,
+          })
+          set((state) => ({
+            modificationRequests: state.modificationRequests.map((r) =>
+              r.id === requestId ? updated : r,
+            ),
+            apiAvailable: true,
+          }))
+        } catch (err) {
+          const message =
+            err && typeof err === 'object' && 'response' in err
+              ? String(
+                  (err as { response?: { data?: { error?: string } } }).response?.data
+                    ?.error ?? '',
+                )
+              : ''
+          if (message) return { ok: false, message }
+          set((state) => ({
+            modificationRequests: state.modificationRequests.map((r) =>
+              r.id === requestId
+                ? {
+                    ...r,
+                    status: 'Rechazada' as const,
+                    rejectionReason: trimmed,
+                    reviewedById: reviewer.id,
+                    reviewedByName: reviewer.name,
+                    reviewedAt: new Date().toISOString(),
+                  }
+                : r,
+            ),
+            apiAvailable: false,
+          }))
+        }
+
         get().addToast('Solicitud rechazada', 'info')
         return { ok: true }
       },
@@ -1513,6 +1750,23 @@ export const useOrdersStore = create<OrdersState>()(
         return [...list].sort(
           (a, b) => new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime(),
         )
+      },
+
+      fetchModificationHistory: async (orderId) => {
+        try {
+          const list = await ordersService.listModificationHistory(orderId)
+          set((state) => ({
+            modificationHistoryByOrderId: {
+              ...state.modificationHistoryByOrderId,
+              [orderId]: list,
+            },
+            apiAvailable: true,
+          }))
+          return list
+        } catch {
+          set({ apiAvailable: false })
+          return get().getModificationHistory(orderId)
+        }
       },
 
       addModificationHistory: (orderId, entry) => {
@@ -1531,6 +1785,23 @@ export const useOrdersStore = create<OrdersState>()(
             ],
           },
         }))
+        void ordersService
+          .addModificationHistory(orderId, entry)
+          .then((saved) => {
+            set((state) => ({
+              modificationHistoryByOrderId: {
+                ...state.modificationHistoryByOrderId,
+                [orderId]: [
+                  saved,
+                  ...(state.modificationHistoryByOrderId[orderId] ?? []).filter(
+                    (h) => h.id !== record.id,
+                  ),
+                ],
+              },
+              apiAvailable: true,
+            }))
+          })
+          .catch(() => set({ apiAvailable: false }))
       },
 
       closeModal: () => set({ modalMode: null, selectedOrder: null }),
@@ -1551,70 +1822,28 @@ export const useOrdersStore = create<OrdersState>()(
         set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
     }),
     {
-      name: 'camus_orders_store_v2',
+      name: 'camus_orders_store_v5',
       partialize: (state) => ({
-        orders: state.orders,
         serviceClocks: state.serviceClocks,
         interventionsByOrderId: state.interventionsByOrderId,
-        commentsByOrderId: state.commentsByOrderId,
-        rescheduleHistoryByOrderId: state.rescheduleHistoryByOrderId,
-        modificationRequests: state.modificationRequests,
-        modificationHistoryByOrderId: state.modificationHistoryByOrderId,
         photoAnnotationsByOrderId: state.photoAnnotationsByOrderId,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<OrdersState> | undefined
-        const orders = normalizeOrdersSort(p?.orders ?? current.orders)
-        const clocksFromOrders = Object.fromEntries(
-          orders
-            .filter((order) => order.serviceStartedAt || order.serviceEndedAt)
-            .map((order) => [
-              order.id,
-              {
-                serviceStartedAt: order.serviceStartedAt,
-                serviceEndedAt: order.serviceEndedAt,
-                clientSignature: order.clientSignature,
-                timeCorrectionNote: order.timeCorrectionNote,
-                startDate: order.startDate,
-                endDate: order.endDate,
-                durationHours: order.durationHours,
-              },
-            ]),
-        )
-        const comments =
-          p?.commentsByOrderId && Object.keys(p.commentsByOrderId).length > 0
-            ? p.commentsByOrderId
-            : groupCommentsByOrder(initialOrderComments)
-        const reschedules =
-          p?.rescheduleHistoryByOrderId &&
-          Object.keys(p.rescheduleHistoryByOrderId).length > 0
-            ? p.rescheduleHistoryByOrderId
-            : groupRescheduleByOrder(initialRescheduleHistory)
-        const modHistory =
-          p?.modificationHistoryByOrderId &&
-          Object.keys(p.modificationHistoryByOrderId).length > 0
-            ? p.modificationHistoryByOrderId
-            : groupModificationHistoryByOrder(initialModificationHistory)
         return {
           ...current,
           ...p,
+          // Órdenes y comentarios siempre desde Postgres (syncFromApi)
+          orders: current.orders,
+          commentsByOrderId: current.commentsByOrderId,
           interventionsByOrderId:
             p?.interventionsByOrderId ?? current.interventionsByOrderId,
-          commentsByOrderId: comments,
-          rescheduleHistoryByOrderId: reschedules,
-          modificationRequests:
-            p?.modificationRequests?.length
-              ? p.modificationRequests
-              : initialModificationRequests,
-          modificationHistoryByOrderId: modHistory,
+          rescheduleHistoryByOrderId: current.rescheduleHistoryByOrderId,
+          modificationRequests: current.modificationRequests,
+          modificationHistoryByOrderId: current.modificationHistoryByOrderId,
           serviceClocks: {
-            ...clocksFromOrders,
             ...(p?.serviceClocks ?? {}),
           },
-          orders: applyServiceClocks(orders, {
-            ...clocksFromOrders,
-            ...(p?.serviceClocks ?? {}),
-          }),
         }
       },
     },

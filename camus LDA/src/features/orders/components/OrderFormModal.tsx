@@ -7,7 +7,7 @@ import { FormGrid } from '@/components/ui/FormGrid'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { useOrdersStore } from '@/store/useOrdersStore'
-import { useInventoryStore } from '@/store/useInventoryStore'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
 import { useUsersStore } from '@/store/useUsersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
@@ -20,6 +20,7 @@ import {
   autoPriorityForIncident,
   INCIDENT_TYPES,
 } from '@/features/orders/utils/priorityRules'
+import { nextOrderId } from '@/features/orders/utils/nextOrderId'
 import type {
   IncidentType,
   OrderPriority,
@@ -56,17 +57,32 @@ interface OrderFormModalProps {
 }
 
 export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalProps) {
+  const orders = useOrdersStore((s) => s.orders)
   const addOrder = useOrdersStore((s) => s.addOrder)
   const updateOrder = useOrdersStore((s) => s.updateOrder)
   const addToast = useOrdersStore((s) => s.addToast)
-  const products = useInventoryStore((s) => s.products)
   const users = useUsersStore((s) => s.users)
   const roles = useUsersStore((s) => s.roles)
+  const equipment = useEquipmentStore((s) => s.equipment)
+  const syncEquipment = useEquipmentStore((s) => s.syncFromApi)
   const currentUser = useSessionUser()
 
-  const trucks = useMemo(
-    () => products.filter((p) => p.category === 'Camiones' && p.currentStock > 0),
-    [products],
+  const autoId = useMemo(
+    () => nextOrderId(orders.map((o) => o.id)),
+    [orders],
+  )
+
+  useEffect(() => {
+    void syncEquipment()
+  }, [syncEquipment])
+
+  const assignableEquipment = useMemo(
+    () =>
+      equipment.filter(
+        (eq) =>
+          eq.status !== 'Fuera de servicio' && eq.status !== 'Mantenimiento',
+      ),
+    [equipment],
   )
 
   const technicians = useMemo(() => {
@@ -215,7 +231,7 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
     }
 
     const payload: WorkOrder = {
-      id: data.id.trim(),
+      id: mode === 'edit' && order ? order.id : '',
       client: data.client.trim(),
       address,
       service: data.service.trim(),
@@ -231,10 +247,12 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         '',
       operatorIds: data.operatorIds,
       operators,
-      ...(data.truckCode ? { truckCode: data.truckCode } : null),
+      truckCode: data.truckCode || undefined,
       ...(typeof latitude === 'number' ? { latitude } : null),
       ...(typeof longitude === 'number' ? { longitude } : null),
-      progress: Number.isFinite(data.progress) ? Number(data.progress) : 0,
+      progress: Number.isFinite(data.progress)
+        ? Math.min(100, Math.max(0, Math.round(Number(data.progress))))
+        : 0,
       startDate: data.startDate || undefined,
       endDate: data.endDate || undefined,
       durationHours:
@@ -243,12 +261,14 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
           : undefined,
       photoUrls: order?.photoUrls,
       thirdParties: order?.thirdParties,
-      equipmentId: order?.equipmentId,
+      equipmentId: data.truckCode
+        ? assignableEquipment.find((e) => e.code === data.truckCode)?.id
+        : undefined,
     }
 
     if (mode === 'create') {
-      addOrder(payload)
-      addToast(`Orden creada para "${payload.client}"`)
+      const createdId = addOrder(payload)
+      addToast(`Orden ${createdId} creada para "${payload.client}"`)
     } else if (order) {
       if (!canEditOrder(currentUser, order)) {
         addToast(orderEditBlockedMessage(order), 'error')
@@ -291,8 +311,18 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
     >
       <form id="order-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <FormGrid cols={2}>
-          <FormField label="ID Orden (opcional)" htmlFor="id">
-            <Input id="id" placeholder="Ej: OT-2026-0130" {...register('id')} />
+          <FormField label="ID Orden" htmlFor="id">
+            <Input
+              id="id"
+              readOnly
+              value={mode === 'edit' && order ? order.id : autoId}
+              className="bg-slate-50 text-slate-700"
+            />
+            {mode === 'create' ? (
+              <p className="mt-1 text-xs text-slate-500">
+                Lo asigna el sistema al crear (correlativo OT-AAAA-NNNN).
+              </p>
+            ) : null}
           </FormField>
           <FormField label="Cliente" htmlFor="client" error={errors.client?.message} required>
             <Input
@@ -344,40 +374,54 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         </FormGrid>
 
         <FormGrid cols={3}>
-          <FormField label="Prioridad" htmlFor="priority" required>
+          <FormField
+            label="Prioridad"
+            htmlFor="priority"
+            required
+          >
             <Select
               id="priority"
-              {...register('priority')}
-              disabled={!priorityManual}
+              {...register('priority', {
+                onChange: () => {
+                  setValue('priorityManual', true, { shouldDirty: true })
+                },
+              })}
             >
               <option value="Urgente">Urgente</option>
               <option value="Alta">Alta</option>
               <option value="Media">Media</option>
               <option value="Baja">Baja</option>
             </Select>
+            
           </FormField>
-          <FormField label="Prioridad manual" htmlFor="priorityManual">
+          <FormField label="Prioridad automática" htmlFor="priorityManual">
             <label className="flex min-h-11 items-center gap-2 text-sm text-slate-700">
               <input
                 id="priorityManual"
                 type="checkbox"
-                checked={priorityManual}
-                onChange={(e) =>
-                  setValue('priorityManual', e.target.checked, {
-                    shouldDirty: true,
-                  })
-                }
+                checked={!priorityManual}
+                onChange={(e) => {
+                  const useAuto = e.target.checked
+                  setValue('priorityManual', !useAuto, { shouldDirty: true })
+                  if (useAuto) {
+                    setValue(
+                      'priority',
+                      autoPriorityForIncident(incidentType),
+                      { shouldDirty: true },
+                    )
+                  }
+                }}
                 className="rounded border-slate-300 text-primary focus:ring-primary"
               />
-              Fijar manualmente
+              Usar prioridad por incidente
             </label>
           </FormField>
-          <FormField label="Camión asignado" htmlFor="truckCode">
+          <FormField label="Equipo / camión asignado" htmlFor="truckCode">
             <Select id="truckCode" {...register('truckCode')}>
               <option value="">Sin asignar</option>
-              {trucks.map((t) => (
-                <option key={t.id} value={t.code}>
-                  {t.code} — {t.name}
+              {assignableEquipment.map((eq) => (
+                <option key={eq.id} value={eq.code}>
+                  {eq.code} — {eq.name} ({eq.category})
                 </option>
               ))}
             </Select>

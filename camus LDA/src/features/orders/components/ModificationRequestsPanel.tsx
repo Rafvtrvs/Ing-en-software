@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Check, Eye, X } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
@@ -20,6 +20,7 @@ const statusStyles: Record<ModificationRequestStatus, string> = {
 /** RF68 — CDS 234: Verificación de solicitudes de modificación */
 export function ModificationRequestsPanel() {
   const requests = useOrdersStore((s) => s.modificationRequests)
+  const syncModificationRequests = useOrdersStore((s) => s.syncModificationRequests)
   const approveModificationRequest = useOrdersStore((s) => s.approveModificationRequest)
   const rejectModificationRequest = useOrdersStore((s) => s.rejectModificationRequest)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
@@ -31,6 +32,10 @@ export function ModificationRequestsPanel() {
   const [selected, setSelected] = useState<OrderModificationRequest | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [detailOpen, setDetailOpen] = useState(false)
+
+  useEffect(() => {
+    void syncModificationRequests()
+  }, [syncModificationRequests])
 
   const filtered = useMemo(() => {
     if (statusFilter === 'all') return requests
@@ -72,9 +77,9 @@ export function ModificationRequestsPanel() {
     },
   ]
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!selected) return
-    const result = approveModificationRequest(selected.id, {
+    const result = await approveModificationRequest(selected.id, {
       id: currentUser.id ?? 'session',
       name: currentUser.name ?? 'Administrador',
     })
@@ -86,9 +91,9 @@ export function ModificationRequestsPanel() {
     setSelected(null)
   }
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (!selected) return
-    const result = rejectModificationRequest(
+    const result = await rejectModificationRequest(
       selected.id,
       rejectReason,
       {

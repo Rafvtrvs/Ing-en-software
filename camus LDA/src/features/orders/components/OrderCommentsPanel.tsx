@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { MessageSquare, User } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useOrdersStore } from '@/store/useOrdersStore'
@@ -25,14 +25,27 @@ export function OrderCommentsPanel({ order }: { order: WorkOrder }) {
     [rawComments],
   )
   const addOrderComment = useOrdersStore((s) => s.addOrderComment)
+  const fetchOrderComments = useOrdersStore((s) => s.fetchOrderComments)
   const addToast = useOrdersStore((s) => s.addToast)
   const currentUser = useSessionUser()
   const [text, setText] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    void fetchOrderComments(order.id).finally(() => {
+      if (active) setLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [order.id, fetchOrderComments])
+
+  const handleSubmit = async () => {
     setSubmitting(true)
-    const result = addOrderComment(order.id, text, {
+    const result = await addOrderComment(order.id, text, {
       id: currentUser.id ?? 'session',
       name: currentUser.name ?? 'Usuario',
     })
@@ -60,7 +73,9 @@ export function OrderCommentsPanel({ order }: { order: WorkOrder }) {
         </div>
       </div>
 
-      {comments.length === 0 ? (
+      {loading ? (
+        <p className="mb-4 text-sm text-slate-500">Cargando comentarios...</p>
+      ) : comments.length === 0 ? (
         <p className="mb-4 text-sm text-slate-500">
           No hay comentarios registrados para esta orden.
         </p>
@@ -106,7 +121,7 @@ export function OrderCommentsPanel({ order }: { order: WorkOrder }) {
           type="button"
           size="sm"
           disabled={submitting || !text.trim()}
-          onClick={handleSubmit}
+          onClick={() => void handleSubmit()}
         >
           Agregar comentario
         </Button>

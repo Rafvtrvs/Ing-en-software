@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Eye, Filter, MoreHorizontal, Pencil, Plus, Search, Upload, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Filter, Plus, Search, Upload, X } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
@@ -9,6 +9,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import { Select } from '@/components/ui/Select'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { exportProductsToCsv } from '@/features/inventory/utils/exportInventory'
+import { ProductActionsMenu } from '@/features/inventory/components/ProductActionsMenu'
 import type { InventoryStatus, Product } from '@/types'
 
 const PAGE_SIZE = 8
@@ -25,10 +26,15 @@ export function InventoryTable() {
   const openCreateModal = useInventoryStore((s) => s.openCreateModal)
   const openViewModal = useInventoryStore((s) => s.openViewModal)
   const openEditModal = useInventoryStore((s) => s.openEditModal)
+  const openDeleteModal = useInventoryStore((s) => s.openDeleteModal)
   const addToast = useInventoryStore((s) => s.addToast)
 
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [products.length, statusFilter, categoryFilter])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
@@ -59,6 +65,14 @@ export function InventoryTable() {
     { key: 'minStock', header: 'Stock Mínimo' },
     { key: 'unit', header: 'Unidad' },
     {
+      key: 'unitCost',
+      header: 'Costo unit.',
+      render: (row) =>
+        row.unitCost != null && row.unitCost > 0
+          ? `$${Math.round(row.unitCost).toLocaleString('es-CL')}`
+          : '—',
+    },
+    {
       key: 'status',
       header: 'Estado',
       render: (row) => <Badge label={row.status} />,
@@ -66,33 +80,14 @@ export function InventoryTable() {
     {
       key: 'actions',
       header: 'Acciones',
-      className: 'w-28 whitespace-nowrap',
+      className: 'w-16 whitespace-nowrap overflow-visible',
       render: (row) => (
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => openViewModal(row)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-primary"
-            aria-label={`Ver ${row.name}`}
-          >
-            <Eye className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => openEditModal(row)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-amber-600"
-            aria-label={`Editar ${row.name}`}
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
-            aria-label="Más opciones"
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </div>
+        <ProductActionsMenu
+          product={row}
+          onView={openViewModal}
+          onEdit={openEditModal}
+          onDelete={openDeleteModal}
+        />
       ),
     },
   ]

@@ -11,7 +11,7 @@ import {
   computeOperatorAvailability,
   exportAvailabilityToCsv,
 } from '@/features/operations/utils/operatorAvailability'
-import type { OrderOperator } from '@/types'
+import { getActiveFieldOperators } from '@/features/operations/utils/fieldTechnicians'
 
 const PAGE_SIZE = 5
 
@@ -20,8 +20,10 @@ const PAGE_SIZE = 5
  */
 export function OperatorAvailabilityPanel() {
   const orders = useOrdersStore((s) => s.orders)
+  const syncOrders = useOrdersStore((s) => s.syncFromApi)
   const users = useUsersStore((s) => s.users)
   const roles = useUsersStore((s) => s.roles)
+  const syncUsers = useUsersStore((s) => s.syncFromApi)
   const addToast = useOrdersStore((s) => s.addToast)
 
   const [dateFrom, setDateFrom] = useState('')
@@ -33,24 +35,15 @@ export function OperatorAvailabilityPanel() {
     Record<string, number>
   >({})
 
-  const operators: OrderOperator[] = useMemo(() => {
-    const techRoleIds = new Set(
-      roles
-        .filter((r) => {
-          const n = r.name.toLowerCase()
-          return (
-            n.includes('técnico') ||
-            n.includes('tecnico') ||
-            n.includes('operador') ||
-            n.includes('campo')
-          )
-        })
-        .map((r) => r.id),
-    )
-    return users
-      .filter((u) => u.status === 'Activo' && techRoleIds.has(u.roleId))
-      .map((u) => ({ id: u.id, name: u.name }))
-  }, [users, roles])
+  useEffect(() => {
+    void syncUsers()
+    void syncOrders()
+  }, [syncUsers, syncOrders])
+
+  const operators = useMemo(
+    () => getActiveFieldOperators(users, roles),
+    [users, roles],
+  )
 
   const rows = useMemo(() => {
     const data = computeOperatorAvailability(operators, orders, {

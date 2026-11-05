@@ -1,35 +1,26 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Gauge } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useUsersStore } from '@/store/useUsersStore'
-import type { OrderOperator } from '@/types'
+import { getActiveFieldOperators } from '@/features/operations/utils/fieldTechnicians'
 import { cn } from '@/utils/cn'
 
 /** CU-163: panel de carga laboral de operadores */
 export function OperatorWorkloadPanel() {
   const users = useUsersStore((s) => s.users)
   const roles = useUsersStore((s) => s.roles)
+  const syncUsers = useUsersStore((s) => s.syncFromApi)
   const getOperatorWorkload = useOrdersStore((s) => s.getOperatorWorkload)
 
-  const technicians: OrderOperator[] = useMemo(() => {
-    const techRoleIds = new Set(
-      roles
-        .filter((r) => {
-          const n = r.name.toLowerCase()
-          return (
-            n.includes('técnico') ||
-            n.includes('tecnico') ||
-            n.includes('operador') ||
-            n.includes('campo')
-          )
-        })
-        .map((r) => r.id),
-    )
-    return users
-      .filter((u) => u.status === 'Activo' && techRoleIds.has(u.roleId))
-      .map((u) => ({ id: u.id, name: u.name }))
-  }, [users, roles])
+  useEffect(() => {
+    void syncUsers()
+  }, [syncUsers])
+
+  const technicians = useMemo(
+    () => getActiveFieldOperators(users, roles),
+    [users, roles],
+  )
 
   const workload = useMemo(
     () => getOperatorWorkload(technicians),

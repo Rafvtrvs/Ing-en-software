@@ -1,26 +1,48 @@
+import { useEffect, useMemo } from 'react'
 import { CheckCircle, Star, Timer, Users } from 'lucide-react'
 import { KpiCard } from '@/components/ui/KpiCard'
 import type { KpiData } from '@/types'
-import { technicianPerformance } from '@/data/mock/reports'
+import { useOrdersStore } from '@/store/useOrdersStore'
+import { useUsersStore } from '@/store/useUsersStore'
+import { buildTechnicianPerformance } from '@/features/reports/utils/technicianPerformance'
 import { ReportBarChart } from './ReportBarChart'
 import { TechniciansPerformanceTable } from './TechniciansPerformanceTable'
 import { ReportExportCatalog } from './ReportExportCatalog'
 
 export function TechniciansReportPanel() {
-  const totalCompleted = technicianPerformance.reduce((s, t) => s + t.completedOrders, 0)
-  const totalInProgress = technicianPerformance.reduce((s, t) => s + t.inProgress, 0)
+  const orders = useOrdersStore((s) => s.orders)
+  const syncOrders = useOrdersStore((s) => s.syncFromApi)
+  const users = useUsersStore((s) => s.users)
+  const roles = useUsersStore((s) => s.roles)
+  const syncUsers = useUsersStore((s) => s.syncFromApi)
+
+  useEffect(() => {
+    void syncUsers()
+    void syncOrders()
+  }, [syncUsers, syncOrders])
+
+  const technicians = useMemo(
+    () => buildTechnicianPerformance(users, roles, orders),
+    [users, roles, orders],
+  )
+
+  const totalCompleted = technicians.reduce((s, t) => s + t.completedOrders, 0)
+  const totalInProgress = technicians.reduce((s, t) => s + t.inProgress, 0)
   const avgRating =
-    technicianPerformance.reduce((s, t) => s + t.rating, 0) / technicianPerformance.length
+    technicians.length === 0
+      ? 0
+      : technicians.reduce((s, t) => s + t.rating, 0) / technicians.length
   const avgDays =
-    technicianPerformance.reduce((s, t) => s + t.avgCompletionDays, 0) /
-    technicianPerformance.length
+    technicians.length === 0
+      ? 0
+      : technicians.reduce((s, t) => s + t.avgCompletionDays, 0) / technicians.length
 
   const kpis: KpiData[] = [
     {
       title: 'Técnicos Activos',
-      value: String(technicianPerformance.length),
-      trend: 'En operaciones',
-      trendDirection: 'up',
+      value: String(technicians.length),
+      trend: 'Registrados en el sistema',
+      trendDirection: technicians.length > 0 ? 'up' : 'down',
       icon: Users,
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
@@ -28,7 +50,7 @@ export function TechniciansReportPanel() {
     {
       title: 'Órdenes Completadas',
       value: String(totalCompleted),
-      trend: 'En el período',
+      trend: 'Asignadas a técnicos',
       trendDirection: 'up',
       icon: CheckCircle,
       iconBg: 'bg-emerald-50',
@@ -44,7 +66,7 @@ export function TechniciansReportPanel() {
       iconColor: 'text-amber-600',
     },
     {
-      title: 'Calificación Promedio',
+      title: 'Índice de cierre',
       value: avgRating.toFixed(1),
       trend: `${avgDays.toFixed(1)} días promedio`,
       trendDirection: 'up',
@@ -54,7 +76,7 @@ export function TechniciansReportPanel() {
     },
   ]
 
-  const chartData = technicianPerformance.map((t) => ({
+  const chartData = technicians.map((t) => ({
     name: t.name.split(' ')[0],
     value: t.completedOrders,
   }))
@@ -67,16 +89,22 @@ export function TechniciansReportPanel() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ReportBarChart
-          title="Órdenes Completadas por Técnico"
-          data={chartData}
-          color="#7c3aed"
-          layout="horizontal"
-          valueLabel="Órdenes"
-        />
-        <TechniciansPerformanceTable />
-      </div>
+      {technicians.length === 0 ? (
+        <p className="rounded-xl border border-slate-100 bg-white p-4 text-sm text-slate-500">
+          No hay técnicos u operadores activos en el sistema, o aún no se sincronizan los datos.
+        </p>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ReportBarChart
+            title="Órdenes Completadas por Técnico"
+            data={chartData}
+            color="#7c3aed"
+            layout="horizontal"
+            valueLabel="Órdenes"
+          />
+          <TechniciansPerformanceTable technicians={technicians} />
+        </div>
+      )}
 
       <ReportExportCatalog filterTab="tecnicos" />
     </div>

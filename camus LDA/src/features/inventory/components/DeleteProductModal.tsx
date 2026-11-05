@@ -17,9 +17,15 @@ export function DeleteProductModal({ product, open, onClose }: DeleteProductModa
   if (!product) return null
 
   const handleDelete = () => {
-    deleteProduct(product.id)
-    addToast(`Producto "${product.name}" eliminado`, 'info')
-    onClose()
+    void (async () => {
+      const result = await deleteProduct(product.id)
+      if (!result.ok) {
+        addToast(result.message ?? 'No se pudo eliminar el producto', 'error')
+        return
+      }
+      addToast(`Producto "${product.name}" eliminado`, 'info')
+      onClose()
+    })()
   }
 
   return (

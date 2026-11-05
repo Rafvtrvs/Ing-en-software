@@ -19,6 +19,10 @@ const TYPE_LABEL: Record<CostRateType, string> = {
   personal: 'Personal',
 }
 
+/** Unidades predefinidas + “Otro” para texto libre. */
+const UNIT_OPTIONS = ['litros', 'cm', 'kit', 'sets', 'unidad', 'hora', 'metro', 'kg'] as const
+const UNIT_OTHER = '__otro__'
+
 interface Row {
   rateId: string
   quantity: string
@@ -39,9 +43,20 @@ export function EstimatesPanel() {
   const [description, setDescription] = useState('')
   const [result, setResult] = useState<EstimateTotals | null>(null)
   const [selected, setSelected] = useState<CostEstimate | null>(null)
-  const [newRate, setNewRate] = useState({ type: 'insumo' as CostRateType, name: '', unit: 'unidad', price: '' })
+  const [newRate, setNewRate] = useState({
+    type: 'insumo' as CostRateType,
+    name: '',
+    unitChoice: 'litros' as string,
+    customUnit: '',
+    price: '',
+  })
   const [busy, setBusy] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+
+  const resolvedUnit =
+    newRate.unitChoice === UNIT_OTHER
+      ? newRate.customUnit.trim()
+      : newRate.unitChoice
 
   const load = useCallback(async () => {
     try {
@@ -99,14 +114,34 @@ export function EstimatesPanel() {
   }
 
   const handleAddRate = async () => {
+    if (!newRate.name.trim()) {
+      addToast('Indica el nombre del recurso', 'error')
+      return
+    }
+    if (!resolvedUnit) {
+      addToast('Selecciona o escribe una unidad', 'error')
+      return
+    }
+    const unitPrice = Number(String(newRate.price).replace(/\D/g, ''))
+    if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
+      addToast('Indica el costo del producto', 'error')
+      return
+    }
     try {
       await estimatesService.createRate({
         type: newRate.type,
-        name: newRate.name,
-        unit: newRate.unit,
-        unitPrice: Number(newRate.price),
+        name: newRate.name.trim(),
+        unit: resolvedUnit,
+        unitPrice,
       })
-      setNewRate({ ...newRate, name: '', price: '' })
+      setNewRate({
+        type: newRate.type,
+        name: '',
+        unitChoice: 'litros',
+        customUnit: '',
+        price: '',
+      })
+      addToast('Tarifa agregada')
       await load()
     } catch (err) {
       addToast(errorMessage(err, 'No se pudo crear la tarifa'), 'error')
@@ -226,53 +261,132 @@ export function EstimatesPanel() {
           </div>
         )}
 
-        <details className="text-sm">
-          <summary className="cursor-pointer font-medium text-slate-700">Tarifas ({rates.length})</summary>
-          <div className="mt-2 space-y-1">
-            {rates.map((r) => (
-              <div key={r.id} className="flex items-center justify-between text-xs text-slate-600">
-                <span>
-                  {TYPE_LABEL[r.type]} · {r.name} — {formatCurrency(r.unitPrice)}/{r.unit}
-                </span>
-                <button type="button" aria-label="Eliminar tarifa" onClick={() => void handleRemoveRate(r.id)}>
-                  <Trash2 className="h-3.5 w-3.5 text-red-500" />
-                </button>
+        <details className="text-sm" open={rates.length === 0}>
+          <summary className="cursor-pointer font-medium text-slate-700">
+            Tarifas / recursos ({rates.length})
+          </summary>
+          <div className="mt-2 space-y-3">
+            {rates.length > 0 && (
+              <div className="overflow-x-auto rounded-lg border border-slate-100">
+                <table className="min-w-full text-left text-xs text-slate-700">
+                  <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">Tipo</th>
+                      <th className="px-3 py-2 font-medium">Producto / recurso</th>
+                      <th className="px-3 py-2 font-medium">Unidad</th>
+                      <th className="px-3 py-2 font-medium text-right">Costo</th>
+                      <th className="px-3 py-2" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {rates.map((r) => (
+                      <tr key={r.id}>
+                        <td className="px-3 py-2">{TYPE_LABEL[r.type]}</td>
+                        <td className="px-3 py-2 font-medium text-slate-900">{r.name}</td>
+                        <td className="px-3 py-2">{r.unit}</td>
+                        <td className="px-3 py-2 text-right tabular-nums">
+                          {formatCurrency(r.unitPrice)}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button
+                            type="button"
+                            aria-label="Eliminar tarifa"
+                            onClick={() => void handleRemoveRate(r.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-            <div className="flex flex-wrap items-end gap-2 pt-2">
-              <Select
-                className="w-32"
-                value={newRate.type}
-                onChange={(e) => setNewRate({ ...newRate, type: e.target.value as CostRateType })}
-              >
-                {Object.entries(TYPE_LABEL).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
-                ))}
-              </Select>
-              <Input
-                className="min-w-[120px] flex-1"
-                placeholder="Nombre"
-                value={newRate.name}
-                onChange={(e) => setNewRate({ ...newRate, name: e.target.value })}
-              />
-              <Input
-                className="w-20"
-                placeholder="Unidad"
-                value={newRate.unit}
-                onChange={(e) => setNewRate({ ...newRate, unit: e.target.value })}
-              />
-              <Input
-                className="w-24"
-                type="number"
-                placeholder="Valor"
-                value={newRate.price}
-                onChange={(e) => setNewRate({ ...newRate, price: e.target.value })}
-              />
-              <Button size="sm" onClick={() => void handleAddRate()}>
-                Agregar
-              </Button>
+            )}
+
+            <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50/80 p-3">
+              <p className="mb-2 text-xs font-medium text-slate-600">Agregar recurso</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <FormField label="Tipo">
+                  <Select
+                    value={newRate.type}
+                    onChange={(e) =>
+                      setNewRate({ ...newRate, type: e.target.value as CostRateType })
+                    }
+                  >
+                    {Object.entries(TYPE_LABEL).map(([k, v]) => (
+                      <option key={k} value={k}>
+                        {v}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+                <FormField label="Nombre del producto">
+                  <Input
+                    placeholder="Ej. Diesel, Kit sellado…"
+                    value={newRate.name}
+                    onChange={(e) => setNewRate({ ...newRate, name: e.target.value })}
+                  />
+                </FormField>
+                <FormField label="Unidad">
+                  <div className="flex gap-2">
+                    <Select
+                      className={newRate.unitChoice === UNIT_OTHER ? 'w-[40%]' : 'w-full'}
+                      value={
+                        UNIT_OPTIONS.includes(
+                          newRate.unitChoice as (typeof UNIT_OPTIONS)[number],
+                        ) || newRate.unitChoice === UNIT_OTHER
+                          ? newRate.unitChoice
+                          : UNIT_OTHER
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setNewRate({
+                          ...newRate,
+                          unitChoice: value,
+                          customUnit: value === UNIT_OTHER ? newRate.customUnit : '',
+                        })
+                      }}
+                    >
+                      {UNIT_OPTIONS.map((u) => (
+                        <option key={u} value={u}>
+                          {u}
+                        </option>
+                      ))}
+                      <option value={UNIT_OTHER}>Otro…</option>
+                    </Select>
+                    {newRate.unitChoice === UNIT_OTHER && (
+                      <Input
+                        className="min-w-0 flex-1"
+                        placeholder="Escribe la unidad"
+                        value={newRate.customUnit}
+                        onChange={(e) =>
+                          setNewRate({ ...newRate, customUnit: e.target.value })
+                        }
+                        autoFocus
+                      />
+                    )}
+                  </div>
+                </FormField>
+                <FormField label="Costo del producto (CLP)">
+                  <Input
+                    inputMode="numeric"
+                    placeholder="Ej. 15.000"
+                    value={newRate.price}
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, '')
+                      const formatted = digits
+                        ? Number(digits).toLocaleString('es-CL')
+                        : ''
+                      setNewRate({ ...newRate, price: formatted })
+                    }}
+                  />
+                </FormField>
+              </div>
+              <div className="mt-3">
+                <Button size="sm" onClick={() => void handleAddRate()}>
+                  Agregar recurso
+                </Button>
+              </div>
             </div>
           </div>
         </details>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useClientsStore } from '@/store/useClientsStore'
-import { mockEquipment } from '@/data/mock/equipment'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
 import { ROUTES } from '@/constants/routes'
 
 /** RF-31 — búsqueda puntual de órdenes, clientes y maquinaria */
@@ -12,6 +12,7 @@ export function GlobalSearch() {
   const orders = useOrdersStore((s) => s.orders)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
   const clients = useClientsStore((s) => s.clients)
+  const equipment = useEquipmentStore((s) => s.equipment)
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
 
@@ -53,7 +54,7 @@ export function GlobalSearch() {
         onSelect: () => navigate(ROUTES.CLIENTES),
       }))
 
-    const equipmentHits = mockEquipment
+    const equipmentHits = equipment
       .filter(
         (eq) =>
           eq.code.toLowerCase().includes(q) ||
@@ -69,7 +70,7 @@ export function GlobalSearch() {
       }))
 
     return [...orderHits, ...clientHits, ...equipmentHits]
-  }, [query, orders, clients, openViewModal, navigate])
+  }, [query, orders, clients, equipment, openViewModal, navigate])
 
   return (
     <div className="relative hidden min-w-0 flex-1 max-w-md md:block">

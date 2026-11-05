@@ -1,5 +1,5 @@
 import { FileEdit } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import type { OrderModificationHistoryEntry } from '@/types'
 
@@ -10,6 +10,12 @@ export function OrderModificationHistoryPanel({ orderId }: { orderId: string }) 
   const rawHistory = useOrdersStore(
     (s) => s.modificationHistoryByOrderId[orderId] ?? EMPTY_HISTORY,
   )
+  const fetchModificationHistory = useOrdersStore((s) => s.fetchModificationHistory)
+
+  useEffect(() => {
+    void fetchModificationHistory(orderId)
+  }, [orderId, fetchModificationHistory])
+
   const history = useMemo(
     () =>
       [...rawHistory].sort(

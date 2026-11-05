@@ -44,6 +44,10 @@ import {
   orderEditBlockedMessage,
 } from '@/features/orders/utils/canEditOrder'
 import { formatDisplayDate } from '@/features/orders/utils/orderDates'
+import {
+  displayProgress,
+  progressForStatus,
+} from '@/features/orders/utils/orderProgress'
 import type { OrderStatus, WorkOrder } from '@/types'
 import { cn } from '@/utils/cn'
 
@@ -71,8 +75,8 @@ function InfoRow({
   )
 }
 
-function ProgressBar({ value }: { value: number }) {
-  const pct = Math.min(100, Math.max(0, value))
+function ProgressBar({ progress }: { progress?: number | null }) {
+  const pct = displayProgress(progress)
   return (
     <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between text-sm">
@@ -80,7 +84,14 @@ function ProgressBar({ value }: { value: number }) {
         <span className="font-semibold text-slate-900">{pct}%</span>
       </div>
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+        <div
+          className="h-full origin-left rounded-full bg-primary"
+          style={{ width: `${pct}%` }}
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          role="progressbar"
+        />
       </div>
     </div>
   )
@@ -109,27 +120,37 @@ export function OrderDetailDrawer({
   const openModificationRequestModal = useOrdersStore((s) => s.openModificationRequestModal)
   const updateOrder = useOrdersStore((s) => s.updateOrder)
   const addToast = useOrdersStore((s) => s.addToast)
+  const orders = useOrdersStore((s) => s.orders)
   const products = useInventoryStore((s) => s.products)
   const currentUser = useSessionUser()
 
-  const isReady = Boolean(order)
-  const status = order?.status ?? 'Pendiente'
+  const liveOrder =
+    order != null
+      ? (orders.find((o) => o.id === order.id) ?? order)
+      : null
+
+  const isReady = Boolean(liveOrder)
+  const status = liveOrder?.status ?? 'Pendiente'
   const next = nextStatus(status)
-  const assignedTruck = order?.truckCode
-    ? products.find((p) => p.code === order.truckCode) ?? null
+  const assignedTruck = liveOrder?.truckCode
+    ? products.find((p) => p.code === liveOrder.truckCode) ?? null
     : null
-  const editable = order ? canEditOrder(currentUser, order) : false
+  const editable = liveOrder ? canEditOrder(currentUser, liveOrder) : false
   const canApprove = !isFieldOperator(currentUser)
   const canManageLifecycle =
-    canApprove && order && order.status !== 'Cancelada'
-  const isAssignedOperator = order ? isAssignedToOrder(currentUser, order) : false
+    canApprove && liveOrder && liveOrder.status !== 'Cancelada'
+  const isAssignedOperator = liveOrder
+    ? isAssignedToOrder(currentUser, liveOrder)
+    : false
   const canReschedule =
-    canApprove && order && (order.status === 'Pendiente' || order.status === 'En Curso')
+    canApprove &&
+    liveOrder &&
+    (liveOrder.status === 'Pendiente' || liveOrder.status === 'En Curso')
 
   const guardEdit = (action: () => void) => {
-    if (!order) return
+    if (!liveOrder) return
     if (!editable) {
-      addToast(orderEditBlockedMessage(order), 'error')
+      addToast(orderEditBlockedMessage(liveOrder), 'error')
       return
     }
     action()
@@ -142,16 +163,15 @@ export function OrderDetailDrawer({
       title="Detalle de Orden"
       widthClassName="w-full sm:max-w-2xl"
       footer={
-        !isReady ? null : (
+        !isReady || !liveOrder ? null : (
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
               leftIcon={<Pencil className="h-4 w-4" />}
               onClick={() => {
                 guardEdit(() => {
-                  if (!order) return
                   onClose()
-                  openEditModal(order)
+                  openEditModal(liveOrder)
                 })
               }}
             >
@@ -163,9 +183,8 @@ export function OrderDetailDrawer({
               leftIcon={<Trash2 className="h-4 w-4" />}
               onClick={() => {
                 guardEdit(() => {
-                  if (!order) return
                   onClose()
-                  openDeleteModal(order)
+                  openDeleteModal(liveOrder)
                 })
               }}
             >
@@ -178,9 +197,8 @@ export function OrderDetailDrawer({
                   className="border-amber-200 text-amber-700 hover:bg-amber-50"
                   leftIcon={<Ban className="h-4 w-4" />}
                   onClick={() => {
-                    if (!order) return
                     onClose()
-                    openCancelModal(order)
+                    openCancelModal(liveOrder)
                   }}
                 >
                   Cancelar Orden
@@ -190,9 +208,8 @@ export function OrderDetailDrawer({
                   className="border-red-200 text-red-600 hover:bg-red-50"
                   leftIcon={<FileX2 className="h-4 w-4" />}
                   onClick={() => {
-                    if (!order) return
                     onClose()
-                    openAnnulModal(order)
+                    openAnnulModal(liveOrder)
                   }}
                 >
                   Anular Orden
@@ -204,9 +221,8 @@ export function OrderDetailDrawer({
                 variant="outline"
                 leftIcon={<CalendarClock className="h-4 w-4" />}
                 onClick={() => {
-                  if (!order) return
                   onClose()
-                  openRescheduleModal(order)
+                  openRescheduleModal(liveOrder)
                 }}
               >
                 Reprogramar fecha
@@ -217,9 +233,8 @@ export function OrderDetailDrawer({
                 variant="outline"
                 leftIcon={<FileEdit className="h-4 w-4" />}
                 onClick={() => {
-                  if (!order) return
                   onClose()
-                  openModificationRequestModal(order)
+                  openModificationRequestModal(liveOrder)
                 }}
               >
                 Solicitar modificación
@@ -230,20 +245,16 @@ export function OrderDetailDrawer({
                 leftIcon={<Play className="h-4 w-4" />}
                 onClick={() => {
                   guardEdit(() => {
-                    if (!order) return
-                    updateOrder(order.id, {
+                    updateOrder(liveOrder.id, {
                       status: next,
-                      progress:
-                        next === 'En Curso'
-                          ? Math.max(order.progress ?? 0, 10)
-                          : 100,
-                      ...(next === 'En Curso' && !order.startDate
+                      progress: progressForStatus(next, liveOrder.progress),
+                      ...(next === 'En Curso' && !liveOrder.startDate
                         ? { startDate: new Date().toISOString().slice(0, 10) }
                         : null),
                       ...(next === 'Completada'
                         ? {
                             endDate:
-                              order.endDate ??
+                              liveOrder.endDate ??
                               new Date().toISOString().slice(0, 10),
                           }
                         : null),
@@ -263,7 +274,7 @@ export function OrderDetailDrawer({
         )
       }
     >
-      {!open ? null : !order ? (
+      {!open ? null : !liveOrder ? (
         <p className="text-sm text-slate-500">Selecciona una orden para ver su detalle.</p>
       ) : (
         <div className="space-y-4">
@@ -278,53 +289,53 @@ export function OrderDetailDrawer({
               <div className="min-w-0">
                 <p className="text-xs font-medium text-slate-500">ID Orden</p>
                 <p className="mt-1 truncate text-lg font-bold text-slate-900">
-                  {order.id}
+                  {liveOrder.id}
                 </p>
                 <p className="mt-1 truncate text-sm text-slate-600">
-                  {order.client}
+                  {liveOrder.client}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <Badge label={order.status} context="order" />
+                <Badge label={liveOrder.status} context="order" />
                 <span
                   className={cn(
                     'rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset',
-                    order.priority === 'Urgente' || order.priority === 'Alta'
+                    liveOrder.priority === 'Urgente' || liveOrder.priority === 'Alta'
                       ? 'bg-red-50 text-red-700 ring-red-600/20'
-                      : order.priority === 'Media'
+                      : liveOrder.priority === 'Media'
                         ? 'bg-amber-50 text-amber-700 ring-amber-600/20'
                         : 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
                   )}
                 >
-                  Prioridad {order.priority ?? 'Media'}
-                  {order.priorityManual ? ' (manual)' : ''}
+                  Prioridad {liveOrder.priority ?? 'Media'}
+                  {liveOrder.priorityManual ? ' (manual)' : ''}
                 </span>
               </div>
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
               <span className="inline-flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-slate-400" />
-                Creada {order.createdAt}
+                Creada {liveOrder.createdAt}
               </span>
-              {order.startDate && (
-                <span>Inicio {formatDisplayDate(order.startDate)}</span>
+              {liveOrder.startDate && (
+                <span>Inicio {formatDisplayDate(liveOrder.startDate)}</span>
               )}
-              {order.endDate && (
-                <span>Término {formatDisplayDate(order.endDate)}</span>
+              {liveOrder.endDate && (
+                <span>Término {formatDisplayDate(liveOrder.endDate)}</span>
               )}
-              {order.durationHours != null && (
-                <span>{order.durationHours} h</span>
+              {liveOrder.durationHours != null && (
+                <span>{liveOrder.durationHours} h</span>
               )}
             </div>
           </div>
 
           <div className="grid gap-3">
-            <InfoRow icon={Wrench} label="Descripción" value={order.service ?? '—'} />
-            <InfoRow icon={MapPin} label="Dirección" value={order.address} />
+            <InfoRow icon={Wrench} label="Descripción" value={liveOrder.service ?? '—'} />
+            <InfoRow icon={MapPin} label="Dirección" value={liveOrder.address} />
             <InfoRow
               icon={Tag}
               label="Incidente / Categoría"
-              value={order.incidentType ?? order.category}
+              value={liveOrder.incidentType ?? liveOrder.category}
             />
             <InfoRow
               icon={Truck}
@@ -332,8 +343,8 @@ export function OrderDetailDrawer({
               value={
                 assignedTruck
                   ? `${assignedTruck.code} — ${assignedTruck.name}`
-                  : order.truckCode
-                    ? order.truckCode
+                  : liveOrder.truckCode
+                    ? liveOrder.truckCode
                     : 'Sin asignar'
               }
             />
@@ -341,9 +352,9 @@ export function OrderDetailDrawer({
               icon={User}
               label="Técnicos / cuadrilla"
               value={
-                order.operators?.length
-                  ? order.operators.map((o) => o.name).join(', ')
-                  : (order.technician ?? 'Sin asignar')
+                liveOrder.operators?.length
+                  ? liveOrder.operators.map((o) => o.name).join(', ')
+                  : (liveOrder.technician ?? 'Sin asignar')
               }
             />
           </div>
@@ -362,72 +373,74 @@ export function OrderDetailDrawer({
             </a>
           </div>
 
-          {(order.cancelReason || order.annulReason) && (
+          {(liveOrder.cancelReason || liveOrder.annulReason) && (
             <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-              {order.cancelReason && (
+              {liveOrder.cancelReason && (
                 <p>
-                  <strong>Motivo cancelación:</strong> {order.cancelReason}
+                  <strong>Motivo cancelación:</strong> {liveOrder.cancelReason}
                 </p>
               )}
-              {order.annulReason && (
-                <p className={order.cancelReason ? 'mt-1' : ''}>
-                  <strong>Motivo anulación:</strong> {order.annulReason}
+              {liveOrder.annulReason && (
+                <p className={liveOrder.cancelReason ? 'mt-1' : ''}>
+                  <strong>Motivo anulación:</strong> {liveOrder.annulReason}
                 </p>
               )}
             </div>
           )}
 
           {/* RF65 — comentarios */}
-          <OrderCommentsPanel order={order} />
+          <OrderCommentsPanel order={liveOrder} />
 
           {/* RF62 — insumos */}
-          <OrderSuppliesPanel order={order} canEdit={editable || canApprove} />
+          <OrderSuppliesPanel order={liveOrder} canEdit={editable || canApprove} />
 
           {/* RF63 — aprobación */}
-          <OrderApprovalPanel order={order} canApprove={canApprove} />
+          <OrderApprovalPanel order={liveOrder} canApprove={canApprove} />
 
           {/* CU-160–164 */}
-          <OrderAssignmentPanel order={order} canEdit={editable} />
+          <OrderAssignmentPanel order={liveOrder} canEdit={editable} />
 
           {/* CU-152–154 */}
-          <OrderDatesPanel order={order} canEdit={editable} />
+          <OrderDatesPanel order={liveOrder} canEdit={editable} />
 
           {/* CU-149 */}
-          {editable && <InterventionRegisterPanel orderId={order.id} />}
+          {editable && <InterventionRegisterPanel orderId={liveOrder.id} />}
 
           {/* CU-150–151 */}
-          <InterventionHistoryPanel orderId={order.id} canEdit={editable} />
+          <InterventionHistoryPanel orderId={liveOrder.id} canEdit={editable} />
 
           {/* RF09 CU-30–34: evidencia visual en servidor */}
           <OrderEvidencePanel
-            order={order}
+            order={liveOrder}
             canUpload={editable}
             canManage={canApprove}
           />
 
           {/* Evidencia fotográfica por URL */}
-          <OrderPhotosPanel order={order} canEdit={editable} />
+          <OrderPhotosPanel order={liveOrder} canEdit={editable} />
 
           {/* CU-188–191 */}
-          <ThirdPartyPanel order={order} canEdit={editable} />
+          <ThirdPartyPanel order={liveOrder} canEdit={editable} />
 
           {/* RF-40..42 documentos / contratos / versiones */}
-          <OrderDocumentsPanel order={order} canEdit={editable} />
+          <OrderDocumentsPanel order={liveOrder} canEdit={editable} />
 
           {/* CU-173–176 */}
-          <OrderPdfPanel order={order} />
+          <OrderPdfPanel order={liveOrder} />
 
           {/* RF66 CDS 229 */}
-          <OrderRescheduleHistoryPanel orderId={order.id} />
+          <OrderRescheduleHistoryPanel orderId={liveOrder.id} />
 
           {/* RF68 CDS 235 */}
-          <OrderModificationHistoryPanel orderId={order.id} />
+          <OrderModificationHistoryPanel orderId={liveOrder.id} />
 
           {/* RF29 CU-99 */}
-          {canApprove && <StatusHistoryPanel orderId={order.id} refreshKey={order.status} />}
+          {canApprove && (
+            <StatusHistoryPanel orderId={liveOrder.id} refreshKey={liveOrder.status} />
+          )}
 
-          <ProgressBar value={order.progress ?? 0} />
-          <OrderLocationCard order={order} />
+          <ProgressBar progress={liveOrder.progress} />
+          <OrderLocationCard order={liveOrder} />
         </div>
       )}
     </Drawer>

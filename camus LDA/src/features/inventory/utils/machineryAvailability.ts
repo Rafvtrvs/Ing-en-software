@@ -8,7 +8,20 @@ export interface MachineryAvailabilityRow {
   lastInfo: string
 }
 
-/** RF67 CDS 232 — determina disponibilidad según asignación y mantenimiento */
+function findActiveAssignment(
+  equipment: Equipment,
+  orders: WorkOrder[],
+): WorkOrder | undefined {
+  return orders.find((o) => {
+    if (o.status !== 'Pendiente' && o.status !== 'En Curso') return false
+    if (equipment.assignedOrderId && o.id === equipment.assignedOrderId) return true
+    if (o.equipmentId && o.equipmentId === equipment.id) return true
+    if (o.truckCode && o.truckCode === equipment.code) return true
+    return false
+  })
+}
+
+/** RF67 CDS 232 — determina disponibilidad según asignación real y mantenimiento */
 export function determineMachineryAvailability(
   equipment: Equipment,
   orders: WorkOrder[],
@@ -31,20 +44,21 @@ export function determineMachineryAvailability(
       lastInfo: equipment.lastMaintenance,
     }
   }
-  if (equipment.status === 'Asignado' || equipment.assignedOrderId) {
-    const order = orders.find(
-      (o) =>
-        o.id === equipment.assignedOrderId ||
-        (o.equipmentId === equipment.id &&
-          (o.status === 'Pendiente' || o.status === 'En Curso')),
-    )
+
+  const order = findActiveAssignment(equipment, orders)
+  if (order || equipment.status === 'Asignado' || equipment.assignedOrderId) {
     return {
       equipment,
       availability: 'En uso',
-      assignment: order ? order.id : (equipment.assignedOrderId ?? equipment.assignedTo ?? '—'),
+      assignment:
+        order?.id ??
+        equipment.assignedOrderId ??
+        equipment.assignedTo ??
+        '—',
       lastInfo: equipment.nextMaintenance,
     }
   }
+
   return {
     equipment,
     availability: 'Disponible',

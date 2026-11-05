@@ -1,11 +1,8 @@
 // ============================================================
-//  Cola de sincronización de terreno (RF35 / CU-117, CU-118, CU-119)
-//  Toda acción del operario (estado, avance, foto) se guarda primero en
-//  el dispositivo y luego se envía al servidor. Con conexión se envía
-//  de inmediato; sin conexión queda pendiente hasta "Sincronizar".
+//  Cola de sincronización de terreno (RF35 / CU-117–119 / RF46)
 // ============================================================
 import { ordersService } from '@/services/ordersService'
-import type { OrderStatus } from '@/types'
+import type { OfflineSyncEntry, OrderStatus, WorkOrder } from '@/types'
 
 export type FieldAction =
   | { kind: 'status'; id: string; orderId: string; at: string; status: OrderStatus; progress?: number }
@@ -19,22 +16,48 @@ export type FieldAction =
       mimeType: string
       data: string
     }
+  | {
+      kind: 'create-order'
+      id: string
+      orderId: string
+      at: string
+      order: WorkOrder
+      notes?: string
+    }
 
 export type NewFieldAction =
   | { kind: 'status'; orderId: string; status: OrderStatus; progress?: number }
   | { kind: 'note'; orderId: string; detail: string }
   | { kind: 'photo'; orderId: string; fileName: string; mimeType: string; data: string }
+  | { kind: 'create-order'; order: WorkOrder; notes?: string }
   | { kind: 'start-service'; orderId: string }
   | { kind: 'finish-service'; orderId: string; clientSignature: string }
 
 export interface SyncResult {
   synced: number
   failed: { action: FieldAction; message: string }[]
-  /** true si se detuvo por falta de conexión */
   offline: boolean
 }
 
 const STORAGE_KEY = 'camus_field_queue_v1'
+const LOG_KEY = 'camus_field_sync_log_v1'
+const QUEUE_EVENT = 'camus-field-queue'
+const LOG_LIMIT = 40
+
+function emitQueueChange() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(QUEUE_EVENT))
+  }
+}
+
+export function subscribeFieldQueue(listener: () => void): () => void {
+  window.addEventListener(QUEUE_EVENT, listener)
+  window.addEventListener('storage', listener)
+  return () => {
+    window.removeEventListener(QUEUE_EVENT, listener)
+    window.removeEventListener('storage', listener)
+  }
+}
 
 export function loadQueue(): FieldAction[] {
   try {
@@ -48,19 +71,86 @@ export function loadQueue(): FieldAction[] {
 function saveQueue(queue: FieldAction[]): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(queue))
+    emitQueueChange()
     return true
   } catch {
-    // Almacenamiento lleno (fotos pesadas)
     return false
   }
 }
 
+function loadLog(): OfflineSyncEntry[] {
+  try {
+    const raw = localStorage.getItem(LOG_KEY)
+    return raw ? (JSON.parse(raw) as OfflineSyncEntry[]) : []
+  } catch {
+    return []
+  }
+}
+
+function saveLog(entries: OfflineSyncEntry[]) {
+  localStorage.setItem(LOG_KEY, JSON.stringify(entries.slice(0, LOG_LIMIT)))
+  emitQueueChange()
+}
+
+function appendLog(entry: OfflineSyncEntry) {
+  saveLog([entry, ...loadLog()].slice(0, LOG_LIMIT))
+}
+
+export function describeFieldAction(action: FieldAction): { module: string; summary: string } {
+  switch (action.kind) {
+    case 'status':
+      return {
+        module: 'Órdenes',
+        summary: `${action.orderId}: estado → ${action.status}`,
+      }
+    case 'note':
+      return {
+        module: 'Intervenciones',
+        summary: `${action.orderId}: ${action.detail.slice(0, 80)}${action.detail.length > 80 ? '…' : ''}`,
+      }
+    case 'photo':
+      return {
+        module: 'Evidencia',
+        summary: `${action.orderId}: foto ${action.fileName}`,
+      }
+    case 'create-order':
+      return {
+        module: 'Órdenes',
+        summary: `Nueva OT ${action.orderId} — ${action.order.client}${action.notes ? ` · ${action.notes.slice(0, 40)}` : ''}`,
+      }
+    default:
+      return { module: 'Terreno', summary: 'Acción pendiente' }
+  }
+}
+
+/** Vista unificada: pendientes de la cola + historial reciente de sync. */
+export function getFieldSyncEntries(): OfflineSyncEntry[] {
+  const pending = loadQueue().map((action) => {
+    const meta = describeFieldAction(action)
+    return {
+      id: action.id,
+      module: meta.module,
+      summary: meta.summary,
+      status: 'pendiente' as const,
+      createdAt: action.at,
+    }
+  })
+  const history = loadLog().filter((e) => !pending.some((p) => p.id === e.id))
+  return [...pending, ...history]
+}
+
 /** Guarda la acción con la fecha/hora capturada automáticamente (CU-117 paso 4). */
 export function enqueue(action: NewFieldAction): { ok: boolean; queued?: FieldAction } {
+  if (action.kind === 'start-service' || action.kind === 'finish-service') {
+    return { ok: false }
+  }
   const queued = {
     ...action,
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     at: new Date().toISOString(),
+    ...(action.kind === 'create-order'
+      ? { orderId: action.order.id }
+      : {}),
   } as FieldAction
   const queue = loadQueue()
   queue.push(queued)
@@ -105,31 +195,53 @@ async function send(action: FieldAction) {
         data: action.data,
       })
       break
+    case 'create-order': {
+      const payload = { ...action.order }
+      if (action.notes?.trim()) {
+        payload.service = payload.service
+          ? `${payload.service} — ${action.notes.trim()}`
+          : action.notes.trim()
+      }
+      await ordersService.create(payload)
+      break
+    }
   }
 }
 
-/**
- * CU-119: envía en orden las acciones pendientes.
- * - Éxito: se elimina de la cola.
- * - Error de red (sin respuesta) o 5xx: se detiene y deja el resto pendiente.
- * - Rechazo del servidor (4xx): se descarta y se informa (reintentar no lo arreglaría).
- */
 async function runFlush(): Promise<SyncResult> {
   const result: SyncResult = { synced: 0, failed: [], offline: false }
   let queue = loadQueue()
 
   while (queue.length > 0) {
     const action = queue[0]
+    const meta = describeFieldAction(action)
     try {
       await send(action)
       result.synced += 1
+      appendLog({
+        id: action.id,
+        module: meta.module,
+        summary: meta.summary,
+        status: 'sincronizado',
+        createdAt: action.at,
+        syncedAt: new Date().toISOString(),
+      })
     } catch (err) {
       const status = statusOf(err)
       if (status === undefined || status >= 500) {
         result.offline = true
         break
       }
-      result.failed.push({ action, message: messageOf(err) })
+      const message = messageOf(err)
+      result.failed.push({ action, message })
+      appendLog({
+        id: action.id,
+        module: meta.module,
+        summary: meta.summary,
+        status: 'error',
+        createdAt: action.at,
+        errorMessage: message,
+      })
     }
     queue = queue.slice(1)
     saveQueue(queue)
@@ -139,7 +251,6 @@ async function runFlush(): Promise<SyncResult> {
 
 let flushing: Promise<SyncResult> | null = null
 
-/** Evita envíos duplicados si se dispara a la vez el automático y el manual. */
 export function flushQueue(): Promise<SyncResult> {
   if (!flushing) {
     flushing = runFlush().finally(() => {
@@ -149,7 +260,6 @@ export function flushQueue(): Promise<SyncResult> {
   return flushing
 }
 
-/** CU-118: reduce la imagen (máx. 1280 px, JPEG 70 %) antes de guardarla/enviarla. */
 export function compressImage(
   file: File,
   maxSide = 1280,

@@ -200,6 +200,9 @@ export const useBillingStore = create<BillingState>()(
               state.selectedInvoice?.id === id ? updated : state.selectedInvoice,
             apiAvailable: true,
           }))
+          if (data.status === 'Pagada' || updated.status === 'Pagada') {
+            void get().syncFromApi()
+          }
           return { ok: true }
         } catch (err) {
           if (isOfflineApiError(err)) {
@@ -241,6 +244,15 @@ export const useBillingStore = create<BillingState>()(
         const current = get().invoices.find((inv) => inv.id === id)
         if (!current) return { ok: false, message: 'Factura no encontrada' }
         const previous = { ...current }
+        const remaining = Math.max(0, current.amount - (current.paidAmount ?? 0))
+        const localPayment: PaymentRecord = {
+          id: safeId(),
+          invoiceNumber: current.number,
+          client: current.client,
+          amount: remaining > 0 ? remaining : current.amount,
+          method,
+          date: new Date().toISOString().slice(0, 10),
+        }
 
         set((state) => ({
           invoices: state.invoices.map((inv) =>
@@ -254,6 +266,7 @@ export const useBillingStore = create<BillingState>()(
                 }
               : inv,
           ),
+          payments: [localPayment, ...state.payments.filter((p) => p.invoiceNumber !== current.number || p.amount !== localPayment.amount)],
           statusHistory: pushStatusHistory(state, {
             id: safeId(),
             invoiceId: id,
@@ -274,12 +287,17 @@ export const useBillingStore = create<BillingState>()(
               inv.id === id ? result.invoice : inv,
             ),
             payments: result.payment
-              ? [result.payment, ...state.payments]
+              ? [
+                  result.payment,
+                  ...state.payments.filter((p) => p.id !== localPayment.id),
+                ]
               : state.payments,
             selectedInvoice:
               state.selectedInvoice?.id === id ? result.invoice : state.selectedInvoice,
             apiAvailable: true,
           }))
+          // Refrescar listado de pagos por si el backend concilió registros
+          void get().syncFromApi()
           return { ok: true }
         } catch (err) {
           if (isOfflineApiError(err)) {
@@ -288,6 +306,7 @@ export const useBillingStore = create<BillingState>()(
           }
           set((state) => ({
             invoices: state.invoices.map((inv) => (inv.id === id ? previous : inv)),
+            payments: state.payments.filter((p) => p.id !== localPayment.id),
           }))
           return { ok: false, message: apiErrorMessage(err, 'No se pudo marcar como pagada') }
         }

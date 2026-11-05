@@ -67,10 +67,19 @@ function requireAddressOrCoordinates(address?: string, lat?: number, lon?: numbe
   }
 }
 
-function genId() {
+async function genId() {
   const year = new Date().getFullYear()
-  const rand = Math.floor(1000 + Math.random() * 9000)
-  return `OT-${year}-${rand}`
+  const prefix = `OT-${year}-`
+  const rows = await prisma.ordenTrabajo.findMany({
+    where: { id: { startsWith: prefix } },
+    select: { id: true },
+  })
+  let max = 0
+  for (const row of rows) {
+    const n = parseInt(row.id.slice(prefix.length), 10)
+    if (!Number.isNaN(n)) max = Math.max(max, n)
+  }
+  return `${prefix}${String(max + 1).padStart(4, '0')}`
 }
 
 async function resolveCliente(name?: string): Promise<number | null> {
@@ -95,14 +104,7 @@ async function resolveOperador(input: {
   const name = input.technician?.trim()
   if (!name) return undefined
   const byName = await prisma.usuario.findFirst({ where: { nombre: name } })
-  if (byName) return byName.id
-  if (name.toLowerCase().includes('luis')) {
-    const op = await prisma.usuario.findFirst({
-      where: { correoElectronico: 'operador@camus.cl' },
-    })
-    return op?.id ?? null
-  }
-  return null
+  return byName?.id ?? null
 }
 
 export const orderService = {
@@ -133,7 +135,7 @@ export const orderService = {
 
     const row = await prisma.ordenTrabajo.create({
       data: {
-        id: input.id || genId(),
+        id: input.id?.trim() || (await genId()),
         direccion: input.address ?? '',
         servicio: input.service ?? '',
         categoria: input.category ?? '',
@@ -151,9 +153,21 @@ export const orderService = {
     await auditService.log({
       modulo: 'ordenes',
       accion: 'crear',
-      valorNuevo: row,
+      valorNuevo: { ...row, orderId: row.id },
       idUsuario: userId,
     })
+    if (row.idOperador) {
+      await auditService.log({
+        modulo: 'ordenes',
+        accion: 'asignar_operador',
+        valorNuevo: {
+          orderId: row.id,
+          idOperador: row.idOperador,
+          operador: row.operador?.nombre ?? null,
+        },
+        idUsuario: userId,
+      })
+    }
     await mailService.send({
       to: 'operaciones@camus.cl',
       subject: `Nueva orden ${row.id}`,
@@ -201,11 +215,30 @@ export const orderService = {
     await auditService.log({
       modulo: 'ordenes',
       accion: 'actualizar',
-      valorAnterior: before,
-      valorNuevo: row,
+      valorAnterior: before ? { ...before, orderId: before.id } : before,
+      valorNuevo: { ...row, orderId: row.id },
       idUsuario: userId,
     })
-    // RF29 CU-97: registrar el cambio de estado en la bitácora
+
+    // Asignación / reasignación de operario a cargo
+    if (before && idOperador !== undefined && before.idOperador !== row.idOperador) {
+      await auditService.log({
+        modulo: 'ordenes',
+        accion: 'asignar_operador',
+        valorAnterior: {
+          orderId: id,
+          idOperador: before.idOperador,
+        },
+        valorNuevo: {
+          orderId: id,
+          idOperador: row.idOperador,
+          operador: row.operador?.nombre ?? null,
+        },
+        idUsuario: userId,
+      })
+    }
+
+    // RF29 CU-97: registrar el cambio de estado en la bitácora (Kanban / terreno)
     if (before && row.estado !== before.estado) {
       await auditService.log({
         modulo: 'ordenes',

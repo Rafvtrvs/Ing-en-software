@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { useOrdersStore } from '@/store/useOrdersStore'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
 import { useReportsStore } from '@/store/useReportsStore'
 import {
   findOrdersForAsset,
@@ -22,9 +23,18 @@ function assetKey(asset: PhysicalAssetOption) {
 export function PhysicalAssetsReportPanel() {
   const products = useInventoryStore((s) => s.products)
   const orders = useOrdersStore((s) => s.orders)
+  const equipment = useEquipmentStore((s) => s.equipment)
+  const syncEquipment = useEquipmentStore((s) => s.syncFromApi)
   const addToast = useReportsStore((s) => s.addToast)
 
-  const categories = useMemo(() => getMachineryCategories(products), [products])
+  useEffect(() => {
+    void syncEquipment()
+  }, [syncEquipment])
+
+  const categories = useMemo(
+    () => getMachineryCategories(products, equipment),
+    [products, equipment],
+  )
 
   const [showFilters, setShowFilters] = useState(true)
   const [category, setCategory] = useState('')
@@ -33,8 +43,8 @@ export function PhysicalAssetsReportPanel() {
   const [confirmed, setConfirmed] = useState(false)
 
   const assetsInCategory = useMemo(
-    () => getPhysicalAssets(products, category || undefined),
-    [products, category],
+    () => getPhysicalAssets(products, category || undefined, equipment),
+    [products, category, equipment],
   )
 
   const selectedAsset = useMemo(() => {
@@ -43,8 +53,8 @@ export function PhysicalAssetsReportPanel() {
 
   const services = useMemo(() => {
     if (!generated || !selectedAsset) return []
-    return findOrdersForAsset(selectedAsset, orders)
-  }, [generated, selectedAsset, orders])
+    return findOrdersForAsset(selectedAsset, orders, equipment)
+  }, [generated, selectedAsset, orders, equipment])
 
   useEffect(() => {
     if (!category && categories.length > 0) {
@@ -72,7 +82,7 @@ export function PhysicalAssetsReportPanel() {
     if (!selectedAsset) return
     setGenerated(true)
     setConfirmed(false)
-    const count = findOrdersForAsset(selectedAsset, orders).length
+    const count = findOrdersForAsset(selectedAsset, orders, equipment).length
     addToast(
       count > 0
         ? `Informe de uso generado: ${count} servicio(s) encontrado(s)`

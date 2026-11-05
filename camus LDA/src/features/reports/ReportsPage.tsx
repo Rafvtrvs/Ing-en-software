@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Download } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -10,8 +10,9 @@ import { useOrdersStore } from '@/store/useOrdersStore'
 import { useBillingStore } from '@/store/useBillingStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import { useClientsStore } from '@/store/useClientsStore'
-import { technicianPerformance } from '@/data/mock/reports'
+import { useUsersStore } from '@/store/useUsersStore'
 import { exportAllReportsPackage } from '@/features/reports/utils/exportReports'
+import { buildTechnicianPerformance } from '@/features/reports/utils/technicianPerformance'
 import type { ReportTab } from '@/types'
 import { ReportPeriodSelect } from './components/ReportPeriodSelect'
 import { SummaryReportPanel } from './components/SummaryReportPanel'
@@ -52,15 +53,26 @@ export function ReportsPage() {
   const removeToast = useReportsStore((s) => s.removeToast)
 
   const orders = useOrdersStore((s) => s.orders)
+  const syncOrders = useOrdersStore((s) => s.syncFromApi)
   const invoices = useBillingStore((s) => s.invoices)
   const syncBillingFromApi = useBillingStore((s) => s.syncFromApi)
   const products = useInventoryStore((s) => s.products)
   const clients = useClientsStore((s) => s.clients)
+  const users = useUsersStore((s) => s.users)
+  const roles = useUsersStore((s) => s.roles)
+  const syncUsers = useUsersStore((s) => s.syncFromApi)
   const [searchParams] = useSearchParams()
+
+  const technicians = useMemo(
+    () => buildTechnicianPerformance(users, roles, orders),
+    [users, roles, orders],
+  )
 
   useEffect(() => {
     void syncBillingFromApi()
-  }, [syncBillingFromApi])
+    void syncOrders()
+    void syncUsers()
+  }, [syncBillingFromApi, syncOrders, syncUsers])
 
   useEffect(() => {
     const tab = searchParams.get('tab') as ReportTab | null
@@ -75,7 +87,7 @@ export function ReportsPage() {
         orders,
         invoices,
         products,
-        technicians: technicianPerformance,
+        technicians,
         clients,
       })
       addToast('Descargado: reporte-completo.xlsx (Órdenes, Facturas, Inventario, Técnicos, Clientes)')

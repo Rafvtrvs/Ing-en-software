@@ -2,13 +2,18 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
 import type { Product } from '@/types'
+import { isConsumableStockCategory } from '@/features/inventory/utils/stockCategories'
 
 interface CriticalStockReportTableProps {
   products: Product[]
 }
 
 export function CriticalStockReportTable({ products }: CriticalStockReportTableProps) {
-  const critical = products.filter((p) => p.status === 'Crítico' || p.status === 'Bajo')
+  const critical = products.filter(
+    (p) =>
+      isConsumableStockCategory(p.category) &&
+      (p.status === 'Crítico' || p.status === 'Bajo'),
+  )
 
   const columns: Column<Product>[] = [
     { key: 'code', header: 'Código' },

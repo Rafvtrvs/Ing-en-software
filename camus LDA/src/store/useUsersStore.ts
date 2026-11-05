@@ -511,9 +511,8 @@ export const useUsersStore = create<UsersState>()(
         set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
     }),
     {
-      name: 'camus_users_store_v1',
+      name: 'camus_users_store_v2',
       partialize: (state) => ({
-        users: state.users,
         roles: state.roles,
         lifecycleHistory: state.lifecycleHistory,
         roleAssignmentHistory: state.roleAssignmentHistory,
@@ -533,7 +532,8 @@ export const useUsersStore = create<UsersState>()(
         return {
           ...current,
           ...p,
-          users: p?.users ?? current.users,
+          // Usuarios siempre desde API/seed actual (no rehidratar mocks viejos)
+          users: current.users,
           roles: p?.roles ?? current.roles,
           lifecycleHistory: mergedHistory,
           roleAssignmentHistory: mergedAssignments,

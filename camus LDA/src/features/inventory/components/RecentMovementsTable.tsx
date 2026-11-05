@@ -1,11 +1,13 @@
-import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { ArrowRight, ChevronUp } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
 import { useInventoryStore } from '@/store/useInventoryStore'
 import type { StockMovement } from '@/types'
 import { cn } from '@/utils/cn'
+
+const PREVIEW_COUNT = 5
 
 const columns: Column<StockMovement>[] = [
   { key: 'date', header: 'Fecha' },
@@ -32,10 +34,10 @@ const columns: Column<StockMovement>[] = [
       <span
         className={cn(
           'font-semibold',
-          row.quantity > 0 ? 'text-emerald-600' : 'text-red-500',
+          row.type === 'Entrada' ? 'text-emerald-600' : 'text-red-500',
         )}
       >
-        {row.quantity > 0 ? `+${row.quantity}` : row.quantity}
+        {row.type === 'Entrada' ? `+${row.quantity}` : `-${row.quantity}`}
       </span>
     ),
   },
@@ -44,25 +46,62 @@ const columns: Column<StockMovement>[] = [
 
 export function RecentMovementsTable() {
   const movements = useInventoryStore((s) => s.movements)
+  const [showAll, setShowAll] = useState(false)
+
+  const sorted = useMemo(
+    () =>
+      [...movements].sort((a, b) => {
+        // Más recientes primero (orden de inserción suele bastar; id como respaldo)
+        return b.id.localeCompare(a.id)
+      }),
+    [movements],
+  )
+
+  const visible = showAll ? sorted : sorted.slice(0, PREVIEW_COUNT)
+  const hasMore = sorted.length > PREVIEW_COUNT
 
   return (
     <Card>
-      <CardHeader title="Movimientos Recientes" />
-      <DataTable
-        columns={columns}
-        data={movements.slice(0, 5)}
-        keyExtractor={(r) => r.id}
+      <CardHeader
+        title="Movimientos Recientes"
+        action={
+          <span className="text-xs font-medium text-slate-500">
+            {sorted.length} registro{sorted.length === 1 ? '' : 's'}
+          </span>
+        }
       />
-      <div className="mt-4 text-right">
-        <Link
-          to="#"
-          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-          onClick={(e) => e.preventDefault()}
-        >
-          Ver todos los movimientos
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
+      {sorted.length === 0 ? (
+        <p className="py-8 text-center text-sm text-slate-500">
+          Aún no hay movimientos registrados.
+        </p>
+      ) : (
+        <>
+          <div className={showAll ? 'max-h-[28rem] overflow-y-auto' : undefined}>
+            <DataTable columns={columns} data={visible} keyExtractor={(r) => r.id} />
+          </div>
+          {hasMore ? (
+            <div className="mt-4 text-right">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+                onClick={() => setShowAll((prev) => !prev)}
+              >
+                {showAll ? (
+                  <>
+                    Mostrar menos
+                    <ChevronUp className="h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    Ver todos los movimientos ({sorted.length})
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          ) : null}
+        </>
+      )}
     </Card>
   )
 }

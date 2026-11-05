@@ -1,21 +1,26 @@
-import { useMemo, useState } from 'react'
-import { Search, Truck } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Search, Truck, AlertTriangle, CheckCircle, LoaderCircle } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { KpiCard } from '@/components/ui/KpiCard'
-import { mockEquipment } from '@/data/mock/equipment'
 import { useOrdersStore } from '@/store/useOrdersStore'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
 import {
   determineMachineryAvailability,
   filterByAvailabilityStatus,
   type MachineryAvailabilityRow,
 } from '@/features/inventory/utils/machineryAvailability'
-import type { MachineryAvailabilityStatus } from '@/types'
+import { EquipmentActionsMenu } from '@/features/inventory/components/EquipmentActionsMenu'
+import {
+  EquipmentDeleteModal,
+  EquipmentEditModal,
+  EquipmentViewModal,
+} from '@/features/inventory/components/EquipmentModals'
+import type { Equipment, MachineryAvailabilityStatus } from '@/types'
 import { formatShortDate } from '@/utils/formatters'
-import { AlertTriangle, CheckCircle, LoaderCircle } from 'lucide-react'
 
 const FILTER_OPTIONS: Array<MachineryAvailabilityStatus | 'all'> = [
   'all',
@@ -31,16 +36,43 @@ const badgeStyles: Record<MachineryAvailabilityStatus, string> = {
 }
 
 /**
- * RF67 — CDS 230/231/232: Disponibilidad de maquinaria
+ * RF67 — CDS 230/231/232: Disponibilidad de maquinaria (datos reales)
  */
 export function MachineryAvailabilityPanel() {
   const orders = useOrdersStore((s) => s.orders)
+  const syncOrders = useOrdersStore((s) => s.syncFromApi)
+  const equipment = useEquipmentStore((s) => s.equipment)
+  const syncEquipment = useEquipmentStore((s) => s.syncFromApi)
+  const loading = useEquipmentStore((s) => s.loading)
+  const apiAvailable = useEquipmentStore((s) => s.apiAvailable)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<MachineryAvailabilityStatus | 'all'>('all')
+  const [selected, setSelected] = useState<Equipment | null>(null)
+  const [viewOpen, setViewOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
+  useEffect(() => {
+    void syncEquipment()
+    void syncOrders()
+  }, [syncEquipment, syncOrders])
+
+  const openView = (eq: Equipment) => {
+    setSelected(eq)
+    setViewOpen(true)
+  }
+  const openEdit = (eq: Equipment) => {
+    setSelected(eq)
+    setEditOpen(true)
+  }
+  const openDelete = (eq: Equipment) => {
+    setSelected(eq)
+    setDeleteOpen(true)
+  }
 
   const rows = useMemo(
-    () => mockEquipment.map((eq) => determineMachineryAvailability(eq, orders)),
-    [orders],
+    () => equipment.map((eq) => determineMachineryAvailability(eq, orders)),
+    [equipment, orders],
   )
 
   const filtered = useMemo(() => {
@@ -108,6 +140,19 @@ export function MachineryAvailabilityPanel() {
       header: 'Última información',
       render: (row) => formatShortDate(row.lastInfo),
     },
+    {
+      key: 'acciones',
+      header: '',
+      className: 'w-12 text-right',
+      render: (row) => (
+        <EquipmentActionsMenu
+          equipment={row.equipment}
+          onView={openView}
+          onEdit={openEdit}
+          onDelete={openDelete}
+        />
+      ),
+    },
   ]
 
   return (
@@ -162,7 +207,11 @@ export function MachineryAvailabilityPanel() {
       <Card>
         <CardHeader
           title="Disponibilidad de maquinaria"
-          subtitle="Consulta, filtrado y determinación automática de estado."
+          subtitle={
+            apiAvailable
+              ? 'Consulta en tiempo real según maquinaria y órdenes activas.'
+              : 'No se pudo sincronizar con el servidor. Reintenta más tarde.'
+          }
         />
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="min-w-[200px] flex-1 max-w-md">
@@ -189,7 +238,9 @@ export function MachineryAvailabilityPanel() {
             </Select>
           </div>
         </div>
-        {filtered.length === 0 ? (
+        {loading ? (
+          <p className="py-8 text-center text-sm text-slate-500">Cargando maquinaria...</p>
+        ) : filtered.length === 0 ? (
           <p className="py-8 text-center text-sm text-slate-500">
             No hay maquinaria que coincida con el filtro.
           </p>
@@ -200,10 +251,38 @@ export function MachineryAvailabilityPanel() {
               data={filtered}
               keyExtractor={(r) => r.equipment.id}
               tableClassName="min-w-[720px]"
+              onRowClick={(row) => openView(row.equipment)}
             />
           </div>
         )}
       </Card>
+
+      <EquipmentViewModal
+        equipment={selected}
+        open={viewOpen}
+        onClose={() => setViewOpen(false)}
+        onEdit={(eq) => {
+          setSelected(eq)
+          setEditOpen(true)
+        }}
+      />
+      <EquipmentEditModal
+        equipment={selected}
+        open={editOpen}
+        onClose={() => {
+          setEditOpen(false)
+          void syncEquipment()
+        }}
+      />
+      <EquipmentDeleteModal
+        equipment={selected}
+        open={deleteOpen}
+        onClose={() => {
+          setDeleteOpen(false)
+          setSelected(null)
+          void syncEquipment()
+        }}
+      />
     </div>
   )
 }

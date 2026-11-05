@@ -96,16 +96,6 @@ export const initialSystemUsers: SystemUser[] = [
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Luis',
   },
   {
-    id: 'u4',
-    name: 'Ana Pérez',
-    email: 'ana.perez@camus.cl',
-    phone: '+56 9 5432 1098',
-    roleId: 'role-tecnico',
-    status: 'Activo',
-    lastLogin: '2026-05-24T16:20:00',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ana',
-  },
-  {
     id: 'u5',
     name: 'Carlos Mendoza',
     email: 'carlos.mendoza@camus.cl',

@@ -63,7 +63,7 @@ export function ProductViewModal({ product, open, onClose }: ProductViewModalPro
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4 rounded-xl border border-slate-100 p-4">
+      <div className="mt-4 grid grid-cols-2 gap-4 rounded-xl border border-slate-100 p-4 sm:grid-cols-3">
         <div>
           <p className="text-xs text-slate-500">Stock actual</p>
           <p className="text-2xl font-bold text-slate-900">
@@ -76,6 +76,14 @@ export function ProductViewModal({ product, open, onClose }: ProductViewModalPro
           <p className="text-2xl font-bold text-slate-900">
             {product.minStock}{' '}
             <span className="text-sm font-normal text-slate-500">{product.unit}</span>
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-slate-500">Costo unitario</p>
+          <p className="text-2xl font-bold text-slate-900">
+            {product.unitCost != null && product.unitCost > 0
+              ? `$${Math.round(product.unitCost).toLocaleString('es-CL')}`
+              : '—'}
           </p>
         </div>
       </div>

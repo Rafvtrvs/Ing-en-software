@@ -2,6 +2,7 @@ import { Package, Wrench } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import type { Equipment, Product } from '@/types'
+import { isConsumableStockCategory } from '@/features/inventory/utils/stockCategories'
 
 interface AvailabilityBlockProps {
   products: Product[]
@@ -9,10 +10,13 @@ interface AvailabilityBlockProps {
 }
 
 export function AvailabilityBlock({ products, equipment }: AvailabilityBlockProps) {
-  const availableProducts = products.filter(
+  const consumables = products.filter((p) => isConsumableStockCategory(p.category))
+  const availableProducts = consumables.filter(
     (p) => p.status === 'Ok' && p.currentStock > p.minStock,
   ).length
-  const lowStock = products.filter((p) => p.status === 'Bajo' || p.status === 'Crítico').length
+  const lowStock = consumables.filter(
+    (p) => p.status === 'Bajo' || p.status === 'Crítico',
+  ).length
   const operativeEq = equipment.filter((e) => e.status === 'Operativo').length
   const maintenanceEq = equipment.filter((e) => e.status === 'Mantenimiento').length
   const assignedEq = equipment.filter((e) => e.status === 'Asignado').length

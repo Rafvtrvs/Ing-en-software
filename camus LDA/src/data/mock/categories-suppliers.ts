@@ -49,6 +49,36 @@ export const initialCategories: ProductCategory[] = [
     description: 'Flota vehicular para operaciones de alcantarillado e hidrojet.',
     status: 'Activa',
   },
+  {
+    id: 'cat-9',
+    name: 'Vehículos',
+    description: 'Camiones y vehículos operativos registrados como maquinaria.',
+    status: 'Activa',
+  },
+  {
+    id: 'cat-10',
+    name: 'Bombas',
+    description: 'Bombas sumergibles, de achique y equipos de impulsión.',
+    status: 'Activa',
+  },
+  {
+    id: 'cat-11',
+    name: 'Herramientas',
+    description: 'Compresores, herramientas industriales y equipos de taller.',
+    status: 'Activa',
+  },
+  {
+    id: 'cat-12',
+    name: 'Energía',
+    description: 'Generadores y equipos de energía en terreno.',
+    status: 'Activa',
+  },
+  {
+    id: 'cat-13',
+    name: 'Inspección',
+    description: 'Cámaras CCTV y equipos de inspección de ductos.',
+    status: 'Activa',
+  },
 ]
 
 export const initialSuppliers: Supplier[] = [

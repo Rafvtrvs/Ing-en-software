@@ -3,6 +3,7 @@ import { Download, ImagePlus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { ordersService } from '@/services/ordersService'
 import { useOrdersStore } from '@/store/useOrdersStore'
+import { useNotificationsStore } from '@/store/useNotificationsStore'
 import type { OrderEvidence, WorkOrder } from '@/types'
 
 const ACCEPTED_MIME = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
@@ -104,6 +105,11 @@ export function OrderEvidencePanel({
     try {
       await ordersService.uploadEvidence(order.id, file)
       addToast('Carga exitosa')
+      useNotificationsStore.getState().pushOrderActivity({
+        orderId: order.id,
+        title: `Orden ${order.id}: evidencia fotográfica`,
+        message: `Se cargó la foto "${file.name}" en la OT de ${order.client}.`,
+      })
       await load()
     } catch (err) {
       addToast(errorMessage(err, 'No se pudo cargar la imagen'), 'error')

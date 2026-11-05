@@ -1,26 +1,66 @@
+import { useEffect, useMemo } from 'react'
 import { AlertTriangle, Boxes, Package } from 'lucide-react'
 import { KpiCard } from '@/components/ui/KpiCard'
-import type { KpiData } from '@/types'
+import type { KpiData, Product } from '@/types'
 import { useInventoryStore } from '@/store/useInventoryStore'
-import { getInventoryStatusChart } from '@/features/reports/utils/reportStats'
-import { mostUsedProducts } from '@/data/mock/inventory'
+import { useOrdersStore } from '@/store/useOrdersStore'
+import { isConsumableStockCategory } from '@/features/inventory/utils/stockCategories'
+import { computeStockStatus } from '@/features/inventory/utils/inventoryStatus'
+import {
+  getInventoryStatusChart,
+  getMostUsedInventoryProducts,
+} from '@/features/reports/utils/reportStats'
 import { ReportDonutChart } from './ReportDonutChart'
 import { ReportBarChart } from './ReportBarChart'
 import { CriticalStockReportTable } from './CriticalStockReportTable'
 import { ReportExportCatalog } from './ReportExportCatalog'
 
-export function InventoryReportPanel() {
-  const products = useInventoryStore((s) => s.products)
+function withLiveStatus(product: Product): Product {
+  return {
+    ...product,
+    status: computeStockStatus(
+      product.currentStock,
+      product.minStock,
+      product.category,
+    ),
+  }
+}
 
-  const ok = products.filter((p) => p.status === 'Ok').length
-  const low = products.filter((p) => p.status === 'Bajo').length
-  const critical = products.filter((p) => p.status === 'Crítico').length
+export function InventoryReportPanel() {
+  const productsRaw = useInventoryStore((s) => s.products)
+  const movements = useInventoryStore((s) => s.movements)
+  const syncProductsFromApi = useInventoryStore((s) => s.syncProductsFromApi)
+  const syncMovementsFromApi = useInventoryStore((s) => s.syncMovementsFromApi)
+  const orders = useOrdersStore((s) => s.orders)
+  const syncOrders = useOrdersStore((s) => s.syncFromApi)
+
+  useEffect(() => {
+    void Promise.all([
+      syncProductsFromApi(),
+      syncMovementsFromApi(),
+      syncOrders(),
+    ])
+  }, [syncProductsFromApi, syncMovementsFromApi, syncOrders])
+
+  const products = useMemo(
+    () => productsRaw.map(withLiveStatus),
+    [productsRaw],
+  )
+
+  const consumables = useMemo(
+    () => products.filter((p) => isConsumableStockCategory(p.category)),
+    [products],
+  )
+
+  const ok = consumables.filter((p) => p.status === 'Ok').length
+  const low = consumables.filter((p) => p.status === 'Bajo').length
+  const critical = consumables.filter((p) => p.status === 'Crítico').length
 
   const kpis: KpiData[] = [
     {
       title: 'Total Productos',
       value: String(products.length),
-      trend: 'En catálogo',
+      trend: 'Catálogo en PostgreSQL',
       trendDirection: 'up',
       icon: Package,
       iconBg: 'bg-primary/10',
@@ -29,7 +69,7 @@ export function InventoryReportPanel() {
     {
       title: 'Stock Ok',
       value: String(ok),
-      trend: `${products.length ? Math.round((ok / products.length) * 100) : 0}% saludable`,
+      trend: `${consumables.length ? Math.round((ok / consumables.length) * 100) : 0}% saludable`,
       trendDirection: 'up',
       icon: Boxes,
       iconBg: 'bg-emerald-50',
@@ -55,10 +95,14 @@ export function InventoryReportPanel() {
     },
   ]
 
-  const usedData = mostUsedProducts.map((p) => ({
-    name: p.name.length > 20 ? `${p.name.slice(0, 20)}…` : p.name,
-    value: p.value,
-  }))
+  const usedData = useMemo(
+    () =>
+      getMostUsedInventoryProducts(orders, products, movements).map((p) => ({
+        name: p.name.length > 20 ? `${p.name.slice(0, 20)}…` : p.name,
+        value: p.value,
+      })),
+    [orders, products, movements],
+  )
 
   return (
     <div className="space-y-6">

@@ -27,8 +27,8 @@ export function OrderModificationRequestModal({
 
   if (!order) return null
 
-  const handleSubmit = () => {
-    const result = submitModificationRequest(
+  const handleSubmit = async () => {
+    const result = await submitModificationRequest(
       order.id,
       { fieldsToModify: fields, reason },
       {

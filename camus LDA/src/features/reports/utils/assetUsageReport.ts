@@ -1,4 +1,3 @@
-import { mockEquipment } from '@/data/mock/equipment'
 import type { Equipment, Product, WorkOrder } from '@/types'
 
 export type PhysicalAssetKind = 'equipment' | 'truck'
@@ -22,8 +21,11 @@ export interface AssetUsageService {
   linkType: 'equipmentId' | 'truckCode' | 'assignedOrderId'
 }
 
-export function getMachineryCategories(products: Product[]): string[] {
-  const fromEquipment = mockEquipment.map((e) => e.category)
+export function getMachineryCategories(
+  products: Product[],
+  equipment: Equipment[] = [],
+): string[] {
+  const fromEquipment = equipment.map((e) => e.category)
   const fromTrucks = products.filter((p) => p.category === 'Camiones').map(() => 'Camiones')
   return Array.from(new Set([...fromEquipment, ...fromTrucks])).sort((a, b) =>
     a.localeCompare(b),
@@ -33,8 +35,9 @@ export function getMachineryCategories(products: Product[]): string[] {
 export function getPhysicalAssets(
   products: Product[],
   category?: string,
+  equipmentList: Equipment[] = [],
 ): PhysicalAssetOption[] {
-  const equipment = mockEquipment
+  const equipment = equipmentList
     .filter((e) => !category || e.category === category)
     .map((e) => ({
       kind: 'equipment' as const,
@@ -63,7 +66,7 @@ export function getPhysicalAssets(
 export function findOrdersForAsset(
   asset: PhysicalAssetOption,
   orders: WorkOrder[],
-  equipment: Equipment[] = mockEquipment,
+  equipment: Equipment[] = [],
 ): AssetUsageService[] {
   const matches: AssetUsageService[] = []
 

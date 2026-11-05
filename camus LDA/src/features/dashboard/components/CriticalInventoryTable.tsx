@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import type { InventoryItem, Product } from '@/types'
 import { ROUTES } from '@/constants/routes'
+import { isConsumableStockCategory } from '@/features/inventory/utils/stockCategories'
 
 const columns: Column<InventoryItem>[] = [
   { key: 'product', header: 'Producto', className: 'font-medium text-slate-900' },
@@ -23,7 +24,11 @@ interface CriticalInventoryTableProps {
 
 export function CriticalInventoryTable({ products }: CriticalInventoryTableProps) {
   const critical: InventoryItem[] = products
-    .filter((p) => p.status === 'Crítico' || p.status === 'Bajo')
+    .filter(
+      (p) =>
+        isConsumableStockCategory(p.category) &&
+        (p.status === 'Crítico' || p.status === 'Bajo'),
+    )
     .slice(0, 6)
     .map((p) => ({
       product: p.name,

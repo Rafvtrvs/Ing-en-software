@@ -1,8 +1,17 @@
+/** Marca elementos tocados por el apilado móvil para poder limpiarlos sin
+ *  destruir otros estilos inline (p. ej. width de barras de progreso). */
+const STACK_ATTR = 'data-form-stack'
+
+function markStacked(el: HTMLElement) {
+  el.setAttribute(STACK_ATTR, '1')
+}
+
 /** Fuerza grillas internas a columna (uno sobre otro) en formularios móviles */
 export function stackFormGrids(root: HTMLElement | null) {
   if (!root) return
 
   root.querySelectorAll<HTMLElement>('.grid, [class*="grid-cols"]').forEach((el) => {
+    markStacked(el)
     el.style.setProperty('display', 'flex', 'important')
     el.style.setProperty('flex-direction', 'column', 'important')
     el.style.setProperty('grid-template-columns', 'none', 'important')
@@ -14,6 +23,7 @@ export function stackFormGrids(root: HTMLElement | null) {
   root.querySelectorAll<HTMLElement>('form, form > div').forEach((el) => {
     const style = window.getComputedStyle(el)
     if (style.display === 'grid' || (style.display === 'flex' && style.flexDirection === 'row')) {
+      markStacked(el)
       el.style.setProperty('display', 'flex', 'important')
       el.style.setProperty('flex-direction', 'column', 'important')
       el.style.setProperty('gap', '1rem', 'important')
@@ -22,6 +32,7 @@ export function stackFormGrids(root: HTMLElement | null) {
   })
 
   root.querySelectorAll<HTMLElement>('input, select, textarea').forEach((el) => {
+    markStacked(el)
     el.style.setProperty('width', '100%', 'important')
     el.style.setProperty('max-width', '100%', 'important')
     el.style.setProperty('min-height', '2.75rem', 'important')
@@ -32,7 +43,7 @@ export function stackFormGrids(root: HTMLElement | null) {
 
 export function clearStackedFormStyles(root: HTMLElement | null) {
   if (!root) return
-  root.querySelectorAll<HTMLElement>('*').forEach((el) => {
+  root.querySelectorAll<HTMLElement>(`[${STACK_ATTR}]`).forEach((el) => {
     ;[
       'display',
       'flex-direction',
@@ -44,5 +55,6 @@ export function clearStackedFormStyles(root: HTMLElement | null) {
       'box-sizing',
       'font-size',
     ].forEach((prop) => el.style.removeProperty(prop))
+    el.removeAttribute(STACK_ATTR)
   })
 }

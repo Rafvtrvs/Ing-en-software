@@ -229,6 +229,8 @@ export interface Product {
   currentStock: number
   minStock: number
   unit: string
+  /** Costo unitario de adquisición (CLP) para utilidad / COGS */
+  unitCost?: number
   status: InventoryStatus
 }
 
@@ -244,6 +246,8 @@ export interface Equipment {
   name: string
   serialNumber: string
   location: string
+  /** Ubicación original definida por el usuario (se restaura al desasignar) */
+  baseLocation?: string
   status: EquipmentStatus
   lastMaintenance: string
   nextMaintenance: string
@@ -251,6 +255,10 @@ export interface Equipment {
   /** OT asociada cuando el equipo está asignado */
   assignedOrderId?: string
   category: string
+  /** Datos de flota (categoría Vehículos / Camiones) */
+  patente?: string
+  marca?: string
+  purchaseDate?: string
 }
 
 export type StockMovementType = 'Entrada' | 'Salida'
@@ -264,6 +272,9 @@ export interface StockMovement {
   detail: string
   quantity: number
   user: string
+  orderId?: string
+  /** ISO desde API (PostgreSQL); útil para filtros por mes */
+  createdAt?: string
 }
 
 export type InventoryTab =
@@ -300,6 +311,7 @@ export type KitStatus = 'Activo' | 'Inactivo'
 export interface KitProductLine {
   productId: string
   productName: string
+  productCode?: string
   quantity: number
   unit: string
 }
@@ -417,6 +429,8 @@ export interface SystemUser {
   email: string
   phone: string
   roleId: string
+  /** Nombre del rol desde API (útil para filtrar técnicos). */
+  roleName?: string
   status: SystemUserStatus
   lastLogin: string
   avatar?: string
@@ -540,6 +554,8 @@ export interface Invoice {
   number: string
   client: string
   clientRut: string
+  /** ID numérico del cliente en Postgres (vínculo real). */
+  clientId?: string
   orderId?: string
   issueDate: string
   dueDate: string

@@ -46,19 +46,35 @@ export function KitViewModal({ kit, open, onClose }: KitViewModalProps) {
         <Badge label={kit.status} context="client" />
       </div>
       <p className="mb-2 text-sm font-semibold text-slate-700">Productos incluidos</p>
-      <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
-        {kit.items.map((item, i) => (
-          <li key={i} className="flex items-center justify-between px-4 py-3 text-sm">
-            <span className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-slate-400" />
-              {item.productName}
-            </span>
-            <span className="font-semibold tabular-nums text-slate-900">
-              {item.quantity} {item.unit}
-            </span>
-          </li>
-        ))}
-      </ul>
+      {kit.items.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
+          Este kit no tiene productos.
+        </p>
+      ) : (
+        <ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+          {kit.items.map((item) => (
+            <li
+              key={item.productId}
+              className="flex items-center justify-between px-4 py-3 text-sm"
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <Package className="h-4 w-4 shrink-0 text-slate-400" />
+                <span className="min-w-0">
+                  <span className="block font-medium text-slate-900">
+                    {item.productName}
+                  </span>
+                  {item.productCode ? (
+                    <span className="block text-xs text-slate-500">{item.productCode}</span>
+                  ) : null}
+                </span>
+              </span>
+              <span className="font-semibold tabular-nums text-slate-900">
+                {item.quantity} {item.unit}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </Modal>
   )
 }

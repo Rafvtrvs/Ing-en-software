@@ -2,13 +2,18 @@ import { AlertTriangle, Package } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { useInventoryStore } from '@/store/useInventoryStore'
+import { isConsumableStockCategory } from '@/features/inventory/utils/stockCategories'
 
 export function InventoryAlerts() {
   const products = useInventoryStore((s) => s.products)
   const openViewModal = useInventoryStore((s) => s.openViewModal)
 
   const alerts = products
-    .filter((p) => p.status === 'Crítico' || p.status === 'Bajo')
+    .filter(
+      (p) =>
+        isConsumableStockCategory(p.category) &&
+        (p.status === 'Crítico' || p.status === 'Bajo'),
+    )
     .sort((a, b) => (a.status === 'Crítico' ? -1 : 1) - (b.status === 'Crítico' ? -1 : 1))
     .slice(0, 5)
 

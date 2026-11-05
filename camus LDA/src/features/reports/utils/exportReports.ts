@@ -106,13 +106,22 @@ export function exportInventoryReport(
   products: Product[],
   format: 'CSV' | 'XLSX' = 'CSV',
 ) {
-  const headers = ['Código', 'Producto', 'Categoría', 'Stock', 'Mínimo', 'Estado']
+  const headers = [
+    'Código',
+    'Producto',
+    'Categoría',
+    'Stock',
+    'Mínimo',
+    'Costo unitario',
+    'Estado',
+  ]
   const rows = products.map((p) => [
     p.code,
     p.name,
     p.category,
     p.currentStock,
     p.minStock,
+    p.unitCost ?? 0,
     p.status,
   ])
   if (format === 'XLSX') {
@@ -130,7 +139,13 @@ export function exportTechniciansReport(
   technicians: TechnicianPerformance[],
   format: 'CSV' | 'XLSX' = 'CSV',
 ) {
-  const headers = ['Técnico', 'Completadas', 'En curso', 'Días promedio', 'Calificación']
+  const headers = [
+    'Técnico',
+    'Completadas',
+    'En curso',
+    'Días promedio',
+    'Índice de cierre',
+  ]
   const rows = technicians.map((t) => [
     t.name,
     t.completedOrders,

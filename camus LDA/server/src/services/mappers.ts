@@ -10,7 +10,9 @@ import type {
   CategoriaInsumo,
   Factura,
   Pago,
+  Maquinaria,
 } from '@prisma/client'
+import { isConsumableStockCategory } from '../utils/stockCategories.js'
 
 function dateOnly(d: Date | null | undefined): string {
   return d ? d.toISOString().slice(0, 10) : ''
@@ -69,15 +71,24 @@ export function toOrderDto(
 }
 
 export function toAssetDto(i: Insumo & { categoria?: CategoriaInsumo | null }) {
+  const category = i.categoria?.nombre ?? ''
+  let status = 'Ok'
+  if (!category || isConsumableStockCategory(category)) {
+    if (i.stockActual <= 0 || i.stockActual < i.stockMinimo * 0.5) status = 'Crítico'
+    else if (i.stockActual <= i.stockMinimo) status = 'Bajo'
+    else status = 'Ok'
+  }
+
   return {
     id: String(i.id),
     code: i.codigo,
     name: i.nombre,
-    category: i.categoria?.nombre ?? '',
+    category,
     currentStock: i.stockActual,
     minStock: i.stockMinimo,
     unit: i.unidad,
-    status: i.estado,
+    unitCost: money(i.costoUnitario),
+    status,
   }
 }
 
@@ -118,5 +129,47 @@ export function toPaymentDto(
     amount: money(p.monto),
     method: p.metodo ?? 'Transferencia',
     date: dateOnly(p.fecha),
+  }
+}
+
+function mapMachineryStatus(raw?: string | null): string {
+  const s = (raw ?? 'Operativo').trim()
+  if (s === 'Operativa') return 'Operativo'
+  if (s === 'No operativa' || s === 'No operativo') return 'Fuera de servicio'
+  return s || 'Operativo'
+}
+
+/** RF67 — maquinaria de Postgres → Equipment del frontend */
+export function toEquipmentDto(m: Maquinaria, assignedOrderId?: string) {
+  let status = mapMachineryStatus(m.estado)
+  if (assignedOrderId && status === 'Operativo') status = 'Asignado'
+
+  const code =
+    m.codigo?.trim() ||
+    m.patente?.trim() ||
+    `MAQ-${String(m.id).padStart(3, '0')}`
+  const name =
+    m.nombre?.trim() ||
+    [m.marca, m.patente].filter(Boolean).join(' ') ||
+    `Maquinaria ${m.id}`
+
+  const baseLocation = m.ubicacionBase?.trim() || m.ubicacion || ''
+
+  return {
+    id: String(m.id),
+    code,
+    name,
+    serialNumber: m.numeroSerie || m.patente || '—',
+    location: m.ubicacion || '—',
+    baseLocation: baseLocation || undefined,
+    status,
+    lastMaintenance: dateOnly(m.ultimaMantencion) || new Date().toISOString().slice(0, 10),
+    nextMaintenance: dateOnly(m.proximaMantencion) || new Date().toISOString().slice(0, 10),
+    assignedTo: m.asignadoA ?? undefined,
+    assignedOrderId: assignedOrderId || undefined,
+    category: m.categoria || 'Maquinaria',
+    patente: m.patente ?? undefined,
+    marca: m.marca ?? undefined,
+    purchaseDate: dateOnly(m.fechaCompra) || undefined,
   }
 }

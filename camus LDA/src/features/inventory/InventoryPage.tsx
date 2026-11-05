@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { Tabs } from '@/components/ui/Tabs'
 import { ToastContainerView } from '@/components/ui/ToastContainer'
 import { useInventoryStore } from '@/store/useInventoryStore'
-import { getInventoryKpis } from '@/data/mock/inventory'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
+import { getInventoryKpis } from '@/features/inventory/utils/inventoryKpis'
 import type { InventoryTab } from '@/types'
 import { InventoryTable } from './components/InventoryTable'
 import { RecentMovementsTable } from './components/RecentMovementsTable'
@@ -39,6 +40,7 @@ const INVENTORY_TABS: { id: InventoryTab; label: string }[] = [
 
 export function InventoryPage() {
   const products = useInventoryStore((s) => s.products)
+  const movements = useInventoryStore((s) => s.movements)
   const activeTab = useInventoryStore((s) => s.activeTab)
   const setActiveTab = useInventoryStore((s) => s.setActiveTab)
   const modalEntity = useInventoryStore((s) => s.modalEntity)
@@ -51,12 +53,28 @@ export function InventoryPage() {
   const toasts = useInventoryStore((s) => s.toasts)
   const removeToast = useInventoryStore((s) => s.removeToast)
   const syncProductsFromApi = useInventoryStore((s) => s.syncProductsFromApi)
+  const syncMovementsFromApi = useInventoryStore((s) => s.syncMovementsFromApi)
+  const equipment = useEquipmentStore((s) => s.equipment)
+  const syncEquipmentFromApi = useEquipmentStore((s) => s.syncFromApi)
 
   useEffect(() => {
-    void syncProductsFromApi()
-  }, [syncProductsFromApi])
+    const refresh = () => {
+      void Promise.all([
+        syncProductsFromApi(),
+        syncMovementsFromApi(),
+        syncEquipmentFromApi(),
+      ])
+    }
+    refresh()
+    const onFocus = () => refresh()
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [syncProductsFromApi, syncMovementsFromApi, syncEquipmentFromApi])
 
-  const kpis = getInventoryKpis(products)
+  const kpis = useMemo(
+    () => getInventoryKpis(products, movements, equipment),
+    [products, movements, equipment],
+  )
 
   return (
     <>

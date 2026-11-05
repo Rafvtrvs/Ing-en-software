@@ -9,7 +9,7 @@ import { useSettingsStore } from '@/store/useSettingsStore'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useBillingStore } from '@/store/useBillingStore'
 import { useInventoryStore } from '@/store/useInventoryStore'
-import { mockEquipment } from '@/data/mock/equipment'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
 import { getDashboardKpis } from './utils/getDashboardKpis'
 import {
   filterOrdersByPriority,
@@ -44,6 +44,8 @@ export function DashboardPage() {
   const invoices = useBillingStore((s) => s.invoices)
   const payments = useBillingStore((s) => s.payments)
   const products = useInventoryStore((s) => s.products)
+  const equipment = useEquipmentStore((s) => s.equipment)
+  const syncEquipment = useEquipmentStore((s) => s.syncFromApi)
   const refreshMinutes = useSettingsStore(
     (s) => s.config.system.chartRefreshMinutes ?? 5,
   )
@@ -64,7 +66,7 @@ export function DashboardPage() {
   const handleRefresh = async () => {
     setRefreshing(true)
     try {
-      await Promise.all([syncFromApi(), syncBillingFromApi()])
+      await Promise.all([syncFromApi(), syncBillingFromApi(), syncEquipment()])
     } finally {
       setLastUpdated(new Date())
       setRefreshTick((t) => t + 1)
@@ -166,11 +168,11 @@ export function DashboardPage() {
       </div>
 
       <OverdueOrdersAlert orders={filteredOrders} />
-      <UnavailableEquipmentAlert equipment={mockEquipment} />
+      <UnavailableEquipmentAlert equipment={equipment} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <FinancialIncomeBlock invoices={invoices} payments={payments} />
-        <AvailabilityBlock products={products} equipment={mockEquipment} />
+        <AvailabilityBlock products={products} equipment={equipment} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-3">

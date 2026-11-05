@@ -15,7 +15,13 @@ import { clientController } from './controllers/client.controller.js'
 import { orderController } from './controllers/order.controller.js'
 import { interventionController } from './controllers/intervention.controller.js'
 import { documentController } from './controllers/document.controller.js'
+import { commentController } from './controllers/comment.controller.js'
 import { assetController } from './controllers/asset.controller.js'
+import { stockMovementController } from './controllers/stock-movement.controller.js'
+import { kitController } from './controllers/kit.controller.js'
+import { machineryController } from './controllers/machinery.controller.js'
+import { modificationController } from './controllers/modification.controller.js'
+import { rescheduleController } from './controllers/reschedule.controller.js'
 import { reportController } from './controllers/report.controller.js'
 import { userController } from './controllers/user.controller.js'
 import { invoiceController } from './controllers/invoice.controller.js'
@@ -74,6 +80,9 @@ router.put(
   requireAuth,
   interventionController.update,
 )
+
+router.get('/orders/:id/comments', requireAuth, commentController.list)
+router.post('/orders/:id/comments', requireAuth, commentController.create)
 
 // Evidencia visual por OT (RF09 / CU-30–34)
 router.get('/orders/:id/evidence', requireAuth, evidenceController.list)
@@ -139,12 +148,82 @@ router.post(
   requireAuth,
   documentController.addVersion,
 )
+router.get(
+  '/orders/:orderId/documents/:documentId/file',
+  requireAuth,
+  documentController.file,
+)
 
 // Activos / inventario
 router.get('/assets', optionalAuth, assetController.list)
 router.post('/assets', requireAuth, assetController.create)
 router.put('/assets/:id', requireAuth, assetController.update)
 router.delete('/assets/:id', requireAuth, assetController.remove)
+
+// Movimientos de stock (historial persistente)
+router.get('/stock-movements', optionalAuth, stockMovementController.list)
+router.post('/stock-movements', requireAuth, stockMovementController.create)
+
+// Kits y paquetes de insumos
+router.get('/kits', optionalAuth, kitController.list)
+router.post('/kits', requireAuth, kitController.create)
+router.put('/kits/:id', requireAuth, kitController.update)
+router.delete('/kits/:id', requireAuth, kitController.remove)
+
+// Maquinaria / equipos (RF67)
+router.get('/machinery', optionalAuth, machineryController.list)
+router.post('/machinery', requireAuth, machineryController.create)
+router.post(
+  '/machinery/sync-assignments',
+  requireAuth,
+  machineryController.syncAssignments,
+)
+router.put('/machinery/:id', requireAuth, machineryController.update)
+router.delete('/machinery/:id', requireAuth, machineryController.remove)
+
+// RF68 — solicitudes de modificación de OT
+router.get(
+  '/modification-requests',
+  optionalAuth,
+  modificationController.listRequests,
+)
+router.post(
+  '/orders/:id/modification-requests',
+  requireAuth,
+  modificationController.createRequest,
+)
+router.post(
+  '/modification-requests/:requestId/approve',
+  requireAuth,
+  modificationController.approve,
+)
+router.post(
+  '/modification-requests/:requestId/reject',
+  requireAuth,
+  modificationController.reject,
+)
+router.get(
+  '/orders/:id/modification-history',
+  optionalAuth,
+  modificationController.listHistory,
+)
+router.post(
+  '/orders/:id/modification-history',
+  requireAuth,
+  modificationController.addHistory,
+)
+
+// RF66 CDS 229 — historial de reprogramaciones
+router.get(
+  '/orders/:id/reschedules',
+  optionalAuth,
+  rescheduleController.list,
+)
+router.post(
+  '/orders/:id/reschedules',
+  requireAuth,
+  rescheduleController.create,
+)
 
 // Usuarios y roles (credenciales en PostgreSQL)
 const userManagers = requireRole('admin', 'jefe', 'supervisor')

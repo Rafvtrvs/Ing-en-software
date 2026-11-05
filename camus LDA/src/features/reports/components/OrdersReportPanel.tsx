@@ -1,9 +1,11 @@
+import { useEffect, useMemo } from 'react'
 import { KpiCard } from '@/components/ui/KpiCard'
-import { getOrdersReportKpis } from '@/data/mock/reports'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import {
   getOrdersByCategory,
   getOrdersByStatusChart,
+  getOrdersReportKpis,
+  getOrdersTrendByMonth,
 } from '@/features/reports/utils/reportStats'
 import { ReportDonutChart } from './ReportDonutChart'
 import { ReportBarChart } from './ReportBarChart'
@@ -12,13 +14,24 @@ import { ReportExportCatalog } from './ReportExportCatalog'
 
 export function OrdersReportPanel() {
   const orders = useOrdersStore((s) => s.orders)
+  const syncFromApi = useOrdersStore((s) => s.syncFromApi)
 
-  const kpis = getOrdersReportKpis({
-    total: orders.length,
-    pending: orders.filter((o) => o.status === 'Pendiente').length,
-    inProgress: orders.filter((o) => o.status === 'En Curso').length,
-    completed: orders.filter((o) => o.status === 'Completada').length,
-  })
+  useEffect(() => {
+    void syncFromApi()
+  }, [syncFromApi])
+
+  const kpis = useMemo(
+    () =>
+      getOrdersReportKpis({
+        total: orders.length,
+        pending: orders.filter((o) => o.status === 'Pendiente').length,
+        inProgress: orders.filter((o) => o.status === 'En Curso').length,
+        completed: orders.filter((o) => o.status === 'Completada').length,
+      }),
+    [orders],
+  )
+
+  const trend = useMemo(() => getOrdersTrendByMonth(orders), [orders])
 
   return (
     <div className="space-y-6">
@@ -30,7 +43,7 @@ export function OrdersReportPanel() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <ReportDonutChart title="Órdenes por Estado" data={getOrdersByStatusChart(orders)} />
-        <OrdersTrendChart />
+        <OrdersTrendChart data={trend} />
       </div>
 
       <ReportBarChart title="Órdenes por Categoría de Falla" data={getOrdersByCategory(orders)} />

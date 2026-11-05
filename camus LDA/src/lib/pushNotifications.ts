@@ -172,14 +172,21 @@ function bindCampanitaBridges() {
   flush()
 }
 
+/** Escucha SW/FCM → campanita para cualquier sesión autenticada. */
+export function ensureCampanitaPushListeners(): void {
+  if (!isFirebaseConfigured()) return
+  bindCampanitaBridges()
+  void drainFcmInboxToCampanita()
+}
+
 export async function registerAdminPushIfNeeded(role: string): Promise<void> {
+  ensureCampanitaPushListeners()
+
   if (!isFirebaseConfigured() || !isAdminRole(role)) return
   if (!firebaseVapidKey) {
     console.warn('[FCM] Falta VITE_FIREBASE_VAPID_KEY')
     return
   }
-
-  bindCampanitaBridges()
 
   if (pushSetupDone) {
     void drainFcmInboxToCampanita()

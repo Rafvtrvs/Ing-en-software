@@ -7,8 +7,9 @@ import { Select } from '@/components/ui/Select'
 import { FormField } from '@/components/ui/FormField'
 import { FormGrid } from '@/components/ui/FormGrid'
 import { useOrdersStore } from '@/store/useOrdersStore'
-import { useOperationsStore } from '@/store/useOperationsStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
+import { enqueue, flushQueue } from '@/features/field/utils/fieldQueue'
+import { nextOrderId } from '@/features/orders/utils/nextOrderId'
 import type { IncidentType, OrderPriority, WorkOrder } from '@/types'
 
 const INCIDENT_TYPES: IncidentType[] = [
@@ -31,8 +32,6 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
   const orders = useOrdersStore((s) => s.orders)
   const addOrder = useOrdersStore((s) => s.addOrder)
   const addToast = useOrdersStore((s) => s.addToast)
-  const offlineMode = useOperationsStore((s) => s.offlineMode)
-  const queueOfflineEntry = useOperationsStore((s) => s.queueOfflineEntry)
   const currentUser = useSessionUser()
 
   const [step, setStep] = useState<1 | 2>(1)
@@ -44,13 +43,10 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const suggestedId = useMemo(() => {
-    const nums = orders
-      .map((o) => parseInt(o.id.replace(/\D/g, ''), 10))
-      .filter((n) => !Number.isNaN(n))
-    const next = (nums.length ? Math.max(...nums) : 127) + 1
-    return `OT-2026-${String(next).padStart(4, '0')}`
-  }, [orders])
+  const suggestedId = useMemo(
+    () => nextOrderId(orders.map((o) => o.id)),
+    [orders],
+  )
 
   const reset = () => {
     setStep(1)
@@ -78,7 +74,7 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
   }
 
   const buildOrder = (): WorkOrder => {
-    const today = new Date().toLocaleDateString('es-CL')
+    const today = new Date().toISOString().slice(0, 10)
     return {
       id: suggestedId,
       client: client.trim(),
@@ -88,6 +84,8 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
       incidentType,
       status: 'Pendiente',
       createdAt: today,
+      executionDate: today,
+      startDate: today,
       priority,
       priorityManual: priority === 'Urgente' || priority === 'Alta',
       technician: currentUser.name ?? 'Operador',
@@ -102,31 +100,58 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
 
   const handleSaveDraft = () => {
     if (!validateStep2()) return
-    if (offlineMode) {
-      queueOfflineEntry({
-        module: 'Órdenes',
-        summary: `Borrador OT terreno ${suggestedId} — ${client.trim()}`,
-      })
-      addToast('Información registrada temporalmente en el dispositivo', 'info')
-    } else {
-      addToast('Formulario guardado temporalmente. Complete el registro para enviar.', 'info')
-    }
+    addToast('Borrador listo en el formulario. Pulse “Finalizar registro” para guardar la OT.', 'info')
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateStep2()) return
-    const order = buildOrder()
-    if (offlineMode) {
-      queueOfflineEntry({
-        module: 'Órdenes',
-        summary: `OT terreno ${order.id} — ${order.client}`,
+    const draft = buildOrder()
+    const offline = !navigator.onLine
+
+    // ID correlativo lo asigna el store; se reutiliza en la cola de sync
+    const createdId = addOrder({ ...draft, id: '' })
+    const order = { ...draft, id: createdId }
+
+    if (offline) {
+      const queued = enqueue({
+        kind: 'create-order',
+        order,
+        notes: notes.trim() || undefined,
       })
-      addToast('Orden guardada localmente. Sincronice cuando recupere conexión.', 'info')
+      if (!queued.ok) {
+        addToast('No se pudo guardar en el dispositivo (almacenamiento lleno)', 'error')
+        return
+      }
+      addToast(
+        `Orden ${createdId} guardada localmente. Sincronice cuando recupere conexión.`,
+        'info',
+      )
       handleClose()
       return
     }
-    addOrder(order)
-    addToast('Registro exitoso: orden de trabajo creada desde terreno')
+
+    const queued = enqueue({
+      kind: 'create-order',
+      order,
+      notes: notes.trim() || undefined,
+    })
+    if (queued.ok) {
+      const res = await flushQueue()
+      if (res.synced > 0) {
+        addToast(`Registro exitoso: ${createdId} creada desde terreno`)
+      } else if (res.offline) {
+        addToast(
+          `Sin conexión estable: ${createdId} quedó pendiente de sincronizar`,
+          'info',
+        )
+      } else if (res.failed.length > 0) {
+        addToast(res.failed[0].message, 'error')
+      } else {
+        addToast(`Registro exitoso: ${createdId} creada desde terreno`)
+      }
+    } else {
+      addToast(`Orden ${createdId} creada localmente; no se pudo encolar para la API`, 'info')
+    }
     handleClose()
   }
 
@@ -166,8 +191,10 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
         <div className="space-y-4">
           <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
             Operador: <strong>{currentUser.name ?? 'Operador'}</strong>
-            {offlineMode && (
-              <p className="mt-2 text-blue-800">Modo sin conexión activo: los datos se guardarán localmente.</p>
+            {!navigator.onLine && (
+              <p className="mt-2 text-blue-800">
+                Sin conexión: los datos se guardarán localmente hasta sincronizar.
+              </p>
             )}
           </div>
           <p className="text-sm text-slate-600">
@@ -175,7 +202,7 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
           </p>
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <ClipboardList className="h-4 w-4" />
-            ID sugerido: <strong className="text-slate-800">{suggestedId}</strong>
+            ID automático: <strong className="text-slate-800">{suggestedId}</strong>
           </div>
         </div>
       ) : (

@@ -96,11 +96,22 @@ model Cliente {
 }
 
 model Maquinaria {
-  id       Int    @id @default(autoincrement()) @map("id_maquinaria")
-  patente  String? @db.VarChar(10)
-  marca    String? @db.VarChar(50)
-  estado   String @default("Operativa") @db.VarChar(50)
-  usos     Utiliza[]
+  id                Int       @id @default(autoincrement()) @map("id_maquinaria")
+  patente           String?   @db.VarChar(20)
+  marca             String?   @db.VarChar(50)
+  estado            String    @default("Operativo") @db.VarChar(50)
+  codigo            String    @default("") @db.VarChar(50)
+  nombre            String    @default("") @db.VarChar(150)
+  numeroSerie       String    @default("") @map("numero_serie") @db.VarChar(50)
+  ubicacion         String    @default("") @db.VarChar(150)
+  /// Ubicación original del usuario; se restaura al liberar de una OT
+  ubicacionBase     String    @default("") @map("ubicacion_base") @db.VarChar(150)
+  categoria         String    @default("") @db.VarChar(100)
+  fechaCompra       DateTime? @map("fecha_compra") @db.Date
+  ultimaMantencion  DateTime? @map("ultima_mantencion") @db.Date
+  proximaMantencion DateTime? @map("proxima_mantencion") @db.Date
+  asignadoA         String?   @map("asignado_a") @db.VarChar(100)
+  usos              Utiliza[]
 
   @@map("maquinaria")
 }
@@ -131,21 +142,41 @@ model CategoriaInsumo {
 }
 
 model Insumo {
-  id          Int    @id @default(autoincrement()) @map("id_insumo")
-  codigo      String @default("") @db.VarChar(50)
-  nombre      String @db.VarChar(100)
-  stockActual Int    @default(0) @map("stock_actual")
-  stockMinimo Int    @default(0) @map("stock_minimo")
-  unidad      String @default("unidad") @db.VarChar(30)
-  estado      String @default("Ok") @db.VarChar(20)
-  idCategoria Int?   @map("id_categoria")
-  idProveedor Int?   @map("id_proveedor")
-  categoria   CategoriaInsumo? @relation(fields: [idCategoria], references: [id])
-  proveedor   Proveedor?       @relation(fields: [idProveedor], references: [id])
-  kitItems    KitItem[]
-  consumos    Consume[]
+  id            Int     @id @default(autoincrement()) @map("id_insumo")
+  codigo        String  @default("") @db.VarChar(50)
+  nombre        String  @db.VarChar(100)
+  stockActual   Int     @default(0) @map("stock_actual")
+  stockMinimo   Int     @default(0) @map("stock_minimo")
+  unidad        String  @default("unidad") @db.VarChar(30)
+  /// Costo unitario de adquisición (para cálculo de utilidad / COGS)
+  costoUnitario Decimal @default(0) @map("costo_unitario") @db.Decimal(12, 2)
+  estado        String  @default("Ok") @db.VarChar(20)
+  idCategoria   Int?    @map("id_categoria")
+  idProveedor   Int?    @map("id_proveedor")
+  categoria     CategoriaInsumo? @relation(fields: [idCategoria], references: [id])
+  proveedor     Proveedor?       @relation(fields: [idProveedor], references: [id])
+  kitItems      KitItem[]
+  consumos      Consume[]
+  movimientos   MovimientoStock[]
 
   @@map("insumo")
+}
+
+/// Historial de entradas/salidas de inventario (persistente)
+model MovimientoStock {
+  id        Int      @id @default(autoincrement()) @map("id_movimiento")
+  idInsumo  Int      @map("id_insumo")
+  tipo      String   @db.VarChar(20)
+  cantidad  Int
+  detalle   String   @default("") @db.VarChar(255)
+  usuario   String   @default("Sistema") @db.VarChar(120)
+  idOt      String?  @map("id_ot") @db.VarChar(30)
+  fecha     DateTime @default(now())
+  insumo    Insumo   @relation(fields: [idInsumo], references: [id], onDelete: Cascade)
+
+  @@index([fecha])
+  @@index([idInsumo])
+  @@map("movimiento_stock")
 }
 
 model Kit {
@@ -193,8 +224,65 @@ model OrdenTrabajo {
   facturas     Factura[]
   usos         Utiliza[]
   consumos     Consume[]
+  solicitudesModificacion SolicitudModificacion[]
+  historialModificacion   HistorialModificacionOt[]
+  historialReprogramacion HistorialReprogramacionOt[]
 
   @@map("orden_trabajo")
+}
+
+/// RF68 — solicitudes de modificación de OT
+model SolicitudModificacion {
+  id              Int       @id @default(autoincrement()) @map("id_solicitud")
+  idOt            String    @map("id_ot") @db.VarChar(30)
+  idOperador      String    @map("id_operador") @db.VarChar(80)
+  nombreOperador  String    @map("nombre_operador") @db.VarChar(150)
+  camposModificar String    @map("campos_modificar") @db.VarChar(255)
+  motivo          String    @db.VarChar(500)
+  estado          String    @default("Pendiente") @db.VarChar(20)
+  solicitadoEn    DateTime  @default(now()) @map("solicitado_en")
+  idRevisor       String?   @map("id_revisor") @db.VarChar(80)
+  nombreRevisor   String?   @map("nombre_revisor") @db.VarChar(150)
+  revisadoEn      DateTime? @map("revisado_en")
+  motivoRechazo   String?   @map("motivo_rechazo") @db.VarChar(500)
+  orden           OrdenTrabajo @relation(fields: [idOt], references: [id], onDelete: Cascade)
+
+  @@index([idOt])
+  @@index([estado])
+  @@map("solicitud_modificacion")
+}
+
+/// RF68 CDS 235 — historial de modificaciones aplicadas
+model HistorialModificacionOt {
+  id            Int      @id @default(autoincrement()) @map("id_historial")
+  idOt          String   @map("id_ot") @db.VarChar(30)
+  campo         String   @db.VarChar(80)
+  etiqueta      String   @db.VarChar(120)
+  valorAnterior String   @map("valor_anterior") @db.VarChar(500)
+  valorNuevo    String   @map("valor_nuevo") @db.VarChar(500)
+  idUsuario     String   @map("id_usuario") @db.VarChar(80)
+  nombreUsuario String   @map("nombre_usuario") @db.VarChar(150)
+  cambiadoEn    DateTime @default(now()) @map("cambiado_en")
+  orden         OrdenTrabajo @relation(fields: [idOt], references: [id], onDelete: Cascade)
+
+  @@index([idOt])
+  @@map("historial_modificacion_ot")
+}
+
+/// RF66 CDS 229 — historial de reprogramaciones de fecha de ejecución
+model HistorialReprogramacionOt {
+  id            Int      @id @default(autoincrement()) @map("id_reprogramacion")
+  idOt          String   @map("id_ot") @db.VarChar(30)
+  fechaAnterior String   @map("fecha_anterior") @db.VarChar(40)
+  fechaNueva    String   @map("fecha_nueva") @db.VarChar(40)
+  idUsuario     String   @map("id_usuario") @db.VarChar(80)
+  nombreUsuario String   @map("nombre_usuario") @db.VarChar(150)
+  cambiadoEn    DateTime @default(now()) @map("cambiado_en")
+  orden         OrdenTrabajo @relation(fields: [idOt], references: [id], onDelete: Cascade)
+
+  @@index([idOt])
+  @@index([cambiadoEn])
+  @@map("historial_reprogramacion_ot")
 }
 
 /// RF-40..42 — documentos / contratos / reportes versionados por OT

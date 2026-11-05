@@ -165,7 +165,7 @@ export function AuditReportPanel() {
     ? 'Registro de inicios de sesión y eventos de autenticación.'
     : criticalOnly
       ? 'Cambios en registros críticos con valor anterior y nuevo (CU-204).'
-      : 'Consulta la bitácora general y filtra por usuario o módulo (CU-202 / CU-203).'
+      : 'Consulta la bitácora general y filtra por usuario o módulo.'
 
   const kpis = [
     {

@@ -9,6 +9,7 @@ import { useSessionUser } from '@/features/auth/useSessionUser'
 import { formatDisplayDate, toInputDate } from '@/features/orders/utils/orderDates'
 import { getExecutionDate, validateRescheduleDate } from '@/features/orders/utils/rescheduleValidation'
 import { useInventoryStore } from '@/store/useInventoryStore'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
 import type { OrderRescheduleEvent, WorkOrder } from '@/types'
 
 const EMPTY_RESCHEDULE_HISTORY: OrderRescheduleEvent[] = []
@@ -26,6 +27,8 @@ interface RescheduleOrderModalProps {
 export function RescheduleOrderModal({ order, open, onClose }: RescheduleOrderModalProps) {
   const orders = useOrdersStore((s) => s.orders)
   const products = useInventoryStore((s) => s.products)
+  const equipment = useEquipmentStore((s) => s.equipment)
+  const syncEquipment = useEquipmentStore((s) => s.syncFromApi)
   const rescheduleOrder = useOrdersStore((s) => s.rescheduleOrder)
   const addToast = useOrdersStore((s) => s.addToast)
   const currentUser = useSessionUser()
@@ -34,19 +37,24 @@ export function RescheduleOrderModal({ order, open, onClose }: RescheduleOrderMo
   const [newDate, setNewDate] = useState(currentDate)
 
   useEffect(() => {
+    if (!open) return
+    void syncEquipment()
+  }, [open, syncEquipment])
+
+  useEffect(() => {
     if (!open || !order) return
     setNewDate(getExecutionDate(order) || toInputDate(order.startDate) || '')
   }, [open, order])
 
   const validation = useMemo(() => {
     if (!order || !newDate) return { available: false, reasons: [] as string[] }
-    return validateRescheduleDate(order, newDate, orders, products)
-  }, [order, newDate, orders, products])
+    return validateRescheduleDate(order, newDate, orders, products, equipment)
+  }, [order, newDate, orders, products, equipment])
 
   if (!order) return null
 
-  const handleConfirm = () => {
-    const result = rescheduleOrder(order.id, newDate, {
+  const handleConfirm = async () => {
+    const result = await rescheduleOrder(order.id, newDate, {
       id: currentUser.id ?? 'session',
       name: currentUser.name ?? 'Administrador',
     })
@@ -158,6 +166,12 @@ export function OrderRescheduleHistoryPanel({ orderId }: { orderId: string }) {
   const rawHistory = useOrdersStore(
     (s) => s.rescheduleHistoryByOrderId[orderId] ?? EMPTY_RESCHEDULE_HISTORY,
   )
+  const fetchRescheduleHistory = useOrdersStore((s) => s.fetchRescheduleHistory)
+
+  useEffect(() => {
+    void fetchRescheduleHistory(orderId)
+  }, [orderId, fetchRescheduleHistory])
+
   const history = useMemo(
     () =>
       [...rawHistory].sort(

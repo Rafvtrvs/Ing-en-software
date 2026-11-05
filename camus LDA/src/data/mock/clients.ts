@@ -1,5 +1,5 @@
 import { Building2, UserCheck, UserPlus, Users } from 'lucide-react'
-import type { ChartDataPoint, Client, ClientDeadline, ClientOrder, KpiData } from '@/types'
+import type { ChartDataPoint, Client, KpiData } from '@/types'
 
 export const clientsKpis: KpiData[] = [
   {
@@ -131,68 +131,3 @@ export const clientsByStatus: ChartDataPoint[] = [
   { name: 'Bloqueados', value: 9, color: '#94a3b8' },
 ]
 
-export const recentOrdersByClient: ClientOrder[] = [
-  {
-    id: 'OT-2026-0128',
-    client: 'Comercial XYZ Ltda.',
-    service: 'Desobstrucción alcantarillado',
-    status: 'En Curso',
-    date: '22/05/2026',
-    technician: 'Luis Torres',
-    technicianAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Luis',
-  },
-  {
-    id: 'OT-2026-0127',
-    client: 'Inversiones SpA',
-    service: 'Reparación tubería',
-    status: 'Pendiente',
-    date: '22/05/2026',
-    technician: 'Ana Pérez',
-    technicianAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ana',
-  },
-  {
-    id: 'OT-2026-0126',
-    client: 'Constructora ABC',
-    service: 'Mantención preventiva',
-    status: 'Completada',
-    date: '21/05/2026',
-    technician: 'Miguel Silva',
-    technicianAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Miguel',
-  },
-  {
-    id: 'OT-2026-0125',
-    client: 'Aguas Claras Ltda.',
-    service: 'Control de rebalse',
-    status: 'En Curso',
-    date: '21/05/2026',
-    technician: 'Carlos Rojas',
-    technicianAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Carlos',
-  },
-]
-
-export const upcomingDeadlines: ClientDeadline[] = [
-  {
-    id: '1',
-    client: 'Aguas Claras Ltda.',
-    reason: 'Vencimiento contrato',
-    date: '30/05/2026',
-  },
-  {
-    id: '2',
-    client: 'Comercial XYZ Ltda.',
-    reason: 'Contacto de seguimiento',
-    date: '02/06/2026',
-  },
-  {
-    id: '3',
-    client: 'Edificio Central',
-    reason: 'Renovación servicio',
-    date: '05/06/2026',
-  },
-  {
-    id: '4',
-    client: 'Inversiones SpA',
-    reason: 'Vencimiento contrato',
-    date: '10/06/2026',
-  },
-]

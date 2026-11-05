@@ -33,6 +33,12 @@ interface NotificationsState {
     service?: string
     status: OrderStatus
   }) => void
+  /** Actividad OT (docs, fotos, comentarios, asignación, reprogramación…). */
+  pushOrderActivity: (payload: {
+    orderId: string
+    title: string
+    message: string
+  }) => void
   pushProductCreated: (payload: {
     code: string
     name: string
@@ -44,6 +50,10 @@ interface NotificationsState {
     name: string
     status: string
   }) => void
+}
+
+function orderLink(orderId: string) {
+  return `${ROUTES.ORDENES}?order=${encodeURIComponent(orderId)}`
 }
 
 function syncHeaderBadge(count: number) {
@@ -118,7 +128,7 @@ export const useNotificationsStore = create<NotificationsState>()(
           message: `La orden de ${client} cambió de "${previousStatus}" a "${newStatus}".`,
           type: 'order',
           orderId,
-          link: `${ROUTES.ORDENES}?order=${encodeURIComponent(orderId)}`,
+          link: orderLink(orderId),
         })
       },
 
@@ -136,7 +146,7 @@ export const useNotificationsStore = create<NotificationsState>()(
           message: `La orden de ${client} — ${detail}`,
           type: 'order',
           orderId,
-          link: `${ROUTES.ORDENES}?order=${encodeURIComponent(orderId)}`,
+          link: orderLink(orderId),
         })
       },
 
@@ -147,7 +157,17 @@ export const useNotificationsStore = create<NotificationsState>()(
           message: `Se creó una orden para ${client}${detail} (estado: ${status}).`,
           type: 'order',
           orderId,
-          link: `${ROUTES.ORDENES}?order=${encodeURIComponent(orderId)}`,
+          link: orderLink(orderId),
+        })
+      },
+
+      pushOrderActivity: ({ orderId, title, message }) => {
+        get().addNotification({
+          title,
+          message,
+          type: 'order',
+          orderId,
+          link: orderLink(orderId),
         })
       },
 

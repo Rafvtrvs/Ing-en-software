@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ExternalLink, Search, Wrench } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
@@ -8,16 +8,23 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { Button } from '@/components/ui/Button'
-import { Modal } from '@/components/ui/Modal'
-import { FormField } from '@/components/ui/FormField'
-import { mockEquipment } from '@/data/mock/equipment'
 import type { Equipment, EquipmentStatus } from '@/types'
 import { formatShortDate } from '@/utils/formatters'
 import { AlertTriangle, CheckCircle, Settings } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { useOrdersStore } from '@/store/useOrdersStore'
-import { useInventoryStore } from '@/store/useInventoryStore'
-import { useNotificationsStore } from '@/store/useNotificationsStore'
+import { useEquipmentStore } from '@/store/useEquipmentStore'
+import { EquipmentActionsMenu } from '@/features/inventory/components/EquipmentActionsMenu'
+import {
+  EquipmentDeleteModal,
+  EquipmentEditModal,
+  EquipmentViewModal,
+} from '@/features/inventory/components/EquipmentModals'
+import { reportsService } from '@/services/reportsService'
+import {
+  mapAuditToEquipmentHistory,
+  type EquipmentHistoryItem,
+} from '@/features/inventory/utils/equipmentHistory'
 
 const STATUS_OPTIONS: Array<EquipmentStatus | 'all'> = [
   'all',
@@ -32,36 +39,34 @@ export function EquipmentPanel() {
   const orders = useOrdersStore((s) => s.orders)
   const openViewModal = useOrdersStore((s) => s.openViewModal)
   const updateOrder = useOrdersStore((s) => s.updateOrder)
-  const addToast = useInventoryStore((s) => s.addToast)
-  const pushEquipmentUnavailable = useNotificationsStore(
-    (s) => s.pushEquipmentUnavailable,
-  )
+  const items = useEquipmentStore((s) => s.equipment)
+  const syncEquipment = useEquipmentStore((s) => s.syncFromApi)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<EquipmentStatus | 'all'>('all')
-  const [items, setItems] = useState<Equipment[]>(mockEquipment)
   const [selected, setSelected] = useState<Equipment | null>(null)
+  const [viewOpen, setViewOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
-  const [draftStatus, setDraftStatus] = useState<EquipmentStatus>('Operativo')
-  const [draftLastMaintenance, setDraftLastMaintenance] = useState('')
-  const [draftNextMaintenance, setDraftNextMaintenance] = useState('')
-  const [history, setHistory] = useState<
-    Array<{
-      id: string
-      equipmentCode: string
-      equipmentName: string
-      from: EquipmentStatus
-      to: EquipmentStatus
-      date: string
-      note?: string
-    }>
-  >([])
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [history, setHistory] = useState<EquipmentHistoryItem[]>([])
+
+  const syncLocationsFromOrders = useEquipmentStore((s) => s.syncLocationsFromOrders)
+
+  const loadHistory = useCallback(async () => {
+    try {
+      const logs = await reportsService.fetchAuditLogs()
+      setHistory(mapAuditToEquipmentHistory(logs))
+    } catch {
+      setHistory([])
+    }
+  }, [])
 
   useEffect(() => {
-    if (!editOpen || !selected) return
-    setDraftStatus(selected.status)
-    setDraftLastMaintenance(selected.lastMaintenance)
-    setDraftNextMaintenance(selected.nextMaintenance)
-  }, [editOpen, selected])
+    void (async () => {
+      await syncEquipment()
+      await syncLocationsFromOrders(useOrdersStore.getState().orders)
+      await loadHistory()
+    })()
+  }, [syncEquipment, syncLocationsFromOrders, loadHistory])
 
   const maintenanceCalendar = useMemo(() => {
     return [...items].sort(
@@ -78,7 +83,8 @@ export function EquipmentPanel() {
         eq.name.toLowerCase().includes(q) ||
         eq.code.toLowerCase().includes(q) ||
         eq.serialNumber.toLowerCase().includes(q) ||
-        eq.location.toLowerCase().includes(q)
+        eq.location.toLowerCase().includes(q) ||
+        (eq.patente ?? '').toLowerCase().includes(q)
       const matchesStatus = statusFilter === 'all' || eq.status === statusFilter
       return matchesSearch && matchesStatus
     })
@@ -123,23 +129,9 @@ export function EquipmentPanel() {
     },
   ]
 
-  const isEquipmentInActiveOrder = (equipment: Equipment): { active: boolean; orderId?: string } => {
-    // 1) Si el equipo ya declara OT asociada
-    if (equipment.assignedOrderId) {
-      const o = orders.find((ord) => ord.id === equipment.assignedOrderId)
-      if (o && (o.status === 'Pendiente' || o.status === 'En Curso')) {
-        return { active: true, orderId: o.id }
-      }
-    }
-
-    // 2) Si alguna OT tiene equipmentId == equipo.id
-    const linked = orders.find(
-      (ord) =>
-        ord.equipmentId === equipment.id &&
-        (ord.status === 'Pendiente' || ord.status === 'En Curso'),
-    )
-    if (linked) return { active: true, orderId: linked.id }
-    return { active: false }
+  const openView = (row: Equipment) => {
+    setSelected(row)
+    setViewOpen(true)
   }
 
   const openEdit = (row: Equipment) => {
@@ -147,85 +139,9 @@ export function EquipmentPanel() {
     setEditOpen(true)
   }
 
-  const saveEdit = () => {
-    if (!selected) return
-
-    const statusChanged = draftStatus !== selected.status
-    const lastChanged = draftLastMaintenance !== selected.lastMaintenance
-    const nextChanged = draftNextMaintenance !== selected.nextMaintenance
-
-    if (!statusChanged && !lastChanged && !nextChanged) {
-      addToast('No hay cambios para guardar', 'info')
-      setEditOpen(false)
-      return
-    }
-
-    if (statusChanged) {
-      const active = isEquipmentInActiveOrder(selected)
-      if (active.active) {
-        addToast(
-          `No se puede cambiar el estado: el equipo está en una orden activa (${active.orderId}).`,
-          'error',
-        )
-        return
-      }
-    }
-
-    const becomesUnavailable =
-      statusChanged &&
-      (draftStatus === 'Fuera de servicio' || draftStatus === 'Mantenimiento')
-
-    setItems((prev) =>
-      prev.map((eq) =>
-        eq.id === selected.id
-          ? {
-              ...eq,
-              status: draftStatus,
-              lastMaintenance: draftLastMaintenance,
-              nextMaintenance: draftNextMaintenance,
-              ...(becomesUnavailable
-                ? { assignedOrderId: undefined, assignedTo: undefined }
-                : {}),
-            }
-          : eq,
-      ),
-    )
-
-    if (statusChanged) {
-      setHistory((prev) =>
-        [
-          {
-            id: `h-${Date.now()}`,
-            equipmentCode: selected.code,
-            equipmentName: selected.name,
-            from: selected.status,
-            to: draftStatus,
-            date: new Date().toISOString(),
-            note:
-              lastChanged || nextChanged
-                ? 'También se actualizaron fechas de mantención'
-                : undefined,
-          },
-          ...prev,
-        ].slice(0, 10),
-      )
-
-      // RF-30 CU-100/101: alertar cuando la maquinaria deja de estar operativa
-      if (becomesUnavailable) {
-        pushEquipmentUnavailable({
-          code: selected.code,
-          name: selected.name,
-          status: draftStatus,
-        })
-        // CU-102: liberar vínculo con OT si estaba asignada
-        if (selected.assignedOrderId) {
-          updateOrder(selected.assignedOrderId, { equipmentId: undefined })
-        }
-      }
-    }
-
-    addToast(`Equipo "${selected.code}" actualizado`, 'success')
-    setEditOpen(false)
+  const openDelete = (row: Equipment) => {
+    setSelected(row)
+    setDeleteOpen(true)
   }
 
   const columns: Column<Equipment>[] = [
@@ -249,9 +165,9 @@ export function EquipmentPanel() {
               ? 'bg-emerald-50 text-emerald-700'
               : row.status === 'Asignado'
                 ? 'bg-blue-50 text-blue-700'
-              : row.status === 'Mantenimiento'
-                ? 'bg-amber-50 text-amber-700'
-                : 'bg-red-50 text-red-700'
+                : row.status === 'Mantenimiento'
+                  ? 'bg-amber-50 text-amber-700'
+                  : 'bg-red-50 text-red-700'
           }
         />
       ),
@@ -284,7 +200,6 @@ export function EquipmentPanel() {
                 navigate(ROUTES.ORDENES)
                 return
               }
-              // Vincula el ID del equipo a la OT (orden activa / asociada)
               updateOrder(order.id, { equipmentId: row.id })
               navigate(ROUTES.ORDENES)
               openViewModal({ ...order, equipmentId: row.id })
@@ -298,19 +213,14 @@ export function EquipmentPanel() {
     {
       key: 'acciones',
       header: '',
-      className: 'w-28 text-right',
+      className: 'w-12 text-right',
       render: (row) => (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={(e) => {
-            e.stopPropagation()
-            openEdit(row)
-          }}
-        >
-          Editar
-        </Button>
+        <EquipmentActionsMenu
+          equipment={row}
+          onView={openView}
+          onEdit={openEdit}
+          onDelete={openDelete}
+        />
       ),
     },
   ]
@@ -352,7 +262,7 @@ export function EquipmentPanel() {
           columns={columns}
           data={filtered}
           keyExtractor={(row) => row.id}
-          onRowClick={(row) => openEdit(row)}
+          onRowClick={(row) => openView(row)}
           selectedKey={selected?.id ?? null}
         />
       </Card>
@@ -379,13 +289,21 @@ export function EquipmentPanel() {
                     Última: {formatShortDate(eq.lastMaintenance)} · Estado: {eq.status}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                    Próx. mantención
-                  </p>
-                  <p className="text-sm font-semibold text-slate-900">
-                    {formatShortDate(eq.nextMaintenance)}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                      Próx. mantención
+                    </p>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {formatShortDate(eq.nextMaintenance)}
+                    </p>
+                  </div>
+                  <EquipmentActionsMenu
+                    equipment={eq}
+                    onView={openView}
+                    onEdit={openEdit}
+                    onDelete={openDelete}
+                  />
                 </div>
               </li>
             ))}
@@ -394,87 +312,66 @@ export function EquipmentPanel() {
       </Card>
 
       <Card>
-        <CardHeader title="Historial de cambios (mock)" subtitle="Últimas modificaciones de estado realizadas." />
+        <CardHeader
+          title="Historial de cambios"
+          subtitle="Detalle de cada campo modificado en equipos y maquinaria."
+        />
         {history.length === 0 ? (
           <p className="text-sm text-slate-500">Aún no hay cambios registrados.</p>
         ) : (
-          <ul className="space-y-2 text-sm">
+          <ul className="max-h-[28rem] space-y-2 overflow-y-auto text-sm">
             {history.map((h) => (
               <li key={h.id} className="rounded-lg border border-slate-100 bg-white p-3">
-                <p className="font-medium text-slate-900">
-                  {h.equipmentCode} — {h.equipmentName}
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="font-medium text-slate-900">
+                    {h.equipmentCode} — {h.equipmentName}
+                  </p>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                    {h.actionLabel}
+                  </span>
+                </div>
+                <ul className="mt-2 space-y-1 text-slate-700">
+                  {h.changes.map((change) => (
+                    <li key={change} className="flex gap-2 text-sm">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      <span>{change}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-slate-400">
+                  {new Date(h.date).toLocaleString('es-CL')} · {h.user}
                 </p>
-                <p className="mt-0.5 text-slate-600">
-                  Estado: <span className="font-semibold">{h.from}</span> →{' '}
-                  <span className="font-semibold">{h.to}</span>
-                </p>
-                {h.note && <p className="mt-0.5 text-xs text-slate-500">{h.note}</p>}
               </li>
             ))}
           </ul>
         )}
       </Card>
 
-      <Modal
+      <EquipmentViewModal
+        equipment={selected}
+        open={viewOpen}
+        onClose={() => setViewOpen(false)}
+        onEdit={(eq) => {
+          setSelected(eq)
+          setEditOpen(true)
+        }}
+      />
+      <EquipmentEditModal
+        equipment={selected}
         open={editOpen}
         onClose={() => setEditOpen(false)}
-        title="Editar equipo"
-        description="Modifica estado y fechas de mantención. El estado no se podrá cambiar si el equipo está en una orden activa."
-        size="md"
-        footer={
-          <>
-            <Button variant="outline" type="button" onClick={() => setEditOpen(false)}>
-              Cancelar
-            </Button>
-            <Button type="button" onClick={saveEdit}>
-              Guardar
-            </Button>
-          </>
-        }
-      >
-        {!selected ? null : (
-          <div className="space-y-4">
-            <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
-              <p className="text-sm font-semibold text-slate-900">
-                {selected.code} — {selected.name}
-              </p>
-              <p className="mt-1 text-xs text-slate-500">{selected.location}</p>
-            </div>
-
-            <FormField label="Estado" htmlFor="equipment-status" required>
-              <Select
-                id="equipment-status"
-                value={draftStatus}
-                onChange={(e) => setDraftStatus(e.target.value as EquipmentStatus)}
-              >
-                {STATUS_OPTIONS.filter((s) => s !== 'all').map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </Select>
-            </FormField>
-
-            <FormField label="Última mantención" htmlFor="equipment-last-maintenance">
-              <Input
-                id="equipment-last-maintenance"
-                type="date"
-                value={draftLastMaintenance}
-                onChange={(e) => setDraftLastMaintenance(e.target.value)}
-              />
-            </FormField>
-
-            <FormField label="Próxima mantención" htmlFor="equipment-next-maintenance">
-              <Input
-                id="equipment-next-maintenance"
-                type="date"
-                value={draftNextMaintenance}
-                onChange={(e) => setDraftNextMaintenance(e.target.value)}
-              />
-            </FormField>
-          </div>
-        )}
-      </Modal>
+        onSaved={() => {
+          void loadHistory()
+        }}
+      />
+      <EquipmentDeleteModal
+        equipment={selected}
+        open={deleteOpen}
+        onClose={() => {
+          setDeleteOpen(false)
+          setSelected(null)
+        }}
+      />
     </div>
   )
 }
