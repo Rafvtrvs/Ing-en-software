@@ -10,6 +10,7 @@ import { env } from '../config/env.js'
 import { auditService } from './audit.service.js'
 import { getFirebaseAuth } from '../external/firebaseAdmin.js'
 import { notifyAdmins } from './pushNotify.service.js'
+import { mailOpsRecipient, mailService } from '../external/mail.service.js'
 
 export interface AuthTokenPayload {
   sub: number
@@ -36,6 +37,19 @@ function toAuthUser(user: {
     role: user.rol?.nombre ?? '',
     avatar: user.avatarUrl?.trim() || '',
   }
+}
+
+function notifyLoginEmail(user: { nombre: string; correoElectronico: string }) {
+  const to = mailOpsRecipient()?.trim()
+  if (!to) return
+  const when = new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' })
+  void mailService
+    .send({
+      to,
+      subject: 'Camus LDA · Nuevo inicio de sesión',
+      body: `Nuevo inicio de sesión\n\nUsuario: ${user.nombre}\nCorreo: ${user.correoElectronico}\nFecha: ${when}`,
+    })
+    .catch((err) => console.error('[auth] mail login', err))
 }
 
 function signAppToken(payload: AuthTokenPayload) {
@@ -140,6 +154,7 @@ export const authService = {
       notifType: 'system',
       excludeUserId: user.id,
     })
+    notifyLoginEmail(user)
 
     return {
       token: signAppToken(payload),
@@ -186,6 +201,7 @@ export const authService = {
       notifType: 'system',
       excludeUserId: user.id,
     })
+    notifyLoginEmail(user)
 
     return {
       token: signAppToken(payload),

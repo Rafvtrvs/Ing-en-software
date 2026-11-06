@@ -538,13 +538,24 @@ export const orderService = {
 
   async create(input: OrderInput, userId?: number) {
     const requestedId = input.id?.trim() || ''
-    // Idempotencia offline: si el ID ya existe, devolver la OT (no duplicar)
+    let createId = requestedId
+    // Mismo alta reintentada: devolver la OT. Si el número ya es de otra orden, asignar uno libre.
     if (requestedId) {
       const existing = await prisma.ordenTrabajo.findUnique({
         where: { id: requestedId },
         include: { cliente: true, operador: true },
       })
-      if (existing) return toOrderDto(existing)
+      if (existing) {
+        const same =
+          (existing.nombreCliente ?? '').trim().toLowerCase() ===
+            (input.client ?? '').trim().toLowerCase() &&
+          (existing.direccion ?? '').trim().toLowerCase() ===
+            (input.address ?? '').trim().toLowerCase() &&
+          (existing.servicio ?? '').trim().toLowerCase() ===
+            (input.service ?? '').trim().toLowerCase()
+        if (same) return toOrderDto(existing)
+        createId = ''
+      }
     }
 
     const idCliente = input.idCliente ?? (await resolveCliente(input.client))
@@ -569,7 +580,7 @@ export const orderService = {
     const nombreCliente = input.client?.trim() || ''
     const row = await prisma.ordenTrabajo.create({
       data: {
-        id: requestedId || (await genId()),
+        id: createId || (await genId()),
         direccion: input.address ?? '',
         servicio: input.service ?? '',
         categoria: input.category ?? '',

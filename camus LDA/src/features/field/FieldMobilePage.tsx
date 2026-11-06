@@ -126,7 +126,7 @@ export function FieldMobilePage() {
 
   useEffect(() => {
     if (!allowed) return
-    void syncFromApi()
+    void sync()
     const goOnline = () => {
       setOnline(true)
       if (loadQueue().length > 0) void sync()
@@ -140,7 +140,7 @@ export function FieldMobilePage() {
       window.removeEventListener('offline', goOffline)
       unsubQueue()
     }
-  }, [allowed, sync, syncFromApi])
+  }, [allowed, sync])
 
   if (!allowed) return <Navigate to={ROUTES.DASHBOARD} replace />
 

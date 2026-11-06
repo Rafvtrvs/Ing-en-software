@@ -201,6 +201,47 @@ function isAlreadyExistsError(err: unknown): boolean {
   )
 }
 
+async function adoptServerOrder(localId: string, created: WorkOrder) {
+  if (!created.id || created.id === localId) return
+  const { useOrdersStore } = await import('@/store/useOrdersStore')
+  useOrdersStore.setState((state) => {
+    const previous = state.commentsByOrderId[localId] ?? []
+    const commentsByOrderId = { ...state.commentsByOrderId }
+    delete commentsByOrderId[localId]
+    commentsByOrderId[created.id] = [
+      ...(commentsByOrderId[created.id] ?? []),
+      ...previous.map((comment) => ({ ...comment, orderId: created.id })),
+    ]
+    return {
+      orders: [
+        { ...created, pendingSync: false },
+        ...state.orders.filter((order) => order.id !== localId && order.id !== created.id),
+      ],
+      commentsByOrderId,
+      selectedOrder:
+        state.selectedOrder?.id === localId
+          ? { ...state.selectedOrder, ...created, id: created.id, pendingSync: false }
+          : state.selectedOrder,
+    }
+  })
+}
+
+function rememberServerOrderId(action: FieldAction, serverId: string) {
+  if (action.kind !== 'create-order' || !serverId || serverId === action.orderId) return
+  action.orderId = serverId
+  action.order = { ...action.order, id: serverId, pendingSync: false }
+  const queue = loadQueue()
+  const index = queue.findIndex((item) => item.id === action.id)
+  if (index >= 0 && queue[index].kind === 'create-order') {
+    queue[index] = {
+      ...queue[index],
+      orderId: serverId,
+      order: { ...queue[index].order, id: serverId, pendingSync: false },
+    }
+    saveQueue(queue)
+  }
+}
+
 async function clearLocalPendingSync(orderId: string) {
   try {
     const { useOrdersStore } = await import('@/store/useOrdersStore')
@@ -265,19 +306,20 @@ async function send(action: FieldAction) {
     case 'create-order': {
       const { pendingSync: _pending, ...rest } = action.order
       const payload = { ...rest }
+      const localId = action.orderId || payload.id
+      let serverId = localId
       try {
-        await ordersService.create(payload)
+        const created = await ordersService.create(payload)
+        serverId = created.id || localId
+        rememberServerOrderId(action, serverId)
+        if (serverId !== localId) await adoptServerOrder(localId, created)
       } catch (err) {
         // Ya está en Postgres con ese ID → éxito idempotente (NO crear otra OT)
         if (!isAlreadyExistsError(err)) throw err
       }
       const notes = action.notes?.trim().slice(0, 2000)
       if (notes) {
-        await ordersService.createComment(
-          action.orderId || payload.id,
-          notes,
-          authorFromSession(),
-        )
+        await ordersService.createComment(serverId, notes, authorFromSession())
       }
       break
     }

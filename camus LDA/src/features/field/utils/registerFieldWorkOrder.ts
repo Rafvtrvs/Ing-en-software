@@ -4,7 +4,7 @@
 // ============================================================
 import { useOrdersStore } from '@/store/useOrdersStore'
 import type { WorkOrder } from '@/types'
-import { enqueue } from './fieldQueue'
+import { enqueue, flushQueue } from './fieldQueue'
 
 export interface RegisterFieldOrderResult {
   id: string
@@ -14,9 +14,8 @@ export interface RegisterFieldOrderResult {
 }
 
 /**
- * Guarda la OT en el store local y la deja en cola de pendientes.
- * La subida al servidor solo ocurre al sincronizar (manual o al recuperar red),
- * para que “Pendientes de envío” muestre la OT.
+ * Con conexión, la OT se crea en el servidor al momento (correo, admin y operador).
+ * Sin conexión, queda en cola y se envía al recuperar la red.
  */
 export async function registerFieldWorkOrder(input: {
   order: Omit<WorkOrder, 'id'> & { id?: string }
@@ -78,9 +77,32 @@ export async function registerFieldWorkOrder(input: {
     }
   }
 
-  const message = navigator.onLine
-    ? `Orden ${createdId} lista para enviar. Pulsa «Sincronizar» o espera a que se envíe al recuperar red.`
-    : `Orden ${createdId} guardada localmente. Sincronice cuando recupere conexión.`
-  addToast(message, 'info')
-  return { id: createdId, queued: true, synced: false, message }
+  if (!navigator.onLine) {
+    const message = `Orden ${createdId} guardada en el teléfono. Se enviará al recuperar conexión.`
+    addToast(message, 'info')
+    return { id: createdId, queued: true, synced: false, message }
+  }
+
+  const idsBefore = new Set(useOrdersStore.getState().orders.map((item) => item.id))
+  const res = await flushQueue()
+  if (res.offline) {
+    const message = `Orden ${createdId} quedó pendiente: no hubo respuesta del servidor.`
+    addToast(message, 'error')
+    return { id: createdId, queued: true, synced: false, message }
+  }
+  if (res.failed.length > 0) {
+    const message = res.failed[0].message
+    addToast(message, 'error')
+    return { id: createdId, queued: true, synced: false, message }
+  }
+
+  await useOrdersStore.getState().syncFromApi()
+  const currentOrders = useOrdersStore.getState().orders
+  const syncedId =
+    currentOrders.find((item) => item.id === createdId)?.id ??
+    currentOrders.find((item) => !idsBefore.has(item.id))?.id ??
+    createdId
+  const message = `Orden ${syncedId} registrada. Ya está en el sistema.`
+  addToast(message, 'success')
+  return { id: syncedId, queued: true, synced: true, message }
 }
