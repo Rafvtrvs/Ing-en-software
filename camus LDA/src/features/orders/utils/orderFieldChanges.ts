@@ -1,4 +1,5 @@
 import type { WorkOrder } from '@/types'
+import { toInputDate } from '@/features/orders/utils/orderDates'
 
 export const ORDER_FIELD_LABELS: Record<string, string> = {
   id: 'ID de orden',
@@ -45,11 +46,15 @@ export interface OrderFieldChange {
   to: string
 }
 
+const DATE_FIELDS = new Set<TrackedOrderField>(['startDate', 'endDate', 'dueDate'])
+
 function normalizeFieldValue(field: TrackedOrderField, value: unknown): string {
   if (field === 'progress' || field === 'durationHours') {
+    if (field === 'durationHours' && (value === '' || value == null)) return ''
     const num = Number(value ?? 0)
     return Number.isFinite(num) ? String(num) : '0'
   }
+  if (DATE_FIELDS.has(field)) return toInputDate(value == null ? '' : String(value))
   return String(value ?? '').trim()
 }
 
@@ -66,11 +71,21 @@ export function getOrderFieldChanges(
 ): OrderFieldChange[] {
   const changes: OrderFieldChange[] = []
 
+  const startSame =
+    normalizeFieldValue('startDate', before.startDate) ===
+    normalizeFieldValue('startDate', after.startDate ?? before.startDate)
+  const endSame =
+    normalizeFieldValue('endDate', before.endDate) ===
+    normalizeFieldValue('endDate', after.endDate ?? before.endDate)
+
   for (const field of TRACKED_FIELDS) {
     const fromRaw = before[field]
     const toRaw = after[field] ?? before[field]
     const fromNorm = normalizeFieldValue(field, fromRaw)
     const toNorm = normalizeFieldValue(field, toRaw)
+
+    // La duración se recalcula al enfocar las fechas; no es un cambio si el día no cambió.
+    if (field === 'durationHours' && startSame && endSame) continue
 
     if (fromNorm !== toNorm) {
       changes.push({

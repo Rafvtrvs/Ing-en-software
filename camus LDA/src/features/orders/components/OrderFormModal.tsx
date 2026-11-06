@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
@@ -152,6 +152,8 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
   const priorityManual = watch('priorityManual')
   const startDate = watch('startDate')
   const endDate = watch('endDate')
+  const baselineDates = useRef({ start: '', end: '' })
+  const incidentTouched = useRef(false)
 
   useEffect(() => {
     if (!open) return
@@ -161,6 +163,10 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         onClose()
         return
       }
+      const start = toInputDate(order.startDate)
+      const end = toInputDate(order.endDate)
+      baselineDates.current = { start, end }
+      incidentTouched.current = false
       reset({
         id: order.id,
         client: order.client,
@@ -178,8 +184,8 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         operatorIds: order.operatorIds ?? [],
         truckCode: order.truckCode ?? '',
         progress: order.progress ?? 0,
-        startDate: toInputDate(order.startDate),
-        endDate: toInputDate(order.endDate),
+        startDate: start,
+        endDate: end,
         durationHours: order.durationHours,
       })
     } else {
@@ -207,12 +213,13 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
   }, [open, mode, order, reset])
 
   useEffect(() => {
-    if (!priorityManual) {
-      setValue('priority', autoPriorityForIncident(incidentType))
-    }
+    if (!incidentTouched.current || priorityManual) return
+    setValue('priority', autoPriorityForIncident(incidentType))
   }, [incidentType, priorityManual, setValue])
 
   useEffect(() => {
+    const baseline = baselineDates.current
+    if (startDate === baseline.start && endDate === baseline.end) return
     const calc = calcDurationHours(startDate, endDate)
     if (calc !== undefined) setValue('durationHours', calc)
   }, [startDate, endDate, setValue])
@@ -386,7 +393,14 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
 
         <FormGrid cols={2}>
           <FormField label="Tipo de incidente" htmlFor="incidentType" required>
-            <Select id="incidentType" {...register('incidentType')}>
+            <Select
+              id="incidentType"
+              {...register('incidentType', {
+                onChange: () => {
+                  incidentTouched.current = true
+                },
+              })}
+            >
               {INCIDENT_TYPES.map((t) => (
                 <option key={t} value={t}>
                   {t}
