@@ -97,6 +97,28 @@ export function getOrderFieldChanges(
     }
   }
 
+  const crewKey = (order?: Partial<WorkOrder>) =>
+    [...(order?.operatorIds ?? order?.operators?.map((op) => op.id) ?? [])]
+      .map((id) => String(id).trim())
+      .filter(Boolean)
+      .sort()
+      .join(',')
+  if (crewKey(before) !== crewKey(after)) {
+    const crewLabel = (order?: Partial<WorkOrder>) => {
+      const names = (order?.operators ?? [])
+        .map((op) => op.name.trim())
+        .filter(Boolean)
+      if (names.length) return names.join(', ')
+      return order?.technician?.trim() || '—'
+    }
+    changes.push({
+      field: 'technician',
+      label: 'Cuadrilla',
+      from: crewLabel(before),
+      to: crewLabel(after),
+    })
+  }
+
   return changes
 }
 

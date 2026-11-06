@@ -50,6 +50,7 @@ export function toOrderDto(
     operador?: { id: number; nombre: string } | null
   },
 ) {
+  const crew = parseCrew(o.operadoresJson, o.operador)
   return {
     id: o.id,
     client:
@@ -73,11 +74,48 @@ export function toOrderDto(
     durationHours: o.duracionHoras ?? undefined,
     truckCode: o.codigoCamion ?? undefined,
     equipmentId: o.idMaquinaria != null ? String(o.idMaquinaria) : undefined,
-    technician: o.operador?.nombre ?? undefined,
-    operatorIds: o.operador ? [String(o.operador.id)] : undefined,
-    operators: o.operador
-      ? [{ id: String(o.operador.id), name: o.operador.nombre }]
-      : undefined,
+    technician: crew.technician,
+    operatorIds: crew.operatorIds,
+    operators: crew.operators,
+  }
+}
+
+function parseCrew(
+  raw: string | null | undefined,
+  operador?: { id: number; nombre: string } | null,
+): {
+  technician?: string
+  operatorIds?: string[]
+  operators?: { id: string; name: string }[]
+} {
+  const text = raw?.trim()
+  if (text) {
+    try {
+      const parsed = JSON.parse(text) as { id?: string | number; name?: string }[]
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const operators = parsed
+          .map((op) => ({
+            id: String(op.id ?? '').trim(),
+            name: String(op.name ?? '').trim(),
+          }))
+          .filter((op) => op.id)
+        if (operators.length > 0) {
+          return {
+            technician: operators[0].name || operador?.nombre || undefined,
+            operatorIds: operators.map((op) => op.id),
+            operators,
+          }
+        }
+      }
+    } catch {
+      /* cuadrilla ilegible: usar el responsable principal */
+    }
+  }
+  if (!operador) return {}
+  return {
+    technician: operador.nombre,
+    operatorIds: [String(operador.id)],
+    operators: [{ id: String(operador.id), name: operador.nombre }],
   }
 }
 

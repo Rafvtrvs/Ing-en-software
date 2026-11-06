@@ -21,6 +21,7 @@ interface OrderInput {
   idCliente?: number
   technician?: string
   operatorIds?: string[]
+  operators?: { id: string; name: string }[]
   idOperador?: number | null
   latitude?: number
   longitude?: number
@@ -241,6 +242,7 @@ function operatorUpdateNeedsApproval(
     latitud: number | null
     longitud: number | null
     idOperador: number | null
+    operadoresJson?: string | null
   },
   input: Partial<OrderInput>,
 ): boolean {
@@ -298,15 +300,22 @@ function operatorUpdateNeedsApproval(
   if (input.status !== undefined) {
     mark('status', input.status !== before.estado)
   }
-  if (input.operatorIds !== undefined || input.technician !== undefined || input.idOperador !== undefined) {
-    // Se resuelve más abajo solo si el resto ya no es una transición operativa.
-    // La comparación fina de operador ocurre si viene un id distinto.
-    if (input.idOperador !== undefined && input.idOperador !== before.idOperador) {
-      mark('operator', true)
-    } else if (input.operatorIds?.length) {
-      const raw = Number(String(input.operatorIds[0]).trim())
-      if (Number.isFinite(raw) && raw > 0 && raw !== before.idOperador) mark('operator', true)
-    }
+  if (
+    input.operatorIds !== undefined ||
+    input.operators !== undefined ||
+    input.technician !== undefined ||
+    input.idOperador !== undefined
+  ) {
+    const nextIds = (
+      input.operators?.map((op) => op.id) ??
+      input.operatorIds ??
+      (input.idOperador != null ? [String(input.idOperador)] : [])
+    )
+      .map((id) => String(id).trim())
+      .filter(Boolean)
+      .sort()
+    const prevIds = crewIds(before.operadoresJson, before.idOperador)
+    if (nextIds.join(',') !== prevIds.join(',')) mark('operator', true)
   }
 
   if (diffs.length === 0) return false
@@ -385,21 +394,60 @@ function hasBusinessFieldChange(
 async function resolveOperador(input: {
   technician?: string
   operatorIds?: string[]
+  operators?: { id: string; name: string }[]
   idOperador?: number | null
 }): Promise<number | null | undefined> {
   if (input.idOperador !== undefined) return input.idOperador
-  if (input.operatorIds?.length) {
-    for (const raw of input.operatorIds) {
+  const ids = input.operatorIds ?? input.operators?.map((op) => op.id)
+  if (ids) {
+    if (ids.length === 0) return null
+    for (const raw of ids) {
       const asNum = Number(String(raw).trim())
       if (Number.isFinite(asNum) && asNum > 0) return asNum
     }
   }
+  if (input.technician === undefined && !ids) return undefined
   const name = input.technician?.trim()
-  if (!name) return undefined
+  if (!name) return ids ? null : undefined
   const byName = await prisma.usuario.findFirst({
     where: { nombre: { equals: name, mode: 'insensitive' } },
   })
   return byName?.id ?? null
+}
+
+function crewIds(
+  raw: string | null | undefined,
+  fallbackId?: number | null,
+): string[] {
+  const text = raw?.trim()
+  if (text) {
+    try {
+      const parsed = JSON.parse(text) as { id?: string | number }[]
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+          .map((op) => String(op?.id ?? '').trim())
+          .filter(Boolean)
+          .sort()
+      }
+    } catch {
+      /* usar el responsable principal */
+    }
+  }
+  return fallbackId != null ? [String(fallbackId)] : []
+}
+
+function crewJson(input: {
+  operatorIds?: string[]
+  operators?: { id: string; name: string }[]
+}): string | undefined {
+  if (input.operators === undefined && input.operatorIds === undefined) return undefined
+  const list =
+    input.operators ??
+    (input.operatorIds ?? []).map((id) => ({ id: String(id), name: '' }))
+  if (list.length === 0) return ''
+  return JSON.stringify(
+    list.map((op) => ({ id: String(op.id), name: String(op.name ?? '').trim() })),
+  )
 }
 
 function normalizeRoleName(role?: string | null): string {
@@ -408,6 +456,26 @@ function normalizeRoleName(role?: string | null): string {
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .trim()
+}
+
+/** La OT está asignada si es el responsable o aparece en la cuadrilla. */
+function assignedToUser(
+  row: { idOperador: number | null; operadoresJson?: string | null },
+  userId: number,
+): boolean {
+  if (row.idOperador === userId) return true
+  const raw = row.operadoresJson?.trim()
+  if (!raw) return false
+  try {
+    const parsed = JSON.parse(raw) as { id?: string | number }[]
+    if (!Array.isArray(parsed)) return false
+    return parsed.some((op) => {
+      const id = Number(String(op?.id ?? '').trim())
+      return Number.isFinite(id) && id === userId
+    })
+  } catch {
+    return false
+  }
 }
 
 /** Técnico / operador / operario de campo: solo ve OT asignadas. */
@@ -437,11 +505,13 @@ export const orderService = {
       isFieldOperatorRole(actor.role)
 
     const rows = await prisma.ordenTrabajo.findMany({
-      where: fieldOnly ? { idOperador: actor!.userId } : undefined,
       include: { cliente: true, operador: true },
       orderBy: { ordenVisual: 'asc' },
     })
-    return rows.map(toOrderDto)
+    const visible = fieldOnly
+      ? rows.filter((row) => assignedToUser(row, actor!.userId!))
+      : rows
+    return visible.map(toOrderDto)
   },
 
   async get(id: string, actor?: { userId?: number; role?: string | null }) {
@@ -457,7 +527,7 @@ export const orderService = {
     if (
       actor?.userId != null &&
       isFieldOperatorRole(actor.role) &&
-      row.idOperador !== actor.userId
+      !assignedToUser(row, actor.userId)
     ) {
       const e: any = new Error('Orden no encontrada')
       e.status = 404
@@ -521,6 +591,7 @@ export const orderService = {
         nombreCliente,
         idCliente,
         idOperador: idOperador ?? null,
+        operadoresJson: crewJson(input) ?? '',
       },
       include: { cliente: true, operador: true },
     })
@@ -618,6 +689,7 @@ export const orderService = {
           ? { nombreCliente: input.client.trim() }
           : null),
         ...(idOperador !== undefined ? { idOperador } : null),
+        ...(crewJson(input) !== undefined ? { operadoresJson: crewJson(input) } : null),
         ...(input.latitude !== undefined ? { latitud: input.latitude } : null),
         ...(input.longitude !== undefined ? { longitud: input.longitude } : null),
         ...(fechaLimite !== undefined ? { fechaLimite } : null),

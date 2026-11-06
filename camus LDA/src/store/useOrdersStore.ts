@@ -58,6 +58,7 @@ function syncEquipmentLocations() {
   void useEquipmentStore.getState().syncLocationsFromOrders(orders)
 }
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
+import { isOrderAssignedTo } from '@/features/operations/utils/fieldTechnicians'
 import { isRestrictedOrderEditor } from '@/features/orders/utils/canEditOrder'
 import { notifyModificationInbox } from '@/features/orders/utils/modificationAlerts'
 import { calcDurationHours, validateServiceTimeSequence } from '@/features/orders/utils/orderDates'
@@ -868,18 +869,20 @@ export const useOrdersStore = create<OrdersState>()(
 
       assignOperators: (orderId, operators) => {
         const order = get().orders.find((o) => o.id === orderId)
-        // Un operador a cargo (id_operador en Postgres)
         const primary = operators[0]
-        const assigned = primary ? [primary] : []
         const technician = primary?.name ?? ''
         const deferred = get().updateOrder(orderId, {
-          operatorIds: assigned.map((o) => o.id),
-          operators: assigned,
+          operatorIds: operators.map((op) => op.id),
+          operators,
           technician,
         })
         if (deferred?.deferred) return
         get().addToast(
-          primary ? `Operador asignado: ${primary.name}` : 'Asignación limpiada',
+          operators.length === 0
+            ? 'Cuadrilla quitada de la orden'
+            : operators.length === 1
+              ? `Operador asignado: ${operators[0].name}`
+              : `Cuadrilla actualizada (${operators.length})`,
           'info',
         )
         if (order && primary) {
@@ -895,11 +898,10 @@ export const useOrdersStore = create<OrdersState>()(
       reassignOperators: (orderId, operators) => {
         const order = get().orders.find((o) => o.id === orderId)
         const primary = operators[0]
-        const assigned = primary ? [primary] : []
         const technician = primary?.name ?? ''
         const deferred = get().updateOrder(orderId, {
-          operatorIds: assigned.map((o) => o.id),
-          operators: assigned,
+          operatorIds: operators.map((op) => op.id),
+          operators,
           technician,
         })
         if (deferred?.deferred) return
@@ -1124,11 +1126,9 @@ export const useOrdersStore = create<OrdersState>()(
       getOperatorWorkload: (technicians) => {
         const orders = get().orders
         return technicians.map((tech) => {
-          const assigned = orders.filter((o) => {
-            if (o.operatorIds?.includes(tech.id)) return true
-            if (o.technician === tech.name) return true
-            return o.operators?.some((op) => op.id === tech.id) ?? false
-          })
+          const assigned = orders.filter((o) =>
+            isOrderAssignedTo(o, tech.id, tech.name),
+          )
           const active = assigned.filter(
             (o) => o.status === 'Pendiente' || o.status === 'En Curso',
           )

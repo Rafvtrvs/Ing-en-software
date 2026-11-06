@@ -1,5 +1,6 @@
 import type { OrderOperator, OrderStatus, WorkOrder } from '@/types'
 import { formatDisplayDate } from '@/features/orders/utils/orderDates'
+import { isOrderAssignedTo } from '@/features/operations/utils/fieldTechnicians'
 
 export type OperatorAvailabilityStatus = 'Disponible' | 'Ocupado'
 
@@ -30,9 +31,7 @@ function orderMatchesOperator(
   operatorId: string,
   operatorName: string,
 ): boolean {
-  if (order.operatorIds?.includes(operatorId)) return true
-  if (order.technician === operatorName) return true
-  return order.operators?.some((o) => o.id === operatorId) ?? false
+  return isOrderAssignedTo(order, operatorId, operatorName)
 }
 
 function normalizeDate(value: string): string {

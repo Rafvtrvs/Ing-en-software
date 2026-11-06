@@ -226,6 +226,8 @@ model OrdenTrabajo {
   ordenVisual  Int      @default(0) @map("orden_visual")
   idCliente    Int?     @map("id_cliente")
   idOperador   Int?     @map("id_operador")
+  /// Cuadrilla completa [{id,name}]. id_operador queda como responsable principal.
+  operadoresJson String @default("") @map("operadores_json") @db.Text
   cliente      Cliente? @relation(fields: [idCliente], references: [id])
   operador     Usuario? @relation(fields: [idOperador], references: [id])
   maquinaria   Maquinaria? @relation(fields: [idMaquinaria], references: [id])

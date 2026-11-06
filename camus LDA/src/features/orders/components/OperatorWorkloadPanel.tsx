@@ -3,7 +3,10 @@ import { Gauge } from 'lucide-react'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { useOrdersStore } from '@/store/useOrdersStore'
 import { useUsersStore } from '@/store/useUsersStore'
-import { getActiveFieldOperators } from '@/features/operations/utils/fieldTechnicians'
+import {
+  getActiveFieldOperators,
+  isOrderAssignedTo,
+} from '@/features/operations/utils/fieldTechnicians'
 import { cn } from '@/utils/cn'
 
 /** CU-163: panel de carga laboral de operadores */
@@ -11,7 +14,7 @@ export function OperatorWorkloadPanel() {
   const users = useUsersStore((s) => s.users)
   const roles = useUsersStore((s) => s.roles)
   const syncUsers = useUsersStore((s) => s.syncFromApi)
-  const getOperatorWorkload = useOrdersStore((s) => s.getOperatorWorkload)
+  const orders = useOrdersStore((s) => s.orders)
 
   useEffect(() => {
     void syncUsers()
@@ -23,8 +26,24 @@ export function OperatorWorkloadPanel() {
   )
 
   const workload = useMemo(
-    () => getOperatorWorkload(technicians),
-    [getOperatorWorkload, technicians],
+    () =>
+      technicians.map((tech) => {
+        const assigned = orders.filter((order) =>
+          isOrderAssignedTo(order, tech.id, tech.name),
+        )
+        const active = assigned.filter(
+          (order) => order.status === 'Pendiente' || order.status === 'En Curso',
+        )
+        return {
+          operatorId: tech.id,
+          name: tech.name,
+          activeOrders: active.length,
+          pendingOrders: assigned.filter((order) => order.status === 'Pendiente').length,
+          inProgressOrders: assigned.filter((order) => order.status === 'En Curso').length,
+          totalAssigned: assigned.length,
+        }
+      }),
+    [orders, technicians],
   )
   const maxActive = Math.max(1, ...workload.map((w) => w.activeOrders))
 

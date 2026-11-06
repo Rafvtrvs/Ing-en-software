@@ -52,13 +52,35 @@ export function getActiveFieldOperators(
     .sort((a, b) => a.name.localeCompare(b.name, 'es'))
 }
 
+function sameId(a?: string | number | null, b?: string | number | null): boolean {
+  if (a == null || b == null) return false
+  const sa = String(a).trim()
+  const sb = String(b).trim()
+  if (!sa || !sb) return false
+  if (sa === sb) return true
+  const na = Number(sa)
+  const nb = Number(sb)
+  return Number.isFinite(na) && Number.isFinite(nb) && na === nb
+}
+
+/** La OT cuenta para el técnico solo si está en la cuadrilla, o por nombre si no hay ids. */
+export function isOrderAssignedTo(
+  order: WorkOrder,
+  operatorId: string,
+  operatorName?: string,
+): boolean {
+  const ids = [
+    ...(order.operatorIds ?? []),
+    ...(order.operators ?? []).map((op) => op.id),
+  ].filter(Boolean)
+  if (ids.length > 0) return ids.some((id) => sameId(id, operatorId))
+  const name = (operatorName ?? '').trim().toLowerCase()
+  const tech = (order.technician ?? '').trim().toLowerCase()
+  return Boolean(name && tech && name === tech)
+}
+
 function ordersForOperator(orders: WorkOrder[], op: OrderOperator): WorkOrder[] {
-  return orders.filter((o) => {
-    if (o.technician && o.technician === op.name) return true
-    return Boolean(
-      o.operators?.some((x) => x.id === op.id || x.name === op.name),
-    )
-  })
+  return orders.filter((order) => isOrderAssignedTo(order, op.id, op.name))
 }
 
 function mapOrderStatusToField(status: string): FieldOperationStatus {
