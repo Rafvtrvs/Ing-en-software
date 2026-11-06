@@ -30,6 +30,10 @@ export const modificationController = {
           reason: String(req.body?.reason ?? ''),
           operatorId: String(req.body?.operatorId ?? req.user?.sub ?? ''),
           operatorName: String(req.body?.operatorName ?? 'Operador'),
+          changes:
+            req.body?.changes && typeof req.body.changes === 'object'
+              ? req.body.changes
+              : null,
         },
         req.user?.sub as number | undefined,
       )

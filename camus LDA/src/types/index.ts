@@ -164,6 +164,15 @@ export interface OrderModificationRequest {
   reviewedByName?: string
   reviewedAt?: string
   rejectionReason?: string
+  /** Diff propuesto; se aplica a la OT solo al aprobar */
+  changes?: OrderFieldChangeSnapshot[]
+}
+
+export interface OrderFieldChangeSnapshot {
+  field: string
+  label: string
+  from: string
+  to: string
 }
 
 /** RF68 CDS 235 — historial de modificaciones de OT */

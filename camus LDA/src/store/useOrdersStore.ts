@@ -35,6 +35,10 @@ function currentHistoryActor(): { id: string; name: string } {
     'Sistema'
   return { id, name }
 }
+
+function sessionIsFieldOperator(): boolean {
+  return isRestrictedOrderEditor(authService.getUser())
+}
 import {
   applySortOrderToColumn,
   getColumnOrders,
@@ -54,6 +58,8 @@ function syncEquipmentLocations() {
   void useEquipmentStore.getState().syncLocationsFromOrders(orders)
 }
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
+import { isRestrictedOrderEditor } from '@/features/orders/utils/canEditOrder'
+import { notifyModificationInbox } from '@/features/orders/utils/modificationAlerts'
 import { calcDurationHours, validateServiceTimeSequence } from '@/features/orders/utils/orderDates'
 import {
   getExecutionDate,
@@ -152,7 +158,11 @@ interface OrdersState {
     order: WorkOrder,
     options?: { deferApi?: boolean },
   ) => string
-  updateOrder: (id: string, data: Partial<WorkOrder>, options?: { fromForm?: boolean }) => void
+  updateOrder: (
+    id: string,
+    data: Partial<WorkOrder>,
+    options?: { fromForm?: boolean },
+  ) => { deferred: true } | undefined
   deleteOrder: (id: string) => void
   addIntervention: (orderId: string, detail: string) => Promise<OrderIntervention>
   updateIntervention: (
@@ -299,7 +309,14 @@ interface OrdersState {
   fetchModificationHistory: (orderId: string) => Promise<OrderModificationHistoryEntry[]>
   submitModificationRequest: (
     orderId: string,
-    data: { fieldsToModify: string; reason: string },
+    data: {
+      fieldsToModify: string
+      reason: string
+      changes?: {
+        patch?: Record<string, unknown>
+        diff?: Array<{ field: string; label: string; from: string; to: string }>
+      }
+    },
     operator: { id: string; name: string },
   ) => Promise<{ ok: boolean; message?: string }>
   approveModificationRequest: (
@@ -450,6 +467,7 @@ export const useOrdersStore = create<OrdersState>()(
                 }
               : null),
           })
+          notifyModificationInbox(modificationRequests)
         } catch {
           set({ apiAvailable: false })
         }
@@ -460,6 +478,7 @@ export const useOrdersStore = create<OrdersState>()(
           const modificationRequests =
             await ordersService.listModificationRequests()
           set({ modificationRequests, apiAvailable: true })
+          notifyModificationInbox(modificationRequests)
         } catch {
           set({ apiAvailable: false })
         }
@@ -524,6 +543,45 @@ export const useOrdersStore = create<OrdersState>()(
       updateOrder: (id, data, options) => {
         const existing = get().orders.find((o) => o.id === id)
         const enriched = withDerivedDuration(data, existing)
+        if (existing && sessionIsFieldOperator()) {
+          const merged = { ...existing, ...enriched }
+          const changes = getOrderFieldChanges(existing, merged)
+          const operational = Boolean(
+            enriched.serviceStartedAt ||
+              enriched.serviceEndedAt ||
+              enriched.clientSignature,
+          )
+          if (changes.length > 0 && !operational) {
+            const actor = currentHistoryActor()
+            const summary = changes
+              .map((c) => `${c.label}: "${c.from}" → "${c.to}"`)
+              .join(' · ')
+            const patch: Record<string, unknown> = {}
+            for (const change of changes) {
+              patch[change.field] = enriched[change.field]
+            }
+            if (changes.some((c) => c.field === 'truckCode')) {
+              patch.equipmentId = enriched.equipmentId
+            }
+            if (changes.some((c) => c.field === 'technician')) {
+              patch.operatorIds = enriched.operatorIds
+              patch.operators = enriched.operators
+            }
+            if (enriched.cancelReason) patch.cancelReason = enriched.cancelReason
+            if (enriched.annulReason) patch.annulReason = enriched.annulReason
+            if (enriched.annulled) patch.annulled = enriched.annulled
+            void get().submitModificationRequest(
+              id,
+              {
+                fieldsToModify: changes.map((c) => c.label).join(', '),
+                reason: summary,
+                changes: { patch, diff: changes },
+              },
+              actor,
+            )
+            return { deferred: true }
+          }
+        }
         if (enriched.progress !== undefined) {
           enriched.progress = clampProgress(enriched.progress)
         }
@@ -814,11 +872,12 @@ export const useOrdersStore = create<OrdersState>()(
         const primary = operators[0]
         const assigned = primary ? [primary] : []
         const technician = primary?.name ?? ''
-        get().updateOrder(orderId, {
+        const deferred = get().updateOrder(orderId, {
           operatorIds: assigned.map((o) => o.id),
           operators: assigned,
           technician,
         })
+        if (deferred?.deferred) return
         get().addToast(
           primary ? `Operador asignado: ${primary.name}` : 'Asignación limpiada',
           'info',
@@ -838,11 +897,12 @@ export const useOrdersStore = create<OrdersState>()(
         const primary = operators[0]
         const assigned = primary ? [primary] : []
         const technician = primary?.name ?? ''
-        get().updateOrder(orderId, {
+        const deferred = get().updateOrder(orderId, {
           operatorIds: assigned.map((o) => o.id),
           operators: assigned,
           technician,
         })
+        if (deferred?.deferred) return
         get().addToast('Operador reasignado — permisos previos revocados', 'info')
         if (order) {
           useNotificationsStore.getState().pushOrderActivity({
@@ -867,10 +927,11 @@ export const useOrdersStore = create<OrdersState>()(
         const duration =
           dates.durationHours ??
           (start && end ? calcDurationHours(start, end) : existing?.durationHours)
-        get().updateOrder(orderId, {
+        const deferred = get().updateOrder(orderId, {
           ...dates,
           durationHours: duration,
         })
+        if (deferred?.deferred) return { ok: true }
         set((state) => ({
           serviceClocks: {
             ...state.serviceClocks,
@@ -974,10 +1035,11 @@ export const useOrdersStore = create<OrdersState>()(
       },
 
       setOrderPriority: (orderId, priority, manual = true) => {
-        get().updateOrder(orderId, {
+        const deferred = get().updateOrder(orderId, {
           priority,
           priorityManual: manual,
         })
+        if (deferred?.deferred) return
         get().addToast(
           manual
             ? `Prioridad manual: ${priority}`
@@ -1207,7 +1269,7 @@ export const useOrdersStore = create<OrdersState>()(
 
       completeFieldOrderForm: (orderId, data) => {
         const progress = data.progress
-        get().updateOrder(orderId, {
+        const deferred = get().updateOrder(orderId, {
           service: data.service,
           startDate: data.startDate,
           endDate: data.endDate,
@@ -1217,7 +1279,7 @@ export const useOrdersStore = create<OrdersState>()(
             ? { status: 'Completada' as const }
             : {}),
         })
-        get().addToast('Formulario de terreno actualizado')
+        if (!deferred?.deferred) get().addToast('Formulario de terreno actualizado')
       },
 
       moveOrderOnBoard: (activeId, overId) => {
@@ -1229,6 +1291,31 @@ export const useOrdersStore = create<OrdersState>()(
         const overOrder = state.orders.find((o) => o.id === overId)
         const targetStatus: OrderStatus =
           overAsColumn ?? overOrder?.status ?? active.status
+
+        if (targetStatus !== active.status && sessionIsFieldOperator()) {
+          const actor = currentHistoryActor()
+          const progress = progressForStatus(targetStatus, active.progress)
+          void get().submitModificationRequest(
+            activeId,
+            {
+              fieldsToModify: 'Estado',
+              reason: `Estado: "${active.status}" → "${targetStatus}"`,
+              changes: {
+                patch: { status: targetStatus, progress },
+                diff: [
+                  {
+                    field: 'status',
+                    label: 'Estado',
+                    from: active.status,
+                    to: targetStatus,
+                  },
+                ],
+              },
+            },
+            actor,
+          )
+          return
+        }
 
         if (targetStatus === active.status) {
           const column = getColumnOrders(state.orders, targetStatus)
@@ -1359,25 +1446,25 @@ export const useOrdersStore = create<OrdersState>()(
       cancelOrder: (orderId, reason) => {
         const trimmed = reason.trim()
         if (!trimmed) return
-        get().updateOrder(orderId, {
+        const deferred = get().updateOrder(orderId, {
           status: 'Cancelada',
           cancelReason: trimmed,
           progress: 0,
         })
-        get().addToast('Orden cancelada con éxito')
+        if (!deferred?.deferred) get().addToast('Orden cancelada con éxito')
         set({ modalMode: null, selectedOrder: null })
       },
 
       annulOrder: (orderId, reason) => {
         const trimmed = reason.trim()
         if (!trimmed) return
-        get().updateOrder(orderId, {
+        const deferred = get().updateOrder(orderId, {
           status: 'Cancelada',
           annulled: true,
           annulReason: trimmed,
           progress: 0,
         })
-        get().addToast('Orden anulada con éxito')
+        if (!deferred?.deferred) get().addToast('Orden anulada con éxito')
         set({ modalMode: null, selectedOrder: null })
       },
 
@@ -1583,6 +1670,18 @@ export const useOrdersStore = create<OrdersState>()(
         }
         const previousDate = getExecutionDate(order) || order.createdAt
 
+        if (sessionIsFieldOperator()) {
+          const deferred = get().updateOrder(orderId, {
+            executionDate: newDate,
+            startDate: newDate,
+            dueDate: newDate,
+          })
+          if (deferred?.deferred) {
+            set({ modalMode: null, selectedOrder: null })
+            return { ok: true }
+          }
+        }
+
         let event: OrderRescheduleEvent = {
           id: eventId('rs'),
           orderId,
@@ -1684,6 +1783,7 @@ export const useOrdersStore = create<OrdersState>()(
             reason: localRequest.reason,
             operatorId: operator.id,
             operatorName: operator.name,
+            changes: data.changes,
           })
           set((state) => ({
             modificationRequests: [created, ...state.modificationRequests],
@@ -1700,7 +1800,7 @@ export const useOrdersStore = create<OrdersState>()(
           }))
         }
 
-        get().addToast('Solicitud de modificación enviada — pendiente de aprobación')
+        get().addToast('cambio registrado, esperando aprobación', 'info')
         return { ok: true }
       },
 
@@ -1752,7 +1852,12 @@ export const useOrdersStore = create<OrdersState>()(
           set({ apiAvailable: false })
         }
 
-        get().addToast('Solicitud aprobada — el operador puede editar la orden')
+        get().addToast(
+          request.changes?.length
+            ? 'Solicitud aprobada. El cambio ya está en la orden.'
+            : 'Solicitud aprobada.',
+        )
+        void get().syncFromApi()
         return { ok: true }
       },
 

@@ -251,6 +251,8 @@ model SolicitudModificacion {
   nombreOperador  String    @map("nombre_operador") @db.VarChar(150)
   camposModificar String    @map("campos_modificar") @db.VarChar(255)
   motivo          String    @db.VarChar(500)
+  /// Parche propuesto (JSON). No se aplica a la OT hasta aprobar.
+  cambiosJson     String    @default("") @map("cambios_json") @db.Text
   estado          String    @default("Pendiente") @db.VarChar(20)
   solicitadoEn    DateTime  @default(now()) @map("solicitado_en")
   idRevisor       String?   @map("id_revisor") @db.VarChar(80)

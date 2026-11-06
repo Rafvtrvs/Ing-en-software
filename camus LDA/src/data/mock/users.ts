@@ -43,7 +43,7 @@ export const initialRoles: AppRole[] = [
     id: 'role-tecnico',
     name: 'Técnico de Campo',
     description: 'Acceso a órdenes asignadas y operaciones en terreno.',
-    permissions: ['dashboard.view', 'orders.manage', 'operations.view'],
+    permissions: ['orders.manage', 'operations.view'],
     status: 'Activo',
     isSystem: true,
   },

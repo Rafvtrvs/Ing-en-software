@@ -65,11 +65,11 @@ export function IncidentsPanel() {
           value={(row.incidentType ?? row.category) as string}
           onChange={(e) => {
             const incidentType = e.target.value as IncidentType
-            updateOrder(row.id, {
+            const deferred = updateOrder(row.id, {
               incidentType,
               category: incidentType,
             })
-            addToast(`Incidente de ${row.id} actualizado`)
+            if (!deferred?.deferred) addToast(`Incidente de ${row.id} actualizado`)
           }}
           className="max-w-[180px] text-xs"
         >

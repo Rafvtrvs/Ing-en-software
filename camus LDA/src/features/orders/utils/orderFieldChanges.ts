@@ -14,6 +14,8 @@ export const ORDER_FIELD_LABELS: Record<string, string> = {
   endDate: 'Fecha término',
   durationHours: 'Duración (h)',
   incidentType: 'Tipo incidente',
+  truckCode: 'Camión',
+  dueDate: 'Fecha límite',
 }
 
 const TRACKED_FIELDS = [
@@ -30,6 +32,8 @@ const TRACKED_FIELDS = [
   'endDate',
   'durationHours',
   'incidentType',
+  'truckCode',
+  'dueDate',
 ] as const
 
 export type TrackedOrderField = (typeof TRACKED_FIELDS)[number]

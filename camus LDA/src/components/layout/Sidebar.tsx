@@ -82,13 +82,15 @@ export function Sidebar() {
             <p className="truncate text-xs text-slate-400">{user.role || 'Sin rol'}</p>
           </div>
         </div>
-        <NavLink
-          to={SUPPORT_ITEM.path}
-          className={({ isActive }) => navItemClass(isActive)}
-        >
-          <SUPPORT_ITEM.icon className="h-5 w-5" />
-          {SUPPORT_ITEM.label}
-        </NavLink>
+        {canAccessPath(user, SUPPORT_ITEM.path) && (
+          <NavLink
+            to={SUPPORT_ITEM.path}
+            className={({ isActive }) => navItemClass(isActive)}
+          >
+            <SUPPORT_ITEM.icon className="h-5 w-5" />
+            {SUPPORT_ITEM.label}
+          </NavLink>
+        )}
       </div>
     </aside>
   )

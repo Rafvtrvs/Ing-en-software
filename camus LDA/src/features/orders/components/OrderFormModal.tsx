@@ -10,6 +10,7 @@ import { useOrdersStore } from '@/store/useOrdersStore'
 import { useEquipmentStore } from '@/store/useEquipmentStore'
 import { useUsersStore } from '@/store/useUsersStore'
 import { useSessionUser } from '@/features/auth/useSessionUser'
+import { isRestrictedOrderEditor } from '@/features/orders/utils/canEditOrder'
 import { getOrderFieldChanges } from '@/features/orders/utils/orderFieldChanges'
 import {
   canEditOrder,
@@ -80,14 +81,24 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
     void syncEquipment()
   }, [syncEquipment])
 
-  const assignableEquipment = useMemo(
-    () =>
-      equipment.filter(
-        (eq) =>
-          eq.status !== 'Fuera de servicio' && eq.status !== 'Mantenimiento',
-      ),
-    [equipment],
-  )
+  const assignableEquipment = useMemo(() => {
+    const currentId = order?.id
+    const taken = new Set<string>()
+    for (const o of orders) {
+      if (currentId && o.id === currentId) continue
+      if (o.status !== 'Pendiente' && o.status !== 'En Curso') continue
+      if (o.equipmentId) taken.add(`id:${o.equipmentId}`)
+      if (o.truckCode?.trim()) taken.add(`code:${o.truckCode.trim().toUpperCase()}`)
+    }
+    return equipment.filter((eq) => {
+      if (eq.status === 'Fuera de servicio' || eq.status === 'Mantenimiento') {
+        return false
+      }
+      if (taken.has(`id:${eq.id}`)) return false
+      if (taken.has(`code:${eq.code.trim().toUpperCase()}`)) return false
+      return true
+    })
+  }, [equipment, orders, order?.id])
 
   const technicians = useMemo(() => {
     const techRoleIds = new Set(
@@ -294,7 +305,11 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
         onClose()
         return
       }
-      updateOrder(order.id, payload, { fromForm: true })
+      const deferred = updateOrder(order.id, payload, { fromForm: true })
+      if (deferred?.deferred) {
+        onClose()
+        return
+      }
       addToast(
         changes.length === 1
           ? `Campo "${changes[0].label}" actualizado en la orden`
@@ -309,7 +324,11 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
       open={open}
       onClose={onClose}
       title={mode === 'create' ? 'Nueva Orden de Trabajo' : 'Editar Orden de Trabajo'}
-      description="Completa los datos principales de la orden."
+      description={
+        isRestrictedOrderEditor(currentUser)
+          ? 'Los cambios quedan pendientes hasta que un administrador los apruebe.'
+          : 'Completa los datos principales de la orden.'
+      }
       size="lg"
       footer={
         <>
@@ -438,6 +457,9 @@ export function OrderFormModal({ mode, order, open, onClose }: OrderFormModalPro
                 </option>
               ))}
             </Select>
+            <p className="mt-1 text-xs text-slate-500">
+              Los camiones ya asignados a otra orden pendiente o en curso no aparecen.
+            </p>
           </FormField>
         </FormGrid>
 

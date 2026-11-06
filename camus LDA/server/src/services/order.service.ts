@@ -89,6 +89,43 @@ async function resolveMaquinaria(input: {
   return { idMaquinaria: null, codigoCamion: null }
 }
 
+const ACTIVE_ORDER_STATUSES = ['Pendiente', 'En Curso'] as const
+
+/** Un camión en una OT pendiente o en curso no puede asignarse a otra. */
+async function assertTruckAvailable(
+  maquinaria: { idMaquinaria: number | null; codigoCamion: string | null } | undefined,
+  opts: { excludeOrderId?: string; status?: string },
+) {
+  if (!maquinaria) return
+  if (!maquinaria.idMaquinaria && !maquinaria.codigoCamion) return
+  const status = opts.status ?? 'Pendiente'
+  if (!ACTIVE_ORDER_STATUSES.includes(status as (typeof ACTIVE_ORDER_STATUSES)[number])) {
+    return
+  }
+
+  const or: Array<{ idMaquinaria?: number; codigoCamion?: { equals: string; mode: 'insensitive' } }> = []
+  if (maquinaria.idMaquinaria != null) or.push({ idMaquinaria: maquinaria.idMaquinaria })
+  if (maquinaria.codigoCamion) {
+    or.push({ codigoCamion: { equals: maquinaria.codigoCamion, mode: 'insensitive' } })
+  }
+
+  const conflict = await prisma.ordenTrabajo.findFirst({
+    where: {
+      estado: { in: [...ACTIVE_ORDER_STATUSES] },
+      ...(opts.excludeOrderId ? { id: { not: opts.excludeOrderId } } : {}),
+      OR: or,
+    },
+    select: { id: true, codigoCamion: true },
+  })
+  if (!conflict) return
+
+  const label = conflict.codigoCamion || maquinaria.codigoCamion || 'El camión'
+  const e: any = new Error(`${label} ya está asignado a la orden ${conflict.id}`)
+  e.status = 409
+  e.field = 'truckCode'
+  throw e
+}
+
 function validateCoordinates(lat?: number, lon?: number) {
   if (lat === undefined && lon === undefined) return
   if (lat !== undefined) {
@@ -171,6 +208,115 @@ async function resolveFieldOperatorActor(
     role.includes('campo')
   if (!isField) return null
   return { id: user.id, name: user.nombre }
+}
+
+function calendarDay(value: Date | string | null | undefined): string {
+  if (!value) return ''
+  if (value instanceof Date) {
+    if (Number.isNaN(value.getTime())) return ''
+    return value.toISOString().slice(0, 10)
+  }
+  const raw = String(value).trim()
+  return raw ? raw.slice(0, 10) : ''
+}
+
+/**
+ * El operario puede iniciar o finalizar el servicio.
+ * Cualquier otro cambio de campos queda para aprobación del administrador.
+ */
+function operatorUpdateNeedsApproval(
+  before: {
+    direccion: string
+    servicio: string
+    categoria: string
+    estado: string
+    prioridad: string
+    progreso: number
+    nombreCliente: string
+    codigoCamion: string | null
+    idMaquinaria: number | null
+    fechaInicio: Date | null
+    fechaTermino: Date | null
+    duracionHoras: number | null
+    latitud: number | null
+    longitud: number | null
+    idOperador: number | null
+  },
+  input: Partial<OrderInput>,
+): boolean {
+  const diffs: string[] = []
+  const mark = (name: string, changed: boolean) => {
+    if (changed) diffs.push(name)
+  }
+
+  if (input.address !== undefined) {
+    mark('address', input.address.trim() !== (before.direccion ?? '').trim())
+  }
+  if (input.service !== undefined) {
+    mark('service', input.service.trim() !== (before.servicio ?? '').trim())
+  }
+  if (input.category !== undefined) {
+    mark('category', input.category.trim() !== (before.categoria ?? '').trim())
+  }
+  if (input.priority !== undefined) {
+    mark('priority', input.priority.trim() !== (before.prioridad ?? '').trim())
+  }
+  if (input.client !== undefined) {
+    mark('client', input.client.trim() !== (before.nombreCliente ?? '').trim())
+  }
+  if (input.progress !== undefined) {
+    mark('progress', Number(input.progress) !== Number(before.progreso ?? 0))
+  }
+  if (input.truckCode !== undefined) {
+    mark(
+      'truckCode',
+      (input.truckCode ?? '').trim() !== (before.codigoCamion ?? '').trim(),
+    )
+  }
+  if (input.equipmentId !== undefined) {
+    const next = input.equipmentId?.trim() || ''
+    const prev = before.idMaquinaria != null ? String(before.idMaquinaria) : ''
+    mark('equipmentId', next !== prev)
+  }
+  if (input.startDate !== undefined) {
+    mark('startDate', calendarDay(input.startDate) !== calendarDay(before.fechaInicio))
+  }
+  if (input.endDate !== undefined) {
+    mark('endDate', calendarDay(input.endDate) !== calendarDay(before.fechaTermino))
+  }
+  if (input.durationHours !== undefined) {
+    const next = input.durationHours == null ? '' : String(input.durationHours)
+    const prev = before.duracionHoras == null ? '' : String(before.duracionHoras)
+    mark('durationHours', next !== prev)
+  }
+  if (input.latitude !== undefined) {
+    mark('latitude', Number(input.latitude) !== Number(before.latitud ?? NaN))
+  }
+  if (input.longitude !== undefined) {
+    mark('longitude', Number(input.longitude) !== Number(before.longitud ?? NaN))
+  }
+  if (input.status !== undefined) {
+    mark('status', input.status !== before.estado)
+  }
+  if (input.operatorIds !== undefined || input.technician !== undefined || input.idOperador !== undefined) {
+    // Se resuelve más abajo solo si el resto ya no es una transición operativa.
+    // La comparación fina de operador ocurre si viene un id distinto.
+    if (input.idOperador !== undefined && input.idOperador !== before.idOperador) {
+      mark('operator', true)
+    } else if (input.operatorIds?.length) {
+      const raw = Number(String(input.operatorIds[0]).trim())
+      if (Number.isFinite(raw) && raw > 0 && raw !== before.idOperador) mark('operator', true)
+    }
+  }
+
+  if (diffs.length === 0) return false
+
+  const allowed = new Set(['status', 'progress', 'startDate', 'endDate', 'durationHours'])
+  const operational =
+    (before.estado === 'Pendiente' && input.status === 'En Curso') ||
+    (before.estado === 'En Curso' && input.status === 'Completada')
+  if (operational && diffs.every((d) => allowed.has(d))) return false
+  return true
 }
 
 function clientLabel(row: {
@@ -342,6 +488,7 @@ export const orderService = {
       idOperador = userId
     }
     const maquinaria = await resolveMaquinaria(input)
+    await assertTruckAvailable(maquinaria, { status: input.status ?? 'Pendiente' })
     const fechaInicio = parseOptionalDate(input.startDate)
     const fechaTermino = parseOptionalDate(input.endDate)
     const fechaLimite = parseOptionalDate(input.dueDate)
@@ -426,6 +573,16 @@ export const orderService = {
 
   async update(id: string, input: Partial<OrderInput>, userId?: number) {
     const before = await prisma.ordenTrabajo.findUnique({ where: { id } })
+    if (before && (await resolveFieldOperatorActor(userId))) {
+      if (operatorUpdateNeedsApproval(before, input)) {
+        const e: any = new Error(
+          'El cambio debe ser aprobado por un administrador',
+        )
+        e.status = 409
+        e.field = 'modification'
+        throw e
+      }
+    }
     const idCliente =
       input.idCliente ??
       (input.client !== undefined
@@ -433,6 +590,10 @@ export const orderService = {
         : undefined)
     const idOperador = await resolveOperador(input)
     const maquinaria = await resolveMaquinaria(input)
+    await assertTruckAvailable(maquinaria, {
+      excludeOrderId: id,
+      status: input.status ?? before?.estado ?? 'Pendiente',
+    })
     const fechaInicio = parseOptionalDate(input.startDate)
     const fechaTermino = parseOptionalDate(input.endDate)
     const fechaLimite = parseOptionalDate(input.dueDate)

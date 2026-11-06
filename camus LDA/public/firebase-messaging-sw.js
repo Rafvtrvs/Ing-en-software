@@ -76,6 +76,8 @@ if (cfg.apiKey && cfg.projectId && cfg.appId) {
   const messaging = firebase.messaging()
   messaging.onBackgroundMessage((payload) => {
     const item = pickPayload(payload)
+    const generic = item.title.replace(/\s+/g, '').toLowerCase() === 'camuslda'
+    if (!item.body && generic) return
     if (!payload.notification) {
       self.registration.showNotification(item.title, {
         body: item.body,

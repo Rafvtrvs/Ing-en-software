@@ -248,6 +248,10 @@ export const ordersService = {
       reason: string
       operatorId: string
       operatorName: string
+      changes?: {
+        patch?: Record<string, unknown>
+        diff?: Array<{ field: string; label: string; from: string; to: string }>
+      }
     },
   ): Promise<OrderModificationRequest> {
     const { data } = await api.post<OrderModificationRequest>(

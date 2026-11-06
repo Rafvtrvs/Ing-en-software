@@ -67,6 +67,11 @@ function campanitaFingerprint(item: FcmCampanitaItem): string {
 }
 
 function pushToCampanita(item: FcmCampanitaItem) {
+  const title = item.title?.trim() ?? ''
+  const body = item.body?.trim() ?? ''
+  const generic = title.replace(/\s+/g, '').toLowerCase() === 'camuslda'
+  if (!body && (!title || generic)) return
+
   const key = campanitaFingerprint(item)
   const now = Date.now()
   const prev = recentCampanitaKeys.get(key)
@@ -146,7 +151,7 @@ function bindCampanitaBridges() {
       window.location.assign(data.link.startsWith('http') ? data.link : data.link)
       return
     }
-    if (data.type && data.type !== 'CAMUS_FCM') return
+    if (data.type !== 'CAMUS_FCM') return
     pushToCampanita({
       title: data.title ?? 'Camus LDA',
       body: data.body ?? '',

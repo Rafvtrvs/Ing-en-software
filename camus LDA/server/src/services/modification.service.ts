@@ -1,5 +1,7 @@
 import { prisma } from '../db/prisma.js'
 import { auditService } from './audit.service.js'
+import { mailOpsRecipient, mailService } from '../external/mail.service.js'
+import { orderService } from './order.service.js'
 
 export class ModificationError extends Error {
   status: number
@@ -24,7 +26,18 @@ function toRequestDto(row: {
   nombreRevisor: string | null
   revisadoEn: Date | null
   motivoRechazo: string | null
+  cambiosJson?: string | null
 }) {
+  let changes: Array<{ field: string; label: string; from: string; to: string }> | undefined
+  const raw = row.cambiosJson?.trim()
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw) as { diff?: typeof changes }
+      if (Array.isArray(parsed.diff) && parsed.diff.length > 0) changes = parsed.diff
+    } catch {
+      changes = undefined
+    }
+  }
   return {
     id: String(row.id),
     orderId: row.idOt,
@@ -38,6 +51,23 @@ function toRequestDto(row: {
     reviewedByName: row.nombreRevisor ?? undefined,
     reviewedAt: row.revisadoEn?.toISOString(),
     rejectionReason: row.motivoRechazo ?? undefined,
+    ...(changes ? { changes } : null),
+  }
+}
+
+function parseStoredPatch(raw?: string | null): {
+  patch?: Record<string, unknown>
+  diff?: Array<{ field: string; label: string; from: string; to: string }>
+} {
+  if (!raw?.trim()) return {}
+  try {
+    const parsed = JSON.parse(raw) as {
+      patch?: Record<string, unknown>
+      diff?: Array<{ field: string; label: string; from: string; to: string }>
+    }
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
   }
 }
 
@@ -80,6 +110,10 @@ export const modificationService = {
       reason: string
       operatorId: string
       operatorName: string
+      changes?: {
+        patch?: Record<string, unknown>
+        diff?: Array<{ field: string; label: string; from: string; to: string }>
+      } | null
     },
     userId?: number,
   ) {
@@ -92,6 +126,13 @@ export const modificationService = {
     const order = await prisma.ordenTrabajo.findUnique({ where: { id: orderId } })
     if (!order) throw new ModificationError(404, 'Orden de trabajo no encontrada')
 
+    const cambiosJson = input.changes?.patch
+      ? JSON.stringify({
+          patch: input.changes.patch,
+          diff: input.changes.diff ?? [],
+        })
+      : ''
+
     const row = await prisma.solicitudModificacion.create({
       data: {
         idOt: orderId,
@@ -99,6 +140,7 @@ export const modificationService = {
         nombreOperador: input.operatorName || 'Operador',
         camposModificar: fields.slice(0, 255),
         motivo: reason.slice(0, 500),
+        cambiosJson,
         estado: 'Pendiente',
       },
     })
@@ -109,6 +151,25 @@ export const modificationService = {
       valorNuevo: row,
       idUsuario: userId,
     })
+
+    const summary = reason.slice(0, 500)
+    const { notifyAdmins } = await import('./pushNotify.service.js')
+    void notifyAdmins({
+      title: `Solicitud de cambio en OT ${orderId}`,
+      body: `${input.operatorName || 'Operador'} solicita modificar: ${summary}`,
+      link: `/ordenes?order=${encodeURIComponent(orderId)}`,
+      orderId,
+      notifType: 'order',
+      excludeUserId: userId,
+    }).catch((err) => console.error('[modification] push', err))
+
+    void mailService
+      .send({
+        to: mailOpsRecipient(),
+        subject: 'Camus LDA · Solicitud de modificación',
+        body: `Solicitud de modificación\n\nOrden: ${orderId}\nOperador: ${input.operatorName || 'Operador'}\nCampos: ${fields}\nDetalle: ${summary}\n\nEl cambio no se aplica hasta que un administrador lo apruebe.`,
+      })
+      .catch((err) => console.error('[modification] mail', err))
 
     return toRequestDto(row)
   },
@@ -124,6 +185,28 @@ export const modificationService = {
     if (!before) throw new ModificationError(404, 'Solicitud no encontrada')
     if (before.estado !== 'Pendiente') {
       throw new ModificationError(409, 'La solicitud ya fue revisada')
+    }
+
+    const stored = parseStoredPatch(before.cambiosJson)
+    if (stored.patch && Object.keys(stored.patch).length > 0) {
+      await orderService.update(
+        before.idOt,
+        stored.patch as Parameters<typeof orderService.update>[1],
+        userId,
+      )
+      for (const change of stored.diff ?? []) {
+        await prisma.historialModificacionOt.create({
+          data: {
+            idOt: before.idOt,
+            campo: String(change.field ?? '').slice(0, 80) || 'campo',
+            etiqueta: String(change.label ?? change.field ?? '').slice(0, 120),
+            valorAnterior: String(change.from ?? '').slice(0, 500),
+            valorNuevo: String(change.to ?? '').slice(0, 500),
+            idUsuario: reviewer.id || 'admin',
+            nombreUsuario: reviewer.name || 'Administrador',
+          },
+        })
+      }
     }
 
     const row = await prisma.solicitudModificacion.update({

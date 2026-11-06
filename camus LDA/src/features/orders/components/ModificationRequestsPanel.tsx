@@ -199,9 +199,20 @@ export function ModificationRequestsPanel() {
             <p>
               <span className="text-slate-500">Campos:</span> {selected.fieldsToModify}
             </p>
-            <p>
-              <span className="text-slate-500">Motivo:</span> {selected.reason}
-            </p>
+            {selected.changes && selected.changes.length > 0 ? (
+              <ul className="space-y-1 rounded-lg bg-slate-50 p-3">
+                {selected.changes.map((change) => (
+                  <li key={`${change.field}-${change.to}`}>
+                    <span className="text-slate-500">{change.label}:</span>{' '}
+                    {change.from} → <strong>{change.to}</strong>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>
+                <span className="text-slate-500">Motivo:</span> {selected.reason}
+              </p>
+            )}
             <Badge label={selected.status} className={statusStyles[selected.status]} />
             {selected.status === 'Pendiente' && (
               <div className="pt-2">

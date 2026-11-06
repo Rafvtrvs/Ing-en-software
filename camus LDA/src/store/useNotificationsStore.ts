@@ -62,6 +62,12 @@ function syncHeaderBadge(count: number) {
   }))
 }
 
+function isPhantomCamusNotice(title?: string, message?: string): boolean {
+  const name = (title ?? '').replace(/\s+/g, '').toLowerCase()
+  const body = (message ?? '').trim()
+  return name === 'camuslda' && body.length === 0
+}
+
 function safeId() {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return `notif-${crypto.randomUUID().split('-')[0]}`
@@ -82,6 +88,7 @@ export const useNotificationsStore = create<NotificationsState>()(
       closePanel: () => set({ panelOpen: false }),
 
       addNotification: (notification) => {
+        if (isPhantomCamusNotice(notification.title, notification.message)) return
         const now = Date.now()
         const dupWindowMs = 90_000
         const isDup = get().items.some((n) => {
@@ -193,9 +200,14 @@ export const useNotificationsStore = create<NotificationsState>()(
       name: 'camus_notifications_store_v1',
       partialize: (state) => ({ items: state.items }),
       onRehydrateStorage: () => (state) => {
-        if (state) {
-          syncHeaderBadge(state.items.filter((n) => !n.read).length)
+        if (!state) return
+        const items = state.items.filter(
+          (n) => !isPhantomCamusNotice(n.title, n.message),
+        )
+        if (items.length !== state.items.length) {
+          useNotificationsStore.setState({ items })
         }
+        syncHeaderBadge(items.filter((n) => !n.read).length)
       },
     },
   ),

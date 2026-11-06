@@ -121,6 +121,7 @@ export function OrderDetailDrawer({
   const updateOrder = useOrdersStore((s) => s.updateOrder)
   const addToast = useOrdersStore((s) => s.addToast)
   const orders = useOrdersStore((s) => s.orders)
+  const modificationRequests = useOrdersStore((s) => s.modificationRequests)
   const products = useInventoryStore((s) => s.products)
   const currentUser = useSessionUser()
 
@@ -136,6 +137,11 @@ export function OrderDetailDrawer({
     ? products.find((p) => p.code === liveOrder.truckCode) ?? null
     : null
   const editable = liveOrder ? canEditOrder(currentUser, liveOrder) : false
+  const pendingChange = liveOrder
+    ? modificationRequests.find(
+        (r) => r.orderId === liveOrder.id && r.status === 'Pendiente',
+      )
+    : undefined
   const canApprove = !isFieldOperator(currentUser)
   const canManageLifecycle =
     canApprove && liveOrder && liveOrder.status !== 'Cancelada'
@@ -245,7 +251,7 @@ export function OrderDetailDrawer({
                 leftIcon={<Play className="h-4 w-4" />}
                 onClick={() => {
                   guardEdit(() => {
-                    updateOrder(liveOrder.id, {
+                    const deferred = updateOrder(liveOrder.id, {
                       status: next,
                       progress: progressForStatus(next, liveOrder.progress),
                       ...(next === 'En Curso' && !liveOrder.startDate
@@ -259,6 +265,7 @@ export function OrderDetailDrawer({
                           }
                         : null),
                     })
+                    if (deferred?.deferred) return
                     addToast(
                       next === 'En Curso'
                         ? 'Orden iniciada'
@@ -278,6 +285,11 @@ export function OrderDetailDrawer({
         <p className="text-sm text-slate-500">Selecciona una orden para ver su detalle.</p>
       ) : (
         <div className="space-y-4">
+          {pendingChange && (
+            <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
+              cambio registrado, esperando aprobación
+            </div>
+          )}
           {!editable && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
               Solo lectura: esta OT no está asignada a tu usuario.

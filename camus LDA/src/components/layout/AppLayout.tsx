@@ -12,8 +12,10 @@ import { isFieldOperator } from '@/features/auth/roleAccess'
 import { useIsMobileViewport } from '@/hooks/useIsMobileViewport'
 import { FieldMobilePage } from '@/features/field/FieldMobilePage'
 import { cn } from '@/utils/cn'
+import { useModificationAlerts } from '@/features/orders/hooks/useModificationAlerts'
 
 export function AppLayout() {
+  useModificationAlerts()
   const sidebarOpen = useAppStore((s) => s.sidebarOpen)
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen)
   const user = useSessionUser()

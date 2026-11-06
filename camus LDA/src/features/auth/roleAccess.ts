@@ -48,7 +48,6 @@ export function permissionsForRole(roleName?: string | null): PermissionKey[] {
   ) {
     return [
       ...(initialRoles.find((r) => r.id === 'role-tecnico')?.permissions ?? [
-        'dashboard.view',
         'orders.manage',
         'operations.view',
       ]),
@@ -78,10 +77,15 @@ export function hasPermission(
   return permissionsForRole(user?.role).includes(permission)
 }
 
+const FIELD_OPERATOR_PATHS = new Set<string>([ROUTES.ORDENES, ROUTES.OPERACIONES])
+
 export function canAccessPath(
   user: OrderPermissionUser | null | undefined,
   path: string,
 ): boolean {
+  if (isFieldOperator(user)) {
+    return FIELD_OPERATOR_PATHS.has(path)
+  }
   const required = ROUTE_PERMISSIONS[path]
   if (required === undefined) return true
   return hasPermission(user, required)
