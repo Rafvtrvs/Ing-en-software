@@ -346,7 +346,7 @@ model BitacoraAuditoria {
 
 model EvidenciaMultimedia {
   id            Int      @id @default(autoincrement()) @map("id_evidencia")
-  tipoArchivo   String?  @map("tipo_archivo") @db.VarChar(50)
+  tipoArchivo   String?  @map("tipo_archivo") @db.VarChar(255)
   version       Int      @default(1)
   rutaArchivoUrl String? @map("ruta_archivo_url") @db.Text
   contenido      Bytes?  @map("contenido")

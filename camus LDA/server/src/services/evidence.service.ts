@@ -129,7 +129,8 @@ export const evidenceService = {
       )
     }
 
-    const fileName = (input.fileName ?? '').trim().slice(0, 120) || `evidencia.${MIME_EXT[mime]}`
+    const fileName =
+      (input.fileName ?? '').trim().slice(0, 200) || `evidencia.${MIME_EXT[mime]}`
     const row = await prisma.evidenciaMultimedia.create({
       data: {
         idOt: orderId,
