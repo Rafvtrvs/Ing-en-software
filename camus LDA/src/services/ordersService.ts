@@ -134,9 +134,35 @@ export const ordersService = {
     )
     return data
   },
+  /** Guarda un enlace http(s) como evidencia de la OT. */
+  async linkEvidenceUrl(orderId: string, url: string): Promise<OrderEvidence> {
+    const { data } = await api.post<OrderEvidence>(`/orders/${orderId}/evidence`, { url })
+    return data
+  },
+
   /** RF09 / CU-32: eliminar evidencia */
   async removeEvidence(orderId: string, evidenceId: number): Promise<void> {
     await api.delete(`/orders/${orderId}/evidence/${evidenceId}`)
+  },
+
+  /** RF-40: documentos PDF persistidos de una OT */
+  async listOrderDocuments(orderId: string): Promise<
+    {
+      id: number
+      titulo: string
+      tipo: string
+      versionActual: number
+      nombreArchivo: string
+      mimeType: string
+      tamanioBytes: number
+      urlArchivo: string
+      subidoPor: string | null
+      nota: string | null
+      fechaCarga: string
+    }[]
+  > {
+    const { data } = await api.get(`/orders/${orderId}/documents`)
+    return data
   },
 
   /** RF-40: subir documento PDF a la OT */

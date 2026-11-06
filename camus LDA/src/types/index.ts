@@ -214,6 +214,7 @@ export interface OrderEvidence {
   fileName: string
   mimeType: string
   uploadedAt: string
+  externalUrl?: string
 }
 
 /** Intervención registrada en una OT (RF-44 / CU-149–151) */

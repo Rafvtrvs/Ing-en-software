@@ -3,7 +3,6 @@
 //  Carga, listado, descarga y eliminación de imágenes, con
 //  validación de integridad (formato, tamaño y firma del archivo).
 // ============================================================
-import { randomUUID } from 'node:crypto'
 import { prisma } from '../db/prisma.js'
 import { storageService } from '../external/storage.service.js'
 import { auditService } from './audit.service.js'
@@ -21,8 +20,8 @@ export class EvidenceError extends Error {
 }
 
 export const MAX_EVIDENCE_BYTES = 5 * 1024 * 1024
-/** CU-30: la OT debe estar en ejecución o finalizada */
-export const UPLOAD_ALLOWED_STATUSES = ['En Curso', 'Completada', 'Abonado']
+/** Se puede adjuntar evidencia mientras la OT no esté cancelada o anulada. */
+export const UPLOAD_ALLOWED_STATUSES = ['Pendiente', 'En Curso', 'Completada', 'Abonado']
 
 const MIME_EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -55,6 +54,8 @@ export interface EvidenceDto {
   fileName: string
   mimeType: string
   uploadedAt: string
+  /** Enlace externo (https) cuando la evidencia no es un archivo subido. */
+  externalUrl?: string
 }
 
 // Formato de tipoArchivo en BD: "<mime>|<nombre original>"
@@ -63,14 +64,20 @@ function toDto(row: {
   tipoArchivo: string | null
   fechaCarga: Date
   idOt: string | null
+  rutaArchivoUrl?: string | null
 }): EvidenceDto {
   const [mimeType = '', ...rest] = (row.tipoArchivo ?? '').split('|')
+  const external =
+    row.rutaArchivoUrl && /^https?:\/\//i.test(row.rutaArchivoUrl)
+      ? row.rutaArchivoUrl
+      : undefined
   return {
     id: row.id,
     orderId: row.idOt ?? '',
-    mimeType,
-    fileName: rest.join('|') || `evidencia-${row.id}`,
+    mimeType: external ? 'url' : mimeType,
+    fileName: rest.join('|') || (external ? 'enlace' : `evidencia-${row.id}`),
     uploadedAt: row.fechaCarga.toISOString(),
+    externalUrl: external,
   }
 }
 
@@ -97,7 +104,7 @@ export const evidenceService = {
     if (!UPLOAD_ALLOWED_STATUSES.includes(order.estado)) {
       throw new EvidenceError(
         409,
-        'La orden debe estar en ejecución o finalizada para adjuntar evidencia',
+        'No se puede adjuntar evidencia a una orden cancelada o anulada',
         'estado',
       )
     }
@@ -123,12 +130,13 @@ export const evidenceService = {
     }
 
     const fileName = (input.fileName ?? '').trim().slice(0, 120) || `evidencia.${MIME_EXT[mime]}`
-    const { url } = await storageService.upload(
-      `${orderId}-${randomUUID()}.${MIME_EXT[mime]}`,
-      buffer,
-    )
     const row = await prisma.evidenciaMultimedia.create({
-      data: { idOt: orderId, tipoArchivo: `${mime}|${fileName}`, rutaArchivoUrl: url },
+      data: {
+        idOt: orderId,
+        tipoArchivo: `${mime}|${fileName}`,
+        rutaArchivoUrl: `db://evidencia`,
+        contenido: buffer,
+      },
     })
 
     await auditService.log({
@@ -140,12 +148,42 @@ export const evidenceService = {
     return toDto(row)
   },
 
+  /** Enlace http(s) guardado en Postgres, sin archivo binario. */
+  async linkUrl(orderId: string, url: string, userId?: number): Promise<EvidenceDto> {
+    await requireOrder(orderId)
+    const href = url.trim()
+    if (!/^https?:\/\//i.test(href)) {
+      throw new EvidenceError(400, 'La URL debe comenzar con http:// o https://', 'url')
+    }
+    const row = await prisma.evidenciaMultimedia.create({
+      data: {
+        idOt: orderId,
+        tipoArchivo: 'url|enlace',
+        rutaArchivoUrl: href,
+      },
+    })
+    await auditService.log({
+      modulo: 'evidencia',
+      accion: 'cargar_url',
+      valorNuevo: { orderId, evidenceId: row.id, url: href },
+      idUsuario: userId,
+    })
+    return toDto(row)
+  },
+
   /** CU-31 */
   async list(orderId: string): Promise<EvidenceDto[]> {
     await requireOrder(orderId)
     const rows = await prisma.evidenciaMultimedia.findMany({
       where: { idOt: orderId },
       orderBy: { id: 'asc' },
+      select: {
+        id: true,
+        tipoArchivo: true,
+        fechaCarga: true,
+        idOt: true,
+        rutaArchivoUrl: true,
+      },
     })
     return rows.map(toDto)
   },
@@ -153,13 +191,17 @@ export const evidenceService = {
   /** CU-33: devuelve el archivo original para visualizar/descargar. */
   async getFile(orderId: string, evidenceId: number) {
     const row = await requireEvidence(orderId, evidenceId)
-    if (!row.rutaArchivoUrl) throw new EvidenceError(404, 'El archivo no está disponible')
-    let content: Buffer
-    try {
-      content = await storageService.read(row.rutaArchivoUrl)
-    } catch {
-      throw new EvidenceError(404, 'El archivo no está disponible')
+    let content: Buffer | null = null
+    if (row.contenido && row.contenido.length > 0) {
+      content = Buffer.from(row.contenido)
+    } else if (row.rutaArchivoUrl && !row.rutaArchivoUrl.startsWith('db://')) {
+      try {
+        content = await storageService.read(row.rutaArchivoUrl)
+      } catch {
+        content = null
+      }
     }
+    if (!content) throw new EvidenceError(404, 'El archivo no está disponible')
     const dto = toDto(row)
     return { content, mimeType: dto.mimeType, fileName: dto.fileName }
   },
@@ -167,7 +209,9 @@ export const evidenceService = {
   /** CU-32 */
   async remove(orderId: string, evidenceId: number, userId?: number): Promise<void> {
     const row = await requireEvidence(orderId, evidenceId)
-    if (row.rutaArchivoUrl) await storageService.remove(row.rutaArchivoUrl)
+    if (row.rutaArchivoUrl?.startsWith('mock-storage://')) {
+      await storageService.remove(row.rutaArchivoUrl).catch(() => undefined)
+    }
     await prisma.evidenciaMultimedia.delete({ where: { id: evidenceId } })
     await auditService.log({
       modulo: 'evidencia',

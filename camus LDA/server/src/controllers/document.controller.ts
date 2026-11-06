@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto'
 import type { Request, Response, NextFunction } from 'express'
 import { prisma } from '../db/prisma.js'
 import { storageService } from '../external/storage.service.js'
@@ -27,6 +26,7 @@ async function resolveStoredFile(input: {
   nombreArchivo: string
   mimeType: string
   tamanioBytes: number
+  contenido?: Buffer
 } | { error: string; status: number }> {
   const mime = String(input.mimeType || PDF_MIME).toLowerCase()
   if (mime !== PDF_MIME) {
@@ -48,15 +48,12 @@ async function resolveStoredFile(input: {
     const safeName = baseName.toLowerCase().endsWith('.pdf')
       ? baseName
       : `${baseName}.pdf`
-    const { url } = await storageService.upload(
-      `docs-${input.orderId}-${randomUUID()}-${safeName}`,
-      buffer,
-    )
     return {
-      urlArchivo: url,
+      urlArchivo: 'db://documento',
       nombreArchivo: safeName.slice(0, 255),
       mimeType: PDF_MIME,
       tamanioBytes: buffer.length,
+      contenido: buffer,
     }
   }
 
@@ -86,6 +83,20 @@ export const documentController = {
       const rows = await prisma.documentoOrden.findMany({
         where: { idOt },
         orderBy: [{ fechaCarga: 'desc' }, { titulo: 'asc' }],
+        select: {
+          id: true,
+          titulo: true,
+          tipo: true,
+          versionActual: true,
+          nombreArchivo: true,
+          mimeType: true,
+          tamanioBytes: true,
+          urlArchivo: true,
+          subidoPor: true,
+          nota: true,
+          fechaCarga: true,
+          idOt: true,
+        },
       })
       res.json(rows)
     } catch (err) {
@@ -137,6 +148,7 @@ export const documentController = {
           mimeType: stored.mimeType,
           tamanioBytes: stored.tamanioBytes,
           urlArchivo: stored.urlArchivo,
+          contenido: stored.contenido,
           subidoPor: subidoPor ? String(subidoPor) : null,
           nota: nota ? String(nota) : null,
         },
@@ -194,6 +206,7 @@ export const documentController = {
           mimeType: stored.mimeType,
           tamanioBytes: stored.tamanioBytes,
           urlArchivo: stored.urlArchivo,
+          contenido: stored.contenido ?? null,
           subidoPor: subidoPor ? String(subidoPor) : current.subidoPor,
           nota: nota ? String(nota) : current.nota,
           fechaCarga: new Date(),
@@ -229,7 +242,10 @@ export const documentController = {
       if (!row || row.idOt !== orderId) {
         return res.status(404).json({ message: 'Documento no encontrado' })
       }
-      const buffer = await storageService.read(row.urlArchivo)
+      const buffer =
+        row.contenido && row.contenido.length > 0
+          ? Buffer.from(row.contenido)
+          : await storageService.read(row.urlArchivo)
       res.setHeader('Content-Type', row.mimeType || PDF_MIME)
       res.setHeader(
         'Content-Disposition',

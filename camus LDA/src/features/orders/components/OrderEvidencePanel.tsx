@@ -9,7 +9,7 @@ import type { OrderEvidence, WorkOrder } from '@/types'
 const ACCEPTED_MIME = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
 const MAX_BYTES = 5 * 1024 * 1024
 /** CU-30: solo se puede adjuntar con la OT en ejecución o finalizada */
-const UPLOAD_STATUSES: WorkOrder['status'][] = ['En Curso', 'Completada', 'Abonado']
+const UPLOAD_STATUSES: WorkOrder['status'][] = ['Pendiente', 'En Curso', 'Completada', 'Abonado']
 
 function isAllowedEvidenceFile(file: File): boolean {
   const type = file.type.toLowerCase()
@@ -73,6 +73,10 @@ export function OrderEvidencePanel({
       const next: Record<number, string> = {}
       for (const item of items) {
         try {
+          if (item.externalUrl) {
+            next[item.id] = item.externalUrl
+            continue
+          }
           const blob = await ordersService.fetchEvidenceFile(order.id, item.id)
           const url = URL.createObjectURL(blob)
           created.push(url)
@@ -165,9 +169,7 @@ export function OrderEvidencePanel({
               variant="outline"
               leftIcon={<ImagePlus className="h-4 w-4" />}
               disabled={!statusOk || uploading}
-              title={
-                statusOk ? undefined : 'La orden debe estar en ejecución o finalizada'
-              }
+                title={statusOk ? undefined : 'No se puede adjuntar evidencia a una orden cancelada'}
               onClick={() => inputRef.current?.click()}
             >
               {uploading ? 'Subiendo…' : 'Subir PNG/JPG'}
@@ -178,8 +180,7 @@ export function OrderEvidencePanel({
 
       {canUpload && !statusOk && (
         <p className="mb-2 text-xs text-amber-700">
-          Para subir evidencia, la orden debe estar en <strong>En Curso</strong>,{' '}
-          <strong>Completada</strong> o <strong>Abonado</strong> (ahora: {order.status}).
+          No se puede adjuntar evidencia con la orden en estado {order.status}.
         </p>
       )}
       {error && <p className="text-sm text-red-600">{error}</p>}

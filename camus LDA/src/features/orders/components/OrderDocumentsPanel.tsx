@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FileStack, History, Paperclip, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -46,7 +46,42 @@ export function OrderDocumentsPanel({
   const addDocumentVersion = useOrdersStore((s) => s.addDocumentVersion)
   const addToast = useOrdersStore((s) => s.addToast)
 
-  const docs = order.documents ?? []
+  const [serverDocs, setServerDocs] = useState<OrderDocument[] | null>(null)
+  const docs = serverDocs ?? order.documents ?? []
+
+  const loadDocs = useCallback(async () => {
+    try {
+      const rows = await ordersService.listOrderDocuments(order.id)
+      setServerDocs(
+        rows.map((row) => ({
+          id: String(row.id),
+          orderId: order.id,
+          kind: (row.tipo as OrderDocumentKind) || 'general',
+          title: row.titulo,
+          currentVersion: row.versionActual,
+          createdAt: row.fechaCarga,
+          versions: [
+            {
+              version: row.versionActual,
+              fileName: row.nombreArchivo,
+              url: `db://${row.id}`,
+              mimeType: row.mimeType || 'application/pdf',
+              sizeBytes: row.tamanioBytes,
+              uploadedAt: row.fechaCarga,
+              uploadedBy: row.subidoPor ?? 'Usuario',
+              note: row.nota ?? undefined,
+            },
+          ],
+        })),
+      )
+    } catch {
+      setServerDocs(null)
+    }
+  }, [order.id])
+
+  useEffect(() => {
+    void loadDocs()
+  }, [loadDocs])
   const [kind, setKind] = useState<OrderDocumentKind>('general')
   const [title, setTitle] = useState('')
   const [file, setFile] = useState<File | null>(null)
@@ -114,6 +149,12 @@ export function OrderDocumentsPanel({
         })
         url = created.urlArchivo
         docId = String(created.id)
+        await loadDocs()
+        setTitle('')
+        setFile(null)
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        addToast('Documento adjunto correctamente')
+        return
       } catch (err) {
         if (!(isDemoMode() || isOfflineApiError(err))) {
           throw err
@@ -172,6 +213,12 @@ export function OrderDocumentsPanel({
             note: 'Nueva versión',
           })
           url = updated.urlArchivo
+          await loadDocs()
+          setVersionFile(null)
+          setVersionTargetId('')
+          if (versionInputRef.current) versionInputRef.current.value = ''
+          addToast(`Versión ${updated.versionActual} guardada`)
+          return
         } else {
           throw new Error('offline')
         }

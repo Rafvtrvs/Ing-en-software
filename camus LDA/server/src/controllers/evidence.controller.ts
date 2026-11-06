@@ -21,7 +21,11 @@ export const evidenceController = {
 
   async upload(req: Request, res: Response, next: NextFunction) {
     try {
-      const created = await evidenceService.upload(req.params.id, req.body ?? {}, req.user?.sub)
+      const body = req.body ?? {}
+      const created =
+        body.url && !body.data
+          ? await evidenceService.linkUrl(req.params.id, String(body.url), req.user?.sub)
+          : await evidenceService.upload(req.params.id, body, req.user?.sub)
       res.status(201).json(created)
     } catch (err) {
       next(err)

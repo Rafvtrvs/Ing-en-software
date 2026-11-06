@@ -311,6 +311,7 @@ model DocumentoOrden {
   mimeType       String   @default("application/pdf") @map("mime_type") @db.VarChar(100)
   tamanioBytes   Int      @default(0) @map("tamanio_bytes")
   urlArchivo     String   @map("url_archivo") @db.VarChar(500)
+  contenido      Bytes?   @map("contenido")
   subidoPor      String?  @map("subido_por") @db.VarChar(120)
   nota           String?  @db.VarChar(255)
   fechaCarga     DateTime @default(now()) @map("fecha_carga")
@@ -347,7 +348,8 @@ model EvidenciaMultimedia {
   id            Int      @id @default(autoincrement()) @map("id_evidencia")
   tipoArchivo   String?  @map("tipo_archivo") @db.VarChar(50)
   version       Int      @default(1)
-  rutaArchivoUrl String? @map("ruta_archivo_url") @db.VarChar(255)
+  rutaArchivoUrl String? @map("ruta_archivo_url") @db.Text
+  contenido      Bytes?  @map("contenido")
   capaDibujoJson String? @map("capa_dibujo_json")
   fechaCarga    DateTime @default(now()) @map("fecha_carga")
   idOt          String?  @map("id_ot") @db.VarChar(30)

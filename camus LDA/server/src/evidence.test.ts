@@ -34,13 +34,13 @@ describe('EvidenceService - RF09 (CU-30 a CU-34)', () => {
       data: `data:image/png;base64,${pngB64}`,
     })
     expect(dto).toMatchObject({ id: 7, orderId: 'OT-1', fileName: 'foto.png', mimeType: 'image/png' })
-    expect(storageService.upload).toHaveBeenCalledOnce()
+    expect(prisma.evidenciaMultimedia.create).toHaveBeenCalled()
     expect(auditService.log).toHaveBeenCalled()
   })
 
-  it('CU-30: rechaza órdenes que no están en ejecución ni finalizadas', async () => {
+  it('CU-30: rechaza órdenes canceladas', async () => {
     // @ts-ignore
-    prisma.ordenTrabajo.findUnique = vi.fn().mockResolvedValue({ id: 'OT-1', estado: 'Pendiente' })
+    prisma.ordenTrabajo.findUnique = vi.fn().mockResolvedValue({ id: 'OT-1', estado: 'Cancelada' })
     await expect(
       evidenceService.upload('OT-1', { mimeType: 'image/png', data: pngB64 }),
     ).rejects.toMatchObject({ status: 409 })

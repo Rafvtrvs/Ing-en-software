@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Camera, ImagePlus, Pencil, Trash2 } from 'lucide-react'
 import { OrderPhotoAnnotationModal } from '@/features/orders/components/OrderPhotoAnnotationModal'
 import { AvatarCropModal } from '@/features/settings/components/AvatarCropModal'
@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/Button'
 import { FormField } from '@/components/ui/FormField'
 import { Input } from '@/components/ui/Input'
 import { useOrdersStore } from '@/store/useOrdersStore'
-import type { WorkOrder } from '@/types'
+import { ordersService } from '@/services/ordersService'
+import type { OrderEvidence, WorkOrder } from '@/types'
 
 const MAX_BYTES = 5 * 1024 * 1024
 
@@ -43,20 +44,72 @@ export function OrderPhotosPanel({
   order: WorkOrder
   canEdit?: boolean
 }) {
-  const addPhotoUrl = useOrdersStore((s) => s.addPhotoUrl)
-  const removePhotoUrl = useOrdersStore((s) => s.removePhotoUrl)
   const addToast = useOrdersStore((s) => s.addToast)
   const fileRef = useRef<HTMLInputElement>(null)
   const [url, setUrl] = useState('')
+  const [items, setItems] = useState<OrderEvidence[]>([])
+  const [thumbs, setThumbs] = useState<Record<number, string>>({})
   const [annotatePhoto, setAnnotatePhoto] = useState<string | null>(null)
   const [cropSrc, setCropSrc] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  const handleSubmit = (e: FormEvent) => {
+  const load = useCallback(async () => {
+    try {
+      setItems(await ordersService.listEvidence(order.id))
+    } catch {
+      setItems([])
+    }
+  }, [order.id])
+
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  useEffect(() => {
+    let cancelled = false
+    const created: string[] = []
+    void (async () => {
+      const next: Record<number, string> = {}
+      for (const item of items) {
+        if (item.externalUrl) {
+          next[item.id] = item.externalUrl
+          continue
+        }
+        try {
+          const blob = await ordersService.fetchEvidenceFile(order.id, item.id)
+          const objectUrl = URL.createObjectURL(blob)
+          created.push(objectUrl)
+          next[item.id] = objectUrl
+        } catch {
+          /* archivo no disponible */
+        }
+      }
+      if (!cancelled) setThumbs(next)
+    })()
+    return () => {
+      cancelled = true
+      created.forEach((objectUrl) => URL.revokeObjectURL(objectUrl))
+    }
+  }, [items, order.id])
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!canEdit || !url.trim()) return
-    addPhotoUrl(order.id, url.trim())
-    setUrl('')
+    const href = url.trim()
+    if (!canEdit || !href) return
+    setBusy(true)
+    try {
+      await ordersService.linkEvidenceUrl(order.id, href)
+      setUrl('')
+      await load()
+      addToast('Evidencia fotográfica agregada')
+    } catch (err) {
+      const message =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        'No se pudo guardar la URL'
+      addToast(message, 'error')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const handlePickFile = async (file: File | null) => {
@@ -80,7 +133,10 @@ export function OrderPhotosPanel({
     }
   }
 
-  const photos = order.photoUrls ?? []
+  const photos = items.flatMap((item) => {
+    const src = thumbs[item.id]
+    return src ? [{ item, src }] : []
+  })
 
   return (
     <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -121,39 +177,24 @@ export function OrderPhotosPanel({
 
       {photos.length > 0 && (
         <div className="mb-3 grid grid-cols-2 gap-2">
-          {photos.map((photo) => (
+          {photos.map(({ item, src }) => (
             <div
-              key={photo}
+              key={item.id}
               className="group relative overflow-hidden rounded-lg border border-slate-100 bg-slate-50"
             >
               <img
-                src={photo}
-                alt="Evidencia"
+                src={src}
+                alt={item.fileName}
                 className="h-28 w-full object-cover"
-                onError={(e) => {
-                  ;(e.target as HTMLImageElement).style.display = 'none'
-                }}
               />
-              {!photo.startsWith('data:') && (
-                <a
-                  href={photo}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block truncate px-2 py-1 text-[11px] text-primary hover:underline"
-                >
-                  {photo}
-                </a>
-              )}
-              {photo.startsWith('data:') && (
-                <p className="truncate px-2 py-1 text-[11px] text-slate-500">
-                  Imagen local
-                </p>
-              )}
+              <p className="truncate px-2 py-1 text-[11px] text-slate-500">
+                {item.externalUrl ? 'Enlace' : item.fileName}
+              </p>
               {canEdit && (
                 <div className="absolute right-1 top-1 flex gap-1 opacity-0 group-hover:opacity-100">
                   <button
                     type="button"
-                    onClick={() => setAnnotatePhoto(photo)}
+                    onClick={() => setAnnotatePhoto(src)}
                     className="rounded bg-white/90 p-1 text-primary shadow"
                     aria-label="Realizar anotación en imagen"
                   >
@@ -161,7 +202,12 @@ export function OrderPhotosPanel({
                   </button>
                   <button
                     type="button"
-                    onClick={() => removePhotoUrl(order.id, photo)}
+                    onClick={() => {
+                      void ordersService
+                        .removeEvidence(order.id, item.id)
+                        .then(() => load())
+                        .catch(() => addToast('No se pudo quitar la foto', 'error'))
+                    }}
                     className="rounded bg-white/90 p-1 text-red-500 shadow"
                     aria-label="Quitar foto"
                   >
@@ -215,8 +261,27 @@ export function OrderPhotosPanel({
         aspect={4 / 3}
         outputSize={960}
         onConfirm={(dataUrl) => {
-          addPhotoUrl(order.id, dataUrl)
           setCropSrc(null)
+          setBusy(true)
+          void (async () => {
+            try {
+              const response = await fetch(dataUrl)
+              const blob = await response.blob()
+              const file = new File([blob], 'evidencia.jpg', {
+                type: blob.type || 'image/jpeg',
+              })
+              await ordersService.uploadEvidence(order.id, file)
+              await load()
+              addToast('Evidencia fotográfica agregada')
+            } catch (err) {
+              const message =
+                (err as { response?: { data?: { error?: string } } })?.response?.data
+                  ?.error ?? 'No se pudo guardar la imagen'
+              addToast(message, 'error')
+            } finally {
+              setBusy(false)
+            }
+          })()
         }}
       />
     </div>
