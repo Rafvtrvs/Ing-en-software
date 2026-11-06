@@ -129,10 +129,10 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn('-mx-1 overflow-x-auto sm:mx-0', className)}>
+    <div className={cn('w-full min-w-0 max-w-full overflow-x-auto', className)}>
       <table
         className={cn(
-          'w-full min-w-[40rem] text-left text-sm',
+          'w-full text-left text-sm',
           highContrast && 'border border-slate-300 dark:border-slate-500',
           tableClassName,
         )}
@@ -149,8 +149,7 @@ export function DataTable<T>({
               <th
                 key={col.key}
                 className={cn(
-                  'px-3 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400',
-                  !col.render && 'truncate',
+                  'whitespace-normal px-3 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400',
                   highContrast && 'text-slate-800 dark:text-slate-100',
                   col.className,
                 )}

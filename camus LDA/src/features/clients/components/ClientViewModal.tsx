@@ -3,6 +3,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { useClientsStore } from '@/store/useClientsStore'
+import { formatLastOrder } from '@/features/clients/utils/formatLastOrder'
 import type { Client } from '@/types'
 
 interface ClientViewModalProps {
@@ -70,7 +71,7 @@ export function ClientViewModal({ client, open, onClose }: ClientViewModalProps)
         <DetailRow icon={User} label="RUT" value={client.rut} />
         <DetailRow icon={Phone} label="Teléfono" value={client.phone} />
         <DetailRow icon={Mail} label="Email" value={client.email} />
-        <DetailRow icon={Building2} label="Última Orden" value={client.lastOrder} />
+        <DetailRow icon={Building2} label="Última Orden" value={formatLastOrder(client.lastOrder)} />
       </div>
     </Modal>
   )

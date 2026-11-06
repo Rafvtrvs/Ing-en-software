@@ -30,6 +30,14 @@ function money(n: { toNumber?: () => number } | number | null | undefined): numb
   return Number(n)
 }
 
+function formatLastOrder(value?: string | null): string {
+  const text = (value ?? '').replace(/\u00a0/g, ' ').trim()
+  if (!text || text === '—' || text === '–' || text === '-' || text.startsWith('â€')) {
+    return 'n/a'
+  }
+  return text
+}
+
 export function toClientDto(c: Cliente) {
   return {
     id: String(c.id),
@@ -39,7 +47,7 @@ export function toClientDto(c: Cliente) {
     phone: c.telefono,
     email: c.email,
     status: c.estado,
-    lastOrder: c.ultimaOrden || '—',
+    lastOrder: formatLastOrder(c.ultimaOrden),
     createdAt: c.creadoEn?.toISOString().slice(0, 10),
   }
 }

@@ -9,6 +9,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import { Select } from '@/components/ui/Select'
 import { useClientsStore } from '@/store/useClientsStore'
 import { exportClientsToCsv } from '@/features/clients/utils/exportClients'
+import { formatLastOrder } from '@/features/clients/utils/formatLastOrder'
 import type { Client, ClientStatus } from '@/types'
 import { cn } from '@/utils/cn'
 
@@ -88,7 +89,11 @@ export function ClientsTable({ onCreateClick }: ClientsTableProps) {
       header: 'Estado',
       render: (row) => <Badge label={row.status} context="client" />,
     },
-    { key: 'lastOrder', header: 'Última Orden' },
+    {
+      key: 'lastOrder',
+      header: 'Última Orden',
+      render: (row) => formatLastOrder(row.lastOrder),
+    },
     {
       key: 'actions',
       header: 'Acciones',

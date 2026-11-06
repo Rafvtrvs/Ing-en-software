@@ -91,7 +91,7 @@ export function ClientFormModal({ mode, client, open, onClose }: ClientFormModal
     if (mode === 'create') {
       const result = await addClient({
         ...data,
-        lastOrder: 'â€”',
+        lastOrder: 'n/a',
         createdAt: new Date().toISOString(),
       })
       if (!result.ok) {

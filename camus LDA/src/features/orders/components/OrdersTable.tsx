@@ -121,38 +121,75 @@ export function OrdersTable({
     {
       key: 'id',
       header: 'ID Orden',
-      className: 'font-medium text-slate-900',
+      className: 'w-[11%] font-medium text-slate-900',
       mobileTitle: true,
       render: (row) => (
         <div className="min-w-0">
-          <p className="font-medium text-slate-900 dark:text-slate-100">{row.id}</p>
+          <p className="truncate font-medium text-slate-900 dark:text-slate-100">{row.id}</p>
           <p className="truncate text-xs font-normal text-slate-500 sm:hidden">{row.client}</p>
         </div>
       ),
     },
-    { key: 'client', header: 'Cliente', mobileHidden: true },
-    { key: 'service', header: 'Servicio', render: (row) => row.service ?? '—' },
+    {
+      key: 'client',
+      header: 'Cliente',
+      className: 'w-[15%]',
+      mobileHidden: true,
+      render: (row) => (
+        <span className="block truncate" title={row.client}>
+          {row.client}
+        </span>
+      ),
+    },
+    {
+      key: 'service',
+      header: 'Servicio',
+      className: 'w-[22%]',
+      render: (row) => {
+        const text = row.service?.trim() || '—'
+        return (
+          <span className="line-clamp-2 break-words" title={text}>
+            {text}
+          </span>
+        )
+      },
+    },
     {
       key: 'incidentType',
       header: 'Incidente',
+      className: 'w-[12%]',
       mobileHidden: true,
-      render: (row) => row.incidentType ?? row.category,
+      render: (row) => {
+        const text = row.incidentType ?? row.category
+        return (
+          <span className="block truncate" title={text}>
+            {text}
+          </span>
+        )
+      },
     },
     {
       key: 'priority',
       header: 'Prioridad',
+      className: 'w-[9%] whitespace-nowrap',
       render: (row) => row.priority ?? 'Media',
     },
     {
       key: 'status',
       header: 'Estado',
+      className: 'w-[11%] whitespace-nowrap',
       render: (row) => <Badge label={row.status} context="order" />,
     },
-    { key: 'createdAt', header: 'Fecha Creación', mobileHidden: true },
+    {
+      key: 'createdAt',
+      header: 'Fecha',
+      className: 'w-[11%] whitespace-nowrap',
+      mobileHidden: true,
+    },
     {
       key: 'actions',
       header: 'Acciones',
-      className: 'w-28 whitespace-nowrap',
+      className: 'w-[9%] whitespace-nowrap',
       render: (row) => {
         const editable = canEditOrder(currentUser, row)
         return (
@@ -191,7 +228,7 @@ export function OrdersTable({
   ]
 
   return (
-    <Card>
+    <Card className="min-w-0 overflow-hidden">
       <CardHeader title="Últimas Órdenes de Trabajo" />
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -286,7 +323,12 @@ export function OrdersTable({
         </div>
       )}
 
-      <DataTable columns={columns} data={paginated} keyExtractor={(r) => r.id} />
+      <DataTable
+        columns={columns}
+        data={paginated}
+        keyExtractor={(r) => r.id}
+        tableClassName="table-fixed"
+      />
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
