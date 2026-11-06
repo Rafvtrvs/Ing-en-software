@@ -41,6 +41,28 @@ export async function registerFieldWorkOrder(input: {
     pendingSync: true,
   }
 
+  if (notes) {
+    const authorName = order.technician?.trim() || 'Operador'
+    useOrdersStore.setState((state) => ({
+      commentsByOrderId: {
+        ...state.commentsByOrderId,
+        [createdId]: [
+          {
+            id: `local-note-${createdId}`,
+            orderId: createdId,
+            content: notes,
+            authorId: order.operatorIds?.[0] ?? '',
+            authorName,
+            createdAt: new Date().toISOString(),
+          },
+          ...(state.commentsByOrderId[createdId] ?? []).filter(
+            (comment) => comment.id !== `local-note-${createdId}`,
+          ),
+        ],
+      },
+    }))
+  }
+
   const queued = enqueue({
     kind: 'create-order',
     order,

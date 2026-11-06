@@ -206,13 +206,13 @@ export function FieldOrderRegisterModal({ open, onClose }: FieldOrderRegisterMod
               </Select>
             </FormField>
           </FormGrid>
-          <FormField label="Observaciones (opcional)">
+          <FormField label="Comentario de la orden (opcional)">
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="Detalle adicional del trabajo en terreno..."
+              placeholder="Se guarda en Comentarios del detalle de la orden"
             />
           </FormField>
         </div>

@@ -231,6 +231,17 @@ function messageOf(err: unknown): string {
   )
 }
 
+function authorFromSession(): string | undefined {
+  try {
+    const raw = localStorage.getItem('auth_user')
+    if (!raw) return undefined
+    const user = JSON.parse(raw) as { name?: string }
+    return user.name?.trim() || undefined
+  } catch {
+    return undefined
+  }
+}
+
 async function send(action: FieldAction) {
   switch (action.kind) {
     case 'status':
@@ -240,19 +251,8 @@ async function send(action: FieldAction) {
       })
       break
     case 'note': {
-      // Persiste como comentario de OT (mismo panel del detalle / OrderCommentsPanel)
-      let authorName: string | undefined
-      try {
-        const raw = localStorage.getItem('auth_user')
-        if (raw) {
-          const u = JSON.parse(raw) as { name?: string }
-          authorName = u.name?.trim() || undefined
-        }
-      } catch {
-        /* ignore */
-      }
       const content = action.detail.trim().slice(0, 2000)
-      await ordersService.createComment(action.orderId, content, authorName)
+      await ordersService.createComment(action.orderId, content, authorFromSession())
       break
     }
     case 'photo':
@@ -265,17 +265,19 @@ async function send(action: FieldAction) {
     case 'create-order': {
       const { pendingSync: _pending, ...rest } = action.order
       const payload = { ...rest }
-      if (action.notes?.trim()) {
-        payload.service = payload.service
-          ? `${payload.service} — ${action.notes.trim()}`
-          : action.notes.trim()
-      }
       try {
         await ordersService.create(payload)
       } catch (err) {
         // Ya está en Postgres con ese ID → éxito idempotente (NO crear otra OT)
-        if (isAlreadyExistsError(err)) break
-        throw err
+        if (!isAlreadyExistsError(err)) throw err
+      }
+      const notes = action.notes?.trim().slice(0, 2000)
+      if (notes) {
+        await ordersService.createComment(
+          action.orderId || payload.id,
+          notes,
+          authorFromSession(),
+        )
       }
       break
     }
@@ -303,10 +305,14 @@ async function runFlush(): Promise<SyncResult> {
       if (action.kind === 'create-order') {
         await clearLocalPendingSync(action.orderId || action.order.id)
       }
-      if (action.kind === 'note') {
+      if (action.kind === 'note' || (action.kind === 'create-order' && action.notes?.trim())) {
         try {
           const { useOrdersStore } = await import('@/store/useOrdersStore')
-          await useOrdersStore.getState().fetchOrderComments(action.orderId)
+          const orderId =
+            action.kind === 'create-order'
+              ? action.orderId || action.order.id
+              : action.orderId
+          await useOrdersStore.getState().fetchOrderComments(orderId)
         } catch {
           /* el comentario ya está en servidor */
         }

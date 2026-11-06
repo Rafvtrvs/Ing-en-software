@@ -169,11 +169,11 @@ export function FieldOrderPanel() {
             />
           </FormField>
           {!reducedData && (
-            <FormField label="Notas" className="sm:col-span-2">
+            <FormField label="Comentario de la orden" className="sm:col-span-2">
               <Input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Opcional"
+                placeholder="Queda en Comentarios del detalle, no en el servicio"
               />
             </FormField>
           )}
