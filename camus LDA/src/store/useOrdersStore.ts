@@ -101,7 +101,7 @@ export interface OperatorWorkload {
   totalAssigned: number
 }
 
-/** RF-56 — marcas de inicio/término que el API no guarda */
+
 interface ServiceClock {
   serviceStartedAt?: string
   serviceEndedAt?: string
@@ -134,23 +134,23 @@ function applyServiceClocks(
 
 interface OrdersState {
   orders: WorkOrder[]
-  /** RF-56 CU-197/198 — sobrevive a la sincronización con el servidor */
+  
   serviceClocks: Record<string, ServiceClock>
   apiAvailable: boolean
-  /** Intervenciones locales por OT (fallback / caché CU-149–151) */
+  
   interventionsByOrderId: Record<string, OrderIntervention[]>
-  /** RF65 — comentarios por OT */
+  
   commentsByOrderId: Record<string, OrderComment[]>
-  /** RF66 CDS 229 — reprogramaciones por OT */
+  
   rescheduleHistoryByOrderId: Record<string, OrderRescheduleEvent[]>
-  /** RF68 — solicitudes de modificación */
+  
   modificationRequests: OrderModificationRequest[]
-  /** RF68 CDS 235 — historial modificaciones por OT */
+  
   modificationHistoryByOrderId: Record<string, OrderModificationHistoryEntry[]>
   modalMode: OrderModalMode
   selectedOrder: WorkOrder | null
   statusFilter: OrderStatus | 'all'
-  /** Filtro urgencia dashboard/listado (CU-172 / CU-177) */
+  
   urgencyFilter: 'all' | 'urgent'
   showFilters: boolean
   toasts: ToastMessage[]
@@ -190,9 +190,9 @@ interface OrdersState {
       timeCorrectionNote?: string
     },
   ) => { ok: boolean; message?: string }
-  /** RF-56 CU-197 — inicio de jornada en terreno */
+  
   startFieldService: (orderId: string) => { ok: boolean; message?: string }
-  /** RF-56 CU-198 — cierre con firma y duración */
+  
   finishFieldService: (
     orderId: string,
     clientSignature: string,
@@ -204,7 +204,7 @@ interface OrdersState {
   ) => void
   addPhotoUrl: (orderId: string, url: string) => void
   removePhotoUrl: (orderId: string, url: string) => void
-  /** RF55 — anotaciones sobre fotos */
+
   photoAnnotationsByOrderId: Record<string, OrderPhotoAnnotation[]>
   getPhotoAnnotation: (orderId: string, photoUrl: string) => OrderPhotoAnnotation | undefined
   savePhotoAnnotation: (
@@ -223,7 +223,7 @@ interface OrdersState {
   ) => void
   getOperatorWorkload: (technicians: OrderOperator[]) => OperatorWorkload[]
   markPdfGenerated: (orderId: string) => void
-  /** RF-40..42 documentos / contratos / reportes versionados */
+  
   addOrderDocument: (
     orderId: string,
     data: {
@@ -250,7 +250,7 @@ interface OrdersState {
       note?: string
     },
   ) => void
-  /** RF-43 — alta rápida de OT en terreno */
+  
   createFieldOrder: (data: {
     client: string
     address: string
@@ -264,7 +264,7 @@ interface OrdersState {
     data: Partial<Pick<WorkOrder, 'service' | 'startDate' | 'endDate' | 'durationHours' | 'progress'>>,
   ) => void
   moveOrderOnBoard: (activeId: string, overId: string) => void
-  /** Reordena la cola de atención por IDs en el nuevo orden visual */
+  
   reorderPriorityQueue: (orderedIds: string[]) => void
   openCreateModal: () => void
   openEditModal: (order: WorkOrder) => void
@@ -358,7 +358,7 @@ function eventId(prefix: string) {
   return `${prefix}-${Date.now()}`
 }
 
-/** Conserva solo extras frontend-only; Postgres manda en estado/asignación. */
+
 function mergeApiOrders(
   apiOrders: WorkOrder[],
   localOrders: WorkOrder[],
@@ -370,7 +370,7 @@ function mergeApiOrders(
     if (!local) return api
     return {
       ...api,
-      // Postgres manda en fechas/camión; el resto aún puede ser local (terreno)
+      
       startDate: api.startDate ?? local.startDate,
       endDate: api.endDate ?? local.endDate,
       durationHours: api.durationHours ?? local.durationHours,
@@ -398,7 +398,7 @@ function mergeApiOrders(
     }
   })
   const apiIds = new Set(apiOrders.map((o) => o.id))
-  // OT creadas offline aún no subidas: no eliminarlas al sincronizar
+  
   const pendingLocals = new Map<string, WorkOrder>()
   for (const local of localOrders) {
     if (

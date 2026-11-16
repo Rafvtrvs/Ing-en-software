@@ -1,8 +1,4 @@
-// ============================================================
-//  OrderService (Lógica del negocio)  -> OrderController
-//  Notifica por correo/push (simulados) al crear órdenes, tal como
-//  muestra el diagrama (Servicios externos).
-// ============================================================
+
 import { prisma } from '../db/prisma.js'
 import { auditService } from './audit.service.js'
 import { toOrderDto } from './mappers.js'
@@ -33,7 +29,7 @@ interface OrderInput {
   equipmentId?: string | null
 }
 
-/** Parsea yyyy-mm-dd / ISO → Date; ''/null limpia; undefined = no tocar. */
+
 function parseOptionalDate(
   value: string | null | undefined,
 ): Date | null | undefined {
@@ -92,7 +88,7 @@ async function resolveMaquinaria(input: {
 
 const ACTIVE_ORDER_STATUSES = ['Pendiente', 'En Curso'] as const
 
-/** Un camión en una OT pendiente o en curso no puede asignarse a otra. */
+
 async function assertTruckAvailable(
   maquinaria: { idMaquinaria: number | null; codigoCamion: string | null } | undefined,
   opts: { excludeOrderId?: string; status?: string },
@@ -188,7 +184,6 @@ async function resolveCliente(name?: string): Promise<number | null> {
   return c?.id ?? null
 }
 
-/** ¿El usuario autenticado es técnico/operador de campo? */
 async function resolveFieldOperatorActor(
   userId?: number,
 ): Promise<{ id: number; name: string } | null> {
@@ -221,10 +216,8 @@ function calendarDay(value: Date | string | null | undefined): string {
   return raw ? raw.slice(0, 10) : ''
 }
 
-/**
- * El operario puede iniciar o finalizar el servicio.
- * Cualquier otro cambio de campos queda para aprobación del administrador.
- */
+
+
 function operatorUpdateNeedsApproval(
   before: {
     direccion: string
@@ -340,7 +333,7 @@ function clientLabel(row: {
   )
 }
 
-/** Campos de negocio relevantes (ignora solo reorden visual). */
+
 function hasBusinessFieldChange(
   before: {
     direccion: string
@@ -458,7 +451,7 @@ function normalizeRoleName(role?: string | null): string {
     .trim()
 }
 
-/** La OT está asignada si es el responsable o aparece en la cuadrilla. */
+
 function assignedToUser(
   row: { idOperador: number | null; operadoresJson?: string | null },
   userId: number,
@@ -478,7 +471,7 @@ function assignedToUser(
   }
 }
 
-/** Técnico / operador / operario de campo: solo ve OT asignadas. */
+
 function isFieldOperatorRole(role?: string | null): boolean {
   const n = normalizeRoleName(role)
   if (!n) return false
@@ -539,7 +532,7 @@ export const orderService = {
   async create(input: OrderInput, userId?: number) {
     const requestedId = input.id?.trim() || ''
     let createId = requestedId
-    // Mismo alta reintentada: devolver la OT. Si el número ya es de otra orden, asignar uno libre.
+  
     if (requestedId) {
       const existing = await prisma.ordenTrabajo.findUnique({
         where: { id: requestedId },
@@ -560,7 +553,7 @@ export const orderService = {
 
     const idCliente = input.idCliente ?? (await resolveCliente(input.client))
     let idOperador = await resolveOperador(input)
-    // Si el técnico crea la OT y no vino operador, queda asignada a quien la registra
+   
     if (
       (idOperador === undefined || idOperador === null) &&
       userId != null &&
@@ -573,7 +566,7 @@ export const orderService = {
     const fechaInicio = parseOptionalDate(input.startDate)
     const fechaTermino = parseOptionalDate(input.endDate)
     const fechaLimite = parseOptionalDate(input.dueDate)
-    // Validar que exista dirección o coordenadas y que tengan formato válido
+ 
     requireAddressOrCoordinates(input.address, input.latitude, input.longitude)
     validateCoordinates(input.latitude, input.longitude)
 
@@ -631,7 +624,7 @@ export const orderService = {
       'Cliente'
     const operadorActor = await resolveFieldOperatorActor(userId)
 
-    // Notificaciones externas: nunca deben tumbar la creación de la OT
+
     void mailService
       .send({
         to: mailOpsRecipient(),
@@ -729,7 +722,7 @@ export const orderService = {
       idUsuario: userId,
     })
 
-    // Asignación / reasignación de operario a cargo
+
     if (before && idOperador !== undefined && before.idOperador !== row.idOperador) {
       await auditService.log({
         modulo: 'ordenes',
@@ -752,7 +745,7 @@ export const orderService = {
     const clienteNombre = clientLabel(row)
     const servicio = row.servicio?.trim() || 'Sin servicio'
 
-    // RF29 CU-97: registrar el cambio de estado en la bitácora (Kanban / terreno)
+ 
     if (before && row.estado !== before.estado) {
       await auditService.log({
         modulo: 'ordenes',
@@ -761,7 +754,7 @@ export const orderService = {
         valorNuevo: { orderId: id, estado: row.estado },
         idUsuario: userId,
       })
-      // RF29 CU-98: notificar el cambio de estado (FCM a administradores)
+
       const byOp = operadorActor ? ` Operario: ${operadorActor.name}.` : ''
       await notifyAdmins({
         title: `OT ${id}: ${before.estado} → ${row.estado}`,
@@ -784,7 +777,7 @@ export const orderService = {
       before &&
       hasBusinessFieldChange(before, row)
     ) {
-      // Edición de OT por operario (campos distintos del solo cambio de estado)
+ 
       await notifyAdmins({
         title: `OT ${id} editada por operario`,
         body: `${operadorActor.name} modificó la orden de ${clienteNombre} · ${servicio}.`,
